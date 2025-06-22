@@ -99,16 +99,6 @@ const FileTree: React.FC<FileTreeProps> = ({ onFileSelect }) => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-gray-300">Files</h3>
-        <button 
-          onClick={loadFileTree}
-          className="text-xs text-blue-400 hover:text-blue-300"
-          title="Refresh file list"
-        >
-          ↻
-        </button>
-      </div>
       {nodes.map((node: FileSystemNode, index: number) => (
         <FileOrFolder key={index} node={node} onFileSelect={onFileSelect} />
       ))}

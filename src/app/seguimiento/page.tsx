@@ -4,7 +4,7 @@ import React from 'react';
 import { useFileContext } from '@/components/FileContext';
 import SpreadsheetViewer from '@/components/SpreadsheetViewer';
 
-const Body: React.FC = () => {
+const Page: React.FC = () => {
   const { selectedFile } = useFileContext();
 
   if (!selectedFile) {
@@ -21,8 +21,7 @@ const Body: React.FC = () => {
   return (
     <div className="flex flex-col h-full p-6">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold mb-2 text-white">Spreadsheet Viewer</h1>
-        <p className="text-gray-400 text-sm">Currently viewing: {selectedFile}</p>
+        <p className="text-gray-400 text-sm">{selectedFile}</p>
       </div>
       <div className="bg-white rounded-lg shadow-sm flex-grow overflow-auto">
         <SpreadsheetViewer />
@@ -31,4 +30,4 @@ const Body: React.FC = () => {
   );
 };
 
-export default Body; 
+export default Page;
