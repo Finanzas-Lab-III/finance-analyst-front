@@ -19,6 +19,47 @@ const SpreadsheetViewer: React.FC = () => {
   const [processingError, setProcessingError] = useState<string | null>(null);
   const hotTableRef = useRef<any>(null);
 
+  const processSheetData = (worksheet: any) => {
+    try {
+      // Get the range to ensure we capture all data
+      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+      
+      // Convert worksheet to JSON with better options
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+        header: 1,
+        range: range,
+        defval: '', // Fill empty cells with empty string
+        blankrows: true // Include blank rows
+      }) as any[][];
+      
+      // Ensure we have valid data
+      if (!jsonData || jsonData.length === 0) {
+        return [['']];
+      }
+      
+      // Ensure all rows have the same number of columns
+      const maxCols = Math.max(...jsonData.map(row => row ? row.length : 0), range.e.c + 1);
+      const normalizedData = jsonData.map(row => {
+        if (!row) return new Array(maxCols).fill('');
+        const newRow = [...row];
+        while (newRow.length < maxCols) {
+          newRow.push('');
+        }
+        return newRow;
+      });
+      
+      // Ensure we have at least one row and column
+      if (normalizedData.length === 0) {
+        return [['']];
+      }
+      
+      return normalizedData;
+    } catch (err) {
+      console.error('Error processing sheet data:', err);
+      return [['']];
+    }
+  };
+
   useEffect(() => {
     const processSpreadsheet = async () => {
       if (!fileData) {
@@ -39,18 +80,18 @@ const SpreadsheetViewer: React.FC = () => {
         setSheetNames(names);
 
         if (names.length > 0) {
-            const firstSheetName = names[0];
-            setSelectedSheet(firstSheetName);
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-            setData(jsonData);
+          const firstSheetName = names[0];
+          setSelectedSheet(firstSheetName);
+          const worksheet = workbook.Sheets[firstSheetName];
+          const processedData = processSheetData(worksheet);
+          setData(processedData);
         } else {
-            setData([]);
+          setData([['']]);
         }
-
       } catch (err) {
         console.error('Error processing spreadsheet:', err);
         setProcessingError('Failed to process spreadsheet data');
+        setData([['']]);
       } finally {
         setProcessing(false);
       }
@@ -60,26 +101,26 @@ const SpreadsheetViewer: React.FC = () => {
   }, [fileData]);
   
   const handleSheetChange = async (sheetName: string) => {
-      if (!fileData || sheetName === selectedSheet) return;
+    if (!fileData || sheetName === selectedSheet) return;
 
-      try {
-        setProcessing(true);
-        setProcessingError(null);
-        setSelectedSheet(sheetName);
+    try {
+      setProcessing(true);
+      setProcessingError(null);
+      setSelectedSheet(sheetName);
 
-        const arrayBuffer = await fileData.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const arrayBuffer = await fileData.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-        setData(jsonData);
-
-      } catch (err) {
-        console.error(`Error processing sheet ${sheetName}:`, err);
-        setProcessingError(`Failed to process sheet: ${sheetName}`);
-      } finally {
-        setProcessing(false);
-      }
+      const worksheet = workbook.Sheets[sheetName];
+      const processedData = processSheetData(worksheet);
+      setData(processedData);
+    } catch (err) {
+      console.error(`Error processing sheet ${sheetName}:`, err);
+      setProcessingError(`Failed to process sheet: ${sheetName}`);
+      setData([['']]);
+    } finally {
+      setProcessing(false);
+    }
   };
 
   if (!selectedFile) {
@@ -140,6 +181,10 @@ const SpreadsheetViewer: React.FC = () => {
     );
   }
 
+  // Calculate columns for better display - ensure we have valid data
+  const numCols = data.length > 0 ? Math.max(...data.map(row => Array.isArray(row) ? row.length : 0)) : 1;
+  const numRows = data.length || 1;
+
   return (
     <div className="h-full overflow-hidden flex flex-col">
       <div className="bg-gray-800 border-b border-gray-600 p-2 flex gap-2 flex-shrink-0">
@@ -171,7 +216,10 @@ const SpreadsheetViewer: React.FC = () => {
           rowHeaders={true}
           height="100%"
           width="100%"
-          stretchH="all"
+          startRows={Math.max(numRows, 10)}
+          startCols={Math.max(numCols, 5)}
+          stretchH="none"
+          colWidths={100}
           autoWrapRow={true}
           autoWrapCol={true}
           contextMenu={true}
@@ -181,6 +229,10 @@ const SpreadsheetViewer: React.FC = () => {
           manualRowResize={true}
           manualColumnResize={true}
           comments={true}
+          allowInsertRow={true}
+          allowInsertColumn={true}
+          allowRemoveRow={true}
+          allowRemoveColumn={true}
           className="htCenter"
         />
       </div>

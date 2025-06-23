@@ -41,7 +41,13 @@ const AIAgentSidebar: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/analyze/budget_variation', {
+      // Determine endpoint based on whether selected file contains "+"
+      // TODO: change ts
+      const endpoint = selectedFile && selectedFile.includes('+') 
+        ? 'http://localhost:8000/analyze/projection'
+        : 'http://localhost:8000/analyze/budget_variation';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
