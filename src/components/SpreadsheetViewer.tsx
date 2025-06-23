@@ -13,6 +13,8 @@ registerAllModules();
 const SpreadsheetViewer: React.FC = () => {
   const { selectedFile, fileData, loading, error } = useFileContext();
   const [data, setData] = useState<any[][]>([]);
+  const [sheetNames, setSheetNames] = useState<string[]>([]);
+  const [selectedSheet, setSelectedSheet] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
   const hotTableRef = useRef<any>(null);
@@ -21,6 +23,8 @@ const SpreadsheetViewer: React.FC = () => {
     const processSpreadsheet = async () => {
       if (!fileData) {
         setData([]);
+        setSheetNames([]);
+        setSelectedSheet(null);
         return;
       }
 
@@ -28,18 +32,22 @@ const SpreadsheetViewer: React.FC = () => {
         setProcessing(true);
         setProcessingError(null);
         
-        // Convert blob to array buffer
         const arrayBuffer = await fileData.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         
-        // Get the first worksheet
-        const worksheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[worksheetName];
-        
-        // Convert worksheet to JSON
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-        
-        setData(jsonData);
+        const names = workbook.SheetNames;
+        setSheetNames(names);
+
+        if (names.length > 0) {
+            const firstSheetName = names[0];
+            setSelectedSheet(firstSheetName);
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+            setData(jsonData);
+        } else {
+            setData([]);
+        }
+
       } catch (err) {
         console.error('Error processing spreadsheet:', err);
         setProcessingError('Failed to process spreadsheet data');
@@ -50,6 +58,29 @@ const SpreadsheetViewer: React.FC = () => {
 
     processSpreadsheet();
   }, [fileData]);
+  
+  const handleSheetChange = async (sheetName: string) => {
+      if (!fileData || sheetName === selectedSheet) return;
+
+      try {
+        setProcessing(true);
+        setProcessingError(null);
+        setSelectedSheet(sheetName);
+
+        const arrayBuffer = await fileData.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+        setData(jsonData);
+
+      } catch (err) {
+        console.error(`Error processing sheet ${sheetName}:`, err);
+        setProcessingError(`Failed to process sheet: ${sheetName}`);
+      } finally {
+        setProcessing(false);
+      }
+  };
 
   if (!selectedFile) {
     return (
@@ -110,8 +141,8 @@ const SpreadsheetViewer: React.FC = () => {
   }
 
   return (
-    <div className="h-full overflow-hidden">
-      <div className="bg-gray-800 border-b border-gray-600 p-2 flex gap-2">
+    <div className="h-full overflow-hidden flex flex-col">
+      <div className="bg-gray-800 border-b border-gray-600 p-2 flex gap-2 flex-shrink-0">
         <button className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-sm text-white hover:bg-gray-600">
           Bold
         </button>
@@ -132,27 +163,44 @@ const SpreadsheetViewer: React.FC = () => {
           Align Right
         </button>
       </div>
-      <HotTable
-        ref={hotTableRef}
-        data={data}
-        colHeaders={true}
-        rowHeaders={true}
-        height="calc(100% - 40px)"
-        width="100%"
-        minRows={data.length}
-        maxRows={data.length}
-        stretchH="all"
-        autoWrapRow={true}
-        autoWrapCol={true}
-        contextMenu={true}
-        filters={true}
-        dropdownMenu={true}
-        columnSorting={true}
-        manualRowResize={true}
-        manualColumnResize={true}
-        comments={true}
-        className="htCenter"
-      />
+      <div className="flex-1 min-h-0 overflow-auto p-2">
+        <HotTable
+          ref={hotTableRef}
+          data={data}
+          colHeaders={true}
+          rowHeaders={true}
+          height="100%"
+          width="100%"
+          stretchH="all"
+          autoWrapRow={true}
+          autoWrapCol={true}
+          contextMenu={true}
+          filters={true}
+          dropdownMenu={true}
+          columnSorting={true}
+          manualRowResize={true}
+          manualColumnResize={true}
+          comments={true}
+          className="htCenter"
+        />
+      </div>
+      {sheetNames.length > 1 && (
+        <div className="flex-shrink-0 flex gap-2 px-4 pb-4 pt-2 border-t border-gray-200 bg-white">
+          {sheetNames.map((name) => (
+            <button
+              key={name}
+              onClick={() => handleSheetChange(name)}
+              className={`px-3 py-1 rounded text-sm font-medium border transition-colors duration-150 ${
+                selectedSheet === name
+                  ? "bg-blue-600 text-white border-blue-700 shadow"
+                  : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
