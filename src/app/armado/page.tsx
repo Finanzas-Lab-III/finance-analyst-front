@@ -1,55 +1,39 @@
 "use client"
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import LintErrorCard from "@/components/LintErrorCard";
 import * as XLSX from "xlsx";
 import { HotTable } from "@handsontable/react";
 import { registerAllModules } from "handsontable/registry";
 import { ArrowLeft } from "lucide-react";
 import "handsontable/dist/handsontable.full.css";
+import axios from "axios";
 
 registerAllModules();
-
-// Simulación de errores de linting
-const mockLintErrors = [
-  {
-    id: 1,
-    message: "Falta punto y coma en la línea 10",
-    line: 10,
-    columns: [5, 8],
-    rule: "semi"
-  },
-  {
-    id: 2,
-    message: "Variable no usada en la línea 15",
-    line: 15,
-    columns: [7],
-    rule: "no-unused-vars"
-  },
-  {
-    id: 3,
-    message: "Indentación incorrecta en la línea 20",
-    line: 20,
-    columns: [1, 2, 3],
-    rule: "indent"
-  }
-];
 
 const Page = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileData, setFileData] = useState<any[][]>([]);
-  const [checkedErrors, setCheckedErrors] = useState<{ [id: number]: boolean }>({});
+  const [prevYearFile, setPrevYearFile] = useState<File | null>(null);
+  const [prevYearFileData, setPrevYearFileData] = useState<any[][]>([]);
   const [loading, setLoading] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevYearFileInputRef = useRef<HTMLInputElement>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [selectedSheet, setSelectedSheet] = useState<string | null>(null);
   const [sheetNames, setSheetNames] = useState<string[]>([]);
+  const [analysisResults, setAnalysisResults] = useState<any[]>([]);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [currentYear, setCurrentYear] = useState("2025");
+
+  // Elimino el manejo de errores mockeados y el check
+  const allChecked = true;
 
   // Procesa el archivo cargado y lo convierte a datos para Handsontable
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     setSelectedFile(file || null);
-    setCheckedErrors({});
     setProcessingError(null);
     setFileData([]);
     setSheetNames([]);
@@ -69,6 +53,25 @@ const Page = () => {
         setProcessingError("No se pudo procesar el archivo");
       } finally {
         setLoading(false);
+      }
+    }
+  };
+
+  // Nuevo: Procesa el archivo del año anterior y lo guarda en el estado, pero no lo muestra
+  const handlePrevYearFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setPrevYearFile(file || null);
+    setPrevYearFileData([]);
+    if (file) {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const firstSheet = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheet];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+        setPrevYearFileData(jsonData);
+      } catch (err) {
+        // No hacer nada por ahora
       }
     }
   };
@@ -94,31 +97,70 @@ const Page = () => {
     }, 0);
   };
 
-  const handleCheck = (id: number) => {
-    setCheckedErrors((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const allChecked = mockLintErrors.every((err) => checkedErrors[err.id]);
+  // Analizar automáticamente cuando ambos archivos estén presentes
+  useEffect(() => {
+    const analyze = async () => {
+      if (!selectedFile || !prevYearFile) return;
+      setAnalysisLoading(true);
+      setAnalysisError(null);
+      setAnalysisResults([]);
+      try {
+        const formData = new FormData();
+        formData.append("current_year", currentYear);
+        formData.append("budget_file", selectedFile);
+        formData.append("previous_years_files", prevYearFile);
+        const response = await axios.post("http://localhost:8001/analyze-budget/", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        console.log("API response", response.data);
+        setAnalysisResults(response.data);
+      } catch (err: any) {
+        setAnalysisError("No se pudo analizar el presupuesto");
+      } finally {
+        setAnalysisLoading(false);
+      }
+    };
+    analyze();
+  }, [selectedFile, prevYearFile, currentYear]);
 
   return (
     <div className="flex flex-col h-full bg-[#2d2f30]">
-      {/* Botón de carga centrado y estilizado */}
+      {/* Inputs de carga centrados y estilizados */}
       {!selectedFile && (
-        <div className="flex-1 flex flex-col items-center justify-center p-6">
-          <button
-            className="px-8 py-3 bg-blue-600 text-white rounded-lg shadow-md text-lg font-semibold hover:bg-blue-700 transition mb-4"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Cargar archivo
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            onChange={handleFileChange}
-            accept=".xlsx,.xls,.csv,.txt"
-          />
-          <p className="text-gray-400 mt-2 text-base">Selecciona un archivo para comenzar el armado</p>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-4">
+          <div className="flex flex-col items-center gap-2">
+            <button
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg shadow-md text-lg font-semibold hover:bg-blue-700 transition mb-2"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Cargar presupuesto año actual
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileChange}
+              accept=".xlsx,.xls,.csv,.txt"
+            />
+            <p className="text-gray-400 text-base">Selecciona el archivo del presupuesto de este año</p>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <button
+              className="px-8 py-3 bg-gray-600 text-white rounded-lg shadow-md text-lg font-semibold hover:bg-gray-700 transition mb-2"
+              onClick={() => prevYearFileInputRef.current?.click()}
+            >
+              Cargar presupuesto año anterior
+            </button>
+            <input
+              type="file"
+              ref={prevYearFileInputRef}
+              className="hidden"
+              onChange={handlePrevYearFileChange}
+              accept=".xlsx,.xls,.csv,.txt"
+            />
+            <p className="text-gray-400 text-base">Selecciona el archivo del presupuesto del año anterior (opcional)</p>
+            {prevYearFile && <span className="text-green-400 text-xs">Archivo cargado: {prevYearFile.name}</span>}
+          </div>
         </div>
       )}
 
@@ -199,22 +241,39 @@ const Page = () => {
           <div className="w-[320px] bg-[#1D1F20] text-white h-full flex flex-col">
             <div className="p-4">
               <div className="border-b border-gray-700 pb-4">
-                <h3 className="text-lg font-semibold">Errores de formato</h3>
+                <h3 className="text-lg font-semibold">Cambios detectados</h3>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto px-4">
-              {mockLintErrors.map((err) => (
-                <LintErrorCard
-                  key={err.id}
-                  id={err.id}
-                  message={err.message}
-                  line={err.line}
-                  columns={err.columns}
-                  rule={err.rule}
-                  checked={!!checkedErrors[err.id]}
-                  onCheck={handleCheck}
-                />
-              ))}
+              {/* Cards de análisis de presupuesto */}
+              {analysisLoading && (
+                <div className="mt-4 text-blue-400">Analizando presupuesto...</div>
+              )}
+              {analysisError && (
+                <div className="mt-4 text-red-400">{analysisError}</div>
+              )}
+              {!analysisLoading && !analysisError && (
+                Array.isArray(analysisResults) ? (
+                  analysisResults.length > 0 ? (
+                    <div className="mt-4 flex flex-col gap-3">
+                      {analysisResults.map((result, idx) => (
+                        <div key={idx} className="bg-[#232425] border-l-4 border-blue-500 rounded shadow p-3">
+                          <div className="font-semibold text-base mb-1">{result.message}</div>
+                          <div className="text-xs text-gray-300 mb-1">{result.description}</div>
+                          <div className="text-sm text-gray-400">{result.comments}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-4 text-gray-400">No se encontraron observaciones en el análisis.</div>
+                  )
+                ) : (
+                  <div className="mt-4 text-yellow-400">
+                    Respuesta inesperada de la API:<br />
+                    <pre className="whitespace-pre-wrap text-xs">{JSON.stringify(analysisResults, null, 2)}</pre>
+                  </div>
+                )
+              )}
             </div>
             <div className="p-4">
               <div className="border-t border-gray-700 pt-4">
@@ -234,7 +293,7 @@ const Page = () => {
                   </div>
                 )}
                 <button
-                  className={`w-full py-2 rounded text-white font-semibold transition-colors ${allChecked ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"}`}
+                  className={`w-full py-2 mt-2 rounded text-white font-semibold transition-colors ${allChecked ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"}`}
                   disabled={!allChecked}
                 >
                   Enviar
