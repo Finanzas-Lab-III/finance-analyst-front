@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import ChatMessage from './ChatMessage';
+
+interface MonthlyData {
+  categories: string[];
+  original_values: number[];
+  modified_values: number[];
+  chart_type: string;
+}
+
+interface InflationScenarioData {
+  is_inflation_scenario: boolean;
+  monthly: MonthlyData;
+}
 
 interface Message {
   id: string;
   message: string;
   sender: 'ai' | 'user';
   timestamp?: string;
+  scenarioData?: InflationScenarioData;
 }
 
 interface QuickAction {
@@ -30,15 +43,29 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   disabled = true 
 }) => {
   const [inputValue, setInputValue] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSendMessage = () => {
     if (inputValue.trim() && onSendMessage && !disabled) {
       onSendMessage(inputValue.trim());
       setInputValue('');
+      // Reset textarea height after clearing
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = '40px';
+      }
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputValue(e.target.value);
+    // Auto-resize the textarea
+    const textarea = e.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -61,6 +88,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 message={msg.message}
                 sender={msg.sender}
                 timestamp={msg.timestamp}
+                scenarioData={msg.scenarioData}
               />
             ))
           )}
@@ -73,18 +101,24 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
 
       {/* Input Area - Fixed at bottom */}
-      <div className="flex-shrink-0 flex items-center space-x-2 pt-4 border-t border-gray-700">
-        <input
-          type="text"
+      <div className="flex-shrink-0 flex items-end space-x-2 pt-4 border-t border-gray-700">
+        <textarea
+          ref={textareaRef}
           placeholder="Ask me about your data..."
-          className="flex-1 bg-[#1D1F20] border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 bg-[#1D1F20] border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none overflow-hidden min-h-[40px] max-h-[120px]"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={handleInputChange}
           onKeyPress={handleKeyPress}
           disabled={disabled}
+          rows={1}
+          style={{
+            height: '40px',
+            minHeight: '40px',
+            maxHeight: '120px'
+          }}
         />
         <button
-          className="bg-transparent hover:bg-gray-700/50 border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-full w-10 h-10 flex items-center justify-center text-white transition-all duration-200 hover:scale-[1.03]"
+          className="bg-transparent hover:bg-gray-700/50 border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-full w-10 h-10 flex items-center justify-center text-white transition-all duration-200 hover:scale-[1.03] flex-shrink-0"
           onClick={handleSendMessage}
           disabled={disabled}
         >

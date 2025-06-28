@@ -8,11 +8,24 @@ import {
 } from './components';
 import { Plus, X } from 'lucide-react';
 
+interface MonthlyData {
+  categories: string[];
+  original_values: number[];
+  modified_values: number[];
+  chart_type: string;
+}
+
+interface InflationScenarioData {
+  is_inflation_scenario: boolean;
+  monthly: MonthlyData;
+}
+
 interface Message {
   id: string;
   message: string;
   sender: 'ai' | 'user';
   timestamp?: string;
+  scenarioData?: InflationScenarioData;
 }
 
 const AIAgentSidebar: React.FC = () => {
@@ -42,7 +55,6 @@ const AIAgentSidebar: React.FC = () => {
 
     try {
       // Determine endpoint based on whether selected file contains "+"
-      // TODO: change ts
       const endpoint = selectedFile && selectedFile.includes('+') 
         ? 'http://localhost:8000/analyze/projection'
         : 'http://localhost:8000/analyze/budget_variation';
@@ -60,13 +72,23 @@ const AIAgentSidebar: React.FC = () => {
       }
 
       const data = await response.json();
+      console.log('API Response:', data);
+      console.log('Scenario data from API:', data.is_inflation_scenario, data.monthly);
+
+      // Check for monthly inflation scenario data
+      const scenarioData = data.is_inflation_scenario && data.monthly ? {
+        is_inflation_scenario: data.is_inflation_scenario,
+        monthly: data.monthly
+      } : undefined;
 
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
         message: data.answer,
         sender: 'ai',
         timestamp: new Date().toLocaleTimeString(),
+        scenarioData: scenarioData,
       };
+      console.log('AI Message created:', aiMessage);
       setMessages(prev => [...prev, aiMessage]);
 
     } catch (error) {
