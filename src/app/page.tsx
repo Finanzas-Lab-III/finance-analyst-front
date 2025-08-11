@@ -101,25 +101,6 @@ export default function Home() {
             ))}
           </div>
         </div>
-
-        {/* Quick Actions */}
-        <div className="bg-gray-800 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">Acciones Rápidas</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 text-left">
-              <div className="font-semibold">Crear Nuevo Presupuesto</div>
-              <div className="text-blue-200 text-sm">Iniciar un nuevo presupuesto desde cero</div>
-            </button>
-            <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 text-left">
-              <div className="font-semibold">Importar Datos</div>
-              <div className="text-purple-200 text-sm">Cargar datos desde archivo Excel</div>
-            </button>
-            <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 text-left">
-              <div className="font-semibold">Ver Reportes</div>
-              <div className="text-green-200 text-sm">Generar reportes de análisis</div>
-            </button>
-          </div>
-        </div>
       </div>
     </main>
   );

@@ -53,61 +53,6 @@ export default function BudgetOverview({ params }: BudgetOverviewProps) {
           </div>
         </div>
 
-        {/* Overview Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gray-800 rounded-lg p-6">
-            <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-green-500 mr-3" />
-              <div>
-                <p className="text-gray-400 text-sm">Presupuesto Total</p>
-                <p className="text-2xl font-bold">${budgetData.totalBudget.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-800 rounded-lg p-6">
-            <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-blue-500 mr-3" />
-              <div>
-                <p className="text-gray-400 text-sm">Ejecutado</p>
-                <p className="text-2xl font-bold">${budgetData.usedBudget.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-800 rounded-lg p-6">
-            <div className="flex items-center">
-              <BarChart3 className="h-8 w-8 text-purple-500 mr-3" />
-              <div>
-                <p className="text-gray-400 text-sm">Disponible</p>
-                <p className="text-2xl font-bold">${(budgetData.totalBudget - budgetData.usedBudget).toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-800 rounded-lg p-6">
-            <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-orange-500 mr-3" />
-              <div>
-                <p className="text-gray-400 text-sm">Progreso</p>
-                <p className="text-2xl font-bold">{progressPercentage.toFixed(1)}%</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="bg-gray-800 rounded-lg p-6 mb-8">
-          <h3 className="text-lg font-semibold mb-4">Ejecución del Presupuesto</h3>
-          <div className="w-full bg-gray-700 rounded-full h-4 mb-2">
-            <div 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 h-4 rounded-full transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-          <div className="flex justify-between text-sm text-gray-400">
-            <span>${budgetData.usedBudget.toLocaleString()} ejecutado</span>
-            <span>${budgetData.totalBudget.toLocaleString()} total</span>
-          </div>
-        </div>
-
         {/* Main Action Buttons */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Link 
@@ -170,23 +115,6 @@ export default function BudgetOverview({ params }: BudgetOverviewProps) {
                   <span className="text-gray-400">Última Modificación:</span>
                   <span>{new Date(budgetData.lastModified).toLocaleDateString('es-ES')}</span>
                 </div>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-medium text-gray-300 mb-2">Acciones Rápidas</h4>
-              <div className="space-y-2">
-                <button className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded transition-colors duration-200">
-                  <FileText className="inline h-4 w-4 mr-2" />
-                  Exportar Reporte
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded transition-colors duration-200">
-                  <Settings className="inline h-4 w-4 mr-2" />
-                  Configurar Alertas
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded transition-colors duration-200">
-                  <History className="inline h-4 w-4 mr-2" />
-                  Ver Historial de Cambios
-                </button>
               </div>
             </div>
           </div>
