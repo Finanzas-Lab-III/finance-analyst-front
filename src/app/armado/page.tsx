@@ -1,6 +1,10 @@
 "use client"
 import React, { useRef, useState, useEffect } from "react";
+import Link from "next/link";
 import LintErrorCard from "@/components/LintErrorCard";
+import BudgetSidebar from "@/components/sidebar/BudgetSidebar";
+import AIAgentSidebar from "@/components/sidebar/ai-agent-sidebar/AIAgentSidebar";
+import { useFileContext } from "@/components/FileContext";
 import * as XLSX from "xlsx";
 import { HotTable } from "@handsontable/react";
 import { registerAllModules } from "handsontable/registry";
@@ -11,6 +15,7 @@ import axios from "axios";
 registerAllModules();
 
 const Page = () => {
+  const { selectedFile: contextSelectedFile } = useFileContext();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileData, setFileData] = useState<any[][]>([]);
   const [prevYearFile, setPrevYearFile] = useState<File | null>(null);
@@ -124,7 +129,9 @@ const Page = () => {
   }, [selectedFile, prevYearFile, currentYear]);
 
   return (
-    <div className="flex flex-col h-full bg-[#2d2f30]">
+    <div className="flex h-screen bg-[#2d2f30]">
+      <BudgetSidebar currentPage="armado" />
+      <div className="flex flex-col flex-1 h-full">
       {/* Inputs de carga centrados y estilizados */}
       {!selectedFile && (
         <div className="flex-1 flex flex-col items-center justify-center p-6 gap-4">
@@ -170,12 +177,12 @@ const Page = () => {
           {/* Columna principal: preview */}
           <div className="flex-1 flex flex-col p-6 overflow-hidden">
             <div className="mb-4 flex items-center">
-              <button
+              <Link
+                href="/budget/lab-budget-2025"
                 className="p-1 rounded-full hover:bg-gray-700 mr-4"
-                onClick={() => setSelectedFile(null)}
               >
                 <ArrowLeft size={24} className="text-white" />
-              </button>
+              </Link>
               <h2 className="text-l font-bold text-white mr-4">Armado</h2>
               <p className="text-gray-400 text-sm truncate">Archivo: {selectedFile.name}</p>
             </div>
@@ -303,6 +310,8 @@ const Page = () => {
           </div>
         </div>
       )}
+      </div>
+      {(selectedFile || contextSelectedFile) && <AIAgentSidebar />}
     </div>
   );
 };

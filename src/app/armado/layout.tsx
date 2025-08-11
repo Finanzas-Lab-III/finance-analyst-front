@@ -1,7 +1,7 @@
 import React from "react";
 import { FileProvider } from "@/components/FileContext";
 
-export default function SeguimientoLayout({
+export default function ArmadoLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -11,4 +11,4 @@ export default function SeguimientoLayout({
       {children}
     </FileProvider>
   );
-}
+} 
