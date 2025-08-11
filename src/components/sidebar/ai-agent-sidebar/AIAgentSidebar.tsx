@@ -123,9 +123,9 @@ const AIAgentSidebar: React.FC = () => {
 
   return (
     <ResizableSidebar
-      defaultWidth={320}
-      minWidth={250}
-      maxWidth={500}
+      defaultWidth={400}
+      minWidth={350}
+      maxWidth={600}
       position="right"
       className="bg-[#1D1F20] text-white"
     >

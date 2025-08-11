@@ -208,41 +208,44 @@ const SpreadsheetViewer: React.FC = () => {
           Align Right
         </button>
       </div>
-      <div className="flex-1 min-h-0 overflow-auto p-2">
-        <HotTable
-          ref={hotTableRef}
-          data={data}
-          colHeaders={true}
-          rowHeaders={true}
-          height="100%"
-          width="100%"
-          startRows={Math.max(numRows, 10)}
-          startCols={Math.max(numCols, 5)}
-          stretchH="none"
-          colWidths={100}
-          autoWrapRow={true}
-          autoWrapCol={true}
-          contextMenu={true}
-          filters={true}
-          dropdownMenu={true}
-          columnSorting={true}
-          manualRowResize={true}
-          manualColumnResize={true}
-          comments={true}
-          allowInsertRow={true}
-          allowInsertColumn={true}
-          allowRemoveRow={true}
-          allowRemoveColumn={true}
-          className="htCenter"
-        />
+      <div className="flex-1 min-h-0 p-2">
+        <div style={{ height: 'calc(100vh - 250px)', overflow: 'hidden' }}>
+          <HotTable
+            ref={hotTableRef}
+            data={data}
+            colHeaders={true}
+            rowHeaders={true}
+            height="100%"
+            width="100%"
+            startRows={Math.max(numRows, 20)}
+            startCols={Math.max(numCols, 10)}
+            stretchH="none"
+            colWidths={100}
+            autoWrapRow={true}
+            autoWrapCol={true}
+            contextMenu={true}
+            filters={true}
+            dropdownMenu={true}
+            columnSorting={true}
+            manualRowResize={true}
+            manualColumnResize={true}
+            comments={true}
+            allowInsertRow={false}
+            allowInsertColumn={false}
+            allowRemoveRow={false}
+            allowRemoveColumn={false}
+            className="htCenter"
+            licenseKey="non-commercial-and-evaluation"
+          />
+        </div>
       </div>
-      {sheetNames.length > 1 && (
-        <div className="flex-shrink-0 flex gap-2 px-4 pb-4 pt-2 border-t border-gray-200 bg-white">
+      {sheetNames.length > 0 && (
+        <div className="flex-shrink-0 flex gap-2 px-4 pb-4 pt-2 border-t border-gray-200 bg-white overflow-x-auto">
           {sheetNames.map((name) => (
             <button
               key={name}
               onClick={() => handleSheetChange(name)}
-              className={`px-3 py-1 rounded text-sm font-medium border transition-colors duration-150 ${
+              className={`px-3 py-1 rounded text-sm font-medium border transition-colors duration-150 whitespace-nowrap ${
                 selectedSheet === name
                   ? "bg-blue-600 text-white border-blue-700 shadow"
                   : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"

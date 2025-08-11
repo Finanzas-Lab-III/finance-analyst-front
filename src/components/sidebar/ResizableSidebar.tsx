@@ -64,7 +64,7 @@ const ResizableSidebar: React.FC<ResizableSidebarProps> = ({
 
   return (
     <div
-      className={`relative h-screen ${className}`}
+      className={`relative h-screen flex-shrink-0 ${className}`}
       style={{ width: `${width}px` }}
     >
       {children}

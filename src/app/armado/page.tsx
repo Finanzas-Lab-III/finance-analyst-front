@@ -129,9 +129,9 @@ const Page = () => {
   }, [selectedFile, prevYearFile, currentYear]);
 
   return (
-    <div className="flex h-screen bg-[#2d2f30]">
+    <div className="flex h-screen bg-[#2d2f30] overflow-hidden">
       <BudgetSidebar currentPage="armado" />
-      <div className="flex flex-col flex-1 h-full">
+      <div className="flex flex-col flex-1 h-full min-w-0">
       {/* Inputs de carga centrados y estilizados */}
       {!selectedFile && (
         <div className="flex-1 flex flex-col items-center justify-center p-6 gap-4">
