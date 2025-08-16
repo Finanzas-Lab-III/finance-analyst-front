@@ -248,33 +248,35 @@ const Page: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      <div className="flex flex-col flex-1 h-full text-white min-w-0">
-        <div className="p-6">
-          <div className="mb-4 flex items-center">
-            <button
-              onClick={() => setSelectedFile(undefined)}
-              className="p-2 rounded-full hover:bg-gray-800 mr-4 transition-colors duration-200"
-            >
-              <ArrowLeft size={24} className="text-white" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold">Seguimiento de Presupuesto</h1>
-              <div className="flex items-center text-gray-400 text-sm mt-1">
-                <FileSpreadsheet size={14} className="mr-1" />
-                <span>{selectedFile?.split('/').pop() || selectedFile}</span>
+    <main className="min-h-screen bg-white text-gray-900">
+      <div className="flex h-screen overflow-hidden">
+        <div className="flex flex-col flex-1 h-full min-w-0">
+          <div className="p-6 border-b border-gray-200">
+            <div className="mb-4 flex items-center">
+              <button
+                onClick={() => setSelectedFile(undefined)}
+                className="p-2 rounded-full hover:bg-gray-100 mr-4 transition-colors duration-200"
+              >
+                <ArrowLeft size={24} className="text-gray-900" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Seguimiento de Presupuesto</h1>
+                <div className="flex items-center text-gray-600 text-sm mt-1">
+                  <FileSpreadsheet size={14} className="mr-1" />
+                  <span>{selectedFile?.split('/').pop() || selectedFile}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="flex-1 px-6 pb-6">
-          <div className="bg-white rounded-lg shadow-sm h-full overflow-hidden">
-            <SpreadsheetViewer />
+          <div className="flex-1 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full overflow-hidden">
+              <SpreadsheetViewer />
+            </div>
           </div>
         </div>
+        {selectedFile && <AIAgentSidebar />}
       </div>
-      {selectedFile && <AIAgentSidebar />}
-    </div>
+    </main>
   );
 };
 

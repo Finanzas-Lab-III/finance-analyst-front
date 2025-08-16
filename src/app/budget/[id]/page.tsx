@@ -27,25 +27,25 @@ export default function BudgetOverview({ params }: BudgetOverviewProps) {
   const progressPercentage = (budgetData.usedBudget / budgetData.totalBudget) * 100;
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white">
+    <main className="min-h-screen bg-white text-gray-900">
       <div className="container mx-auto px-6 py-8">
         {/* Header with back button */}
         <div className="flex items-center mb-8">
           <Link 
             href="/"
-            className="p-2 rounded-full hover:bg-gray-800 mr-4 transition-colors duration-200"
+            className="p-2 rounded-full hover:bg-gray-100 mr-4 transition-colors duration-200"
           >
-            <ArrowLeft size={24} className="text-white" />
+            <ArrowLeft size={24} className="text-gray-900" />
           </Link>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold">{budgetData.name}</h1>
-            <p className="text-gray-400 mt-1">{budgetData.description}</p>
+            <h1 className="text-3xl font-bold text-gray-900">{budgetData.name}</h1>
+            <p className="text-gray-600 mt-1">{budgetData.description}</p>
           </div>
           <div className="flex items-center space-x-2">
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              budgetData.status === 'active' ? 'bg-green-900 text-green-300' :
-              budgetData.status === 'draft' ? 'bg-yellow-900 text-yellow-300' :
-              'bg-gray-900 text-gray-300'
+              budgetData.status === 'active' ? 'bg-green-100 text-green-800' :
+              budgetData.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-gray-100 text-gray-800'
             }`}>
               {budgetData.status === 'active' ? 'Activo' :
                budgetData.status === 'draft' ? 'Borrador' : 'Completado'}
@@ -93,27 +93,27 @@ export default function BudgetOverview({ params }: BudgetOverviewProps) {
         </div>
 
         {/* Budget Information Card */}
-        <div className="bg-gray-800 rounded-lg p-6">
-          <h3 className="text-xl font-semibold mb-4">Información del Presupuesto</h3>
+        <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+          <h3 className="text-xl font-semibold mb-4 text-gray-900">Información del Presupuesto</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium text-gray-300 mb-2">Detalles Generales</h4>
+              <h4 className="font-medium text-gray-700 mb-2">Detalles Generales</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Departamento:</span>
-                  <span>{budgetData.department}</span>
+                  <span className="text-gray-600">Departamento:</span>
+                  <span className="text-gray-900">{budgetData.department}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Responsable:</span>
-                  <span>{budgetData.manager}</span>
+                  <span className="text-gray-600">Responsable:</span>
+                  <span className="text-gray-900">{budgetData.manager}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Año Fiscal:</span>
-                  <span>{budgetData.year}</span>
+                  <span className="text-gray-600">Año Fiscal:</span>
+                  <span className="text-gray-900">{budgetData.year}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Última Modificación:</span>
-                  <span>{new Date(budgetData.lastModified).toLocaleDateString('es-ES')}</span>
+                  <span className="text-gray-600">Última Modificación:</span>
+                  <span className="text-gray-900">{new Date(budgetData.lastModified).toLocaleDateString('es-ES')}</span>
                 </div>
               </div>
             </div>

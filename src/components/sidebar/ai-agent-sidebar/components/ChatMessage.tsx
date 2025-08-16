@@ -31,8 +31,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, timestamp, s
     scenarioData 
   });
 
-  const userMessageClasses = 'bg-white/5 border border-white/10 rounded-lg p-3 text-sm';
-  const aiMessageClasses = 'py-2 text-sm';
+  const userMessageClasses = 'bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-gray-900';
+  const aiMessageClasses = 'py-2 text-sm text-gray-900';
 
   return (
     <div className={isUser ? userMessageClasses : aiMessageClasses}>
@@ -55,7 +55,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, timestamp, s
         message
       )}
       {timestamp && (
-        <div className="text-xs mt-1 text-gray-400">
+        <div className="text-xs mt-1 text-gray-500">
           {timestamp}
         </div>
       )}
