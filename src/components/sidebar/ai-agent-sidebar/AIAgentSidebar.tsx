@@ -55,9 +55,10 @@ const AIAgentSidebar: React.FC = () => {
 
     try {
       // Determine endpoint based on whether selected file contains "+"
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
       const endpoint = selectedFile && selectedFile.includes('+') 
-        ? 'http://localhost:8000/analyze/projection'
-        : 'http://localhost:8000/analyze/budget_variation';
+        ? `${baseUrl}/analyze/projection`
+        : `${baseUrl}/analyze/budget_variation`;
 
       const response = await fetch(endpoint, {
         method: 'POST',

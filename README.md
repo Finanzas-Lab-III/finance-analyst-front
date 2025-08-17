@@ -12,7 +12,7 @@ This is a [Next.js](https://nextjs.org) project that provides a web interface fo
 
 ## Prerequisites
 
-Before running this application, you need to have the backend server running. The backend should be accessible at `http://localhost:8000` and provide the following endpoints:
+Before running this application, you need to have the backend servers running. Configure the API URLs in your environment variables (see Environment Configuration section below):
 
 - `GET /excel/files` - Returns the file tree structure
 - `GET /excel/file/{filepath}` - Returns the actual Excel file as a blob
@@ -53,7 +53,8 @@ The `/excel/files` endpoint should return data in this format:
 
 ## Getting Started
 
-1. **Start the Backend Server**: Make sure your backend server is running on `http://localhost:8000`
+1. **Configure Environment Variables**: Copy `.env.example` to `.env.local` and update the URLs as needed
+2. **Start the Backend Servers**: Make sure your backend servers are running (see Environment Configuration for URLs)
 
 2. **Install Dependencies**:
    ```bash
@@ -73,7 +74,20 @@ The `/excel/files` endpoint should return data in this format:
    bun dev
    ```
 
-4. **Open the Application**: Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. **Open the Application**: Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Environment Configuration
+
+This application uses environment variables to configure API endpoints. Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# API Configuration
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000          # Main AI analysis API
+NEXT_PUBLIC_FILE_SERVICE_URL=http://localhost:8010      # File service API  
+NEXT_PUBLIC_BUDGET_ANALYSIS_URL=http://localhost:8001   # Budget analysis API
+```
+
+Copy `.env.example` to `.env.local` and modify the URLs according to your backend service configuration.
 
 ## Usage
 
