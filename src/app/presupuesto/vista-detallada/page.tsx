@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download, Edit2, Save, Plus, Trash2 } from 'lucide-react';
 import { getBudgetData } from '@/data/mockBudgetData';
 
-const BudgetDetailedViewPage = () => {
+const BudgetDetailedViewContent = () => {
   const searchParams = useSearchParams();
   const year = searchParams.get('year');
   const area = searchParams.get('area');
@@ -183,6 +183,23 @@ const BudgetDetailedViewPage = () => {
         </div>
       </div>
     </main>
+  );
+};
+
+const LoadingBudgetDetails = () => (
+  <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p className="mt-4 text-gray-600">Cargando detalles del presupuesto...</p>
+    </div>
+  </div>
+);
+
+const BudgetDetailedViewPage = () => {
+  return (
+    <Suspense fallback={<LoadingBudgetDetails />}>
+      <BudgetDetailedViewContent />
+    </Suspense>
   );
 };
 
