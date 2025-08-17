@@ -1,107 +1,73 @@
 "use client"
-import React from 'react';
-import Link from 'next/link';
-import { ChevronRight, FileSpreadsheet, Calendar, TrendingUp } from 'lucide-react';
+import React from "react";
+import Link from "next/link";
 
-interface Budget {
-  id: string;
-  name: string;
-  description: string;
-  status: 'active' | 'draft' | 'completed';
-  lastModified: string;
-  year: string;
-}
-
-export default function Home() {
-  // For now, we have one budget but the structure supports multiple
-  const budgets: Budget[] = [
-    {
-      id: 'lab-budget-2025',
-      name: 'Presupuesto Laboratorio',
-      description: 'Presupuesto para el laboratorio de investigación 2025',
-      status: 'active',
-      lastModified: '2024-12-15',
-      year: '2025'
-    }
-  ];
-
+const Page = () => {
   return (
     <main className="min-h-screen bg-white text-gray-900">
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 py-8">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-4 text-gray-900">Sistema de Gestión de Presupuestos</h1>
-          <p className="text-gray-600 text-lg">Administra y supervisa todos los presupuestos de manera centralizada</p>
-        </div>
-
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-            <div className="flex items-center">
-              <FileSpreadsheet className="h-8 w-8 text-blue-600 mr-3" />
-              <div>
-                <p className="text-gray-600 text-sm">Total Presupuestos</p>
-                <p className="text-2xl font-bold text-gray-900">{budgets.length}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-            <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-green-600 mr-3" />
-              <div>
-                <p className="text-gray-600 text-sm">Año Actual</p>
-                <p className="text-2xl font-bold text-gray-900">2025</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-            <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-purple-600 mr-3" />
-              <div>
-                <p className="text-gray-600 text-sm">Presupuestos Activos</p>
-                <p className="text-2xl font-bold text-gray-900">{budgets.filter(b => b.status === 'active').length}</p>
-              </div>
-            </div>
+        <div className="flex items-center mb-8">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-gray-900">Sistema de Gestión de Presupuestos</h1>
+            <p className="text-gray-600 mt-1">Administra y supervisa todos los presupuestos de manera centralizada</p>
           </div>
         </div>
 
-        {/* Budget List */}
+        {/* Main Budget Selection */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900">Presupuestos Disponibles</h2>
-          <div className="grid gap-4">
-            {budgets.map((budget) => (
-              <Link
-                key={budget.id}
-                href={`/budget/${budget.id}`}
-                className="block bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition-colors duration-200 border border-gray-200 hover:border-gray-300"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center mb-2">
-                      <h3 className="text-xl font-semibold mr-3 text-gray-900">{budget.name}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        budget.status === 'active' ? 'bg-green-100 text-green-800' :
-                        budget.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {budget.status === 'active' ? 'Activo' :
-                         budget.status === 'draft' ? 'Borrador' : 'Completado'}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 mb-2">{budget.description}</p>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span>Año: {budget.year}</span>
-                      <span className="mx-2">•</span>
-                      <span>Última modificación: {new Date(budget.lastModified).toLocaleDateString('es-ES')}</span>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-6 w-6 text-gray-400" />
-                </div>
-              </Link>
-            ))}
+          <h2 className="text-2xl font-semibold mb-6 text-gray-900">Presupuestos - Facultad de Ingeniería</h2>
+          <div className="bg-gray-50 rounded-lg p-6 mb-8">
+            <Link
+              href="/presupuesto/ingenieria"
+              className="block bg-white hover:bg-gray-100 rounded-lg p-6 transition-colors duration-200 border border-gray-200"
+            >
+              <h3 className="text-xl font-semibold text-gray-900">Presupuesto de Ingeniería</h3>
+              <p className="text-gray-600 mt-2">Presupuesto general de la Facultad de Ingeniería</p>
+            </Link>
+          </div>
+        </div>
+
+        {/* Sub-areas Section */}
+        <div>
+          <h2 className="text-2xl font-semibold mb-6 text-gray-900">Presupuestos de las sub áreas de la facultad</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Link
+              href="/presupuesto/laboratorio"
+              className="bg-gray-50 hover:bg-gray-100 rounded-lg p-6 transition-colors duration-200 block border border-gray-200"
+            >
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">Presupuesto de Laboratorio</h3>
+              <p className="text-gray-600 text-sm">Gestión del presupuesto del laboratorio de investigación</p>
+            </Link>
+
+            <Link
+              href="/presupuesto/biomedica"
+              className="bg-gray-50 hover:bg-gray-100 rounded-lg p-6 transition-colors duration-200 block border border-gray-200"
+            >
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">Presupuesto de Facultad Biomédica</h3>
+              <p className="text-gray-600 text-sm">Presupuesto específico para el área biomédica</p>
+            </Link>
+
+            <Link
+              href="/presupuesto/informatica"
+              className="bg-gray-50 hover:bg-gray-100 rounded-lg p-6 transition-colors duration-200 block border border-gray-200"
+            >
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">Presupuesto de Informática</h3>
+              <p className="text-gray-600 text-sm">Gestión presupuestaria del departamento de informática</p>
+            </Link>
+
+            <Link
+              href="/presupuesto/industrial"
+              className="bg-gray-50 hover:bg-gray-100 rounded-lg p-6 transition-colors duration-200 block border border-gray-200"
+            >
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">Presupuesto de Ingeniería Industrial</h3>
+              <p className="text-gray-600 text-sm">Presupuesto del área de ingeniería industrial</p>
+            </Link>
           </div>
         </div>
       </div>
     </main>
   );
-}
+};
+
+export default Page;

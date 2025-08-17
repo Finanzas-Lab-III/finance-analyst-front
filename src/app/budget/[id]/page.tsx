@@ -56,12 +56,12 @@ export default function BudgetOverview({ params }: BudgetOverviewProps) {
         {/* Main Action Buttons */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Link 
-            href="/armado"
+            href="/presupuesto/laboratorio"
             className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-lg transition-colors duration-200 block"
           >
             <div className="flex items-center mb-3">
               <Settings className="h-8 w-8 mr-3" />
-              <h3 className="text-xl font-semibold">Armado de Presupuesto</h3>
+              <h3 className="text-xl font-semibold">Gestión de Presupuesto</h3>
             </div>
             <p className="text-blue-200">
               Crear y editar el presupuesto, cargar archivos Excel y configurar partidas presupuestarias.
