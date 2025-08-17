@@ -8,11 +8,24 @@ import {
 } from './components';
 import { Plus, X } from 'lucide-react';
 
+interface MonthlyData {
+  categories: string[];
+  original_values: number[];
+  modified_values: number[];
+  chart_type: string;
+}
+
+interface InflationScenarioData {
+  is_inflation_scenario: boolean;
+  monthly: MonthlyData;
+}
+
 interface Message {
   id: string;
   message: string;
   sender: 'ai' | 'user';
   timestamp?: string;
+  scenarioData?: InflationScenarioData;
 }
 
 const AIAgentSidebar: React.FC = () => {
@@ -41,7 +54,13 @@ const AIAgentSidebar: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/analyze/budget_variation', {
+      // Determine endpoint based on whether selected file contains "+"
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const endpoint = selectedFile && selectedFile.includes('+') 
+        ? `${baseUrl}/analyze/projection`
+        : `${baseUrl}/analyze/budget_variation`;
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,13 +73,23 @@ const AIAgentSidebar: React.FC = () => {
       }
 
       const data = await response.json();
+      console.log('API Response:', data);
+      console.log('Scenario data from API:', data.is_inflation_scenario, data.monthly);
+
+      // Check for monthly inflation scenario data
+      const scenarioData = data.is_inflation_scenario && data.monthly ? {
+        is_inflation_scenario: data.is_inflation_scenario,
+        monthly: data.monthly
+      } : undefined;
 
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
         message: data.answer,
         sender: 'ai',
         timestamp: new Date().toLocaleTimeString(),
+        scenarioData: scenarioData,
       };
+      console.log('AI Message created:', aiMessage);
       setMessages(prev => [...prev, aiMessage]);
 
     } catch (error) {
@@ -95,25 +124,25 @@ const AIAgentSidebar: React.FC = () => {
 
   return (
     <ResizableSidebar
-      defaultWidth={320}
-      minWidth={250}
-      maxWidth={500}
+      defaultWidth={400}
+      minWidth={350}
+      maxWidth={600}
       position="right"
-      className="bg-[#1D1F20] text-white"
+      className="bg-white text-gray-900 border-l border-gray-200"
     >
       <div className="h-full flex flex-col p-4">
-        <div className="mb-4 border-b border-gray-700 pb-4">
+        <div className="mb-4 border-b border-gray-200 pb-4">
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={handleAddFile} className="p-1.5 hover:bg-gray-700 rounded-md text-gray-400 hover:text-white">
+            <button onClick={handleAddFile} className="p-1.5 hover:bg-gray-100 rounded-md text-gray-600 hover:text-gray-900">
               <Plus size={16} />
             </button>
             {attendedFiles.length > 0 ? (
               attendedFiles.map(file => (
-                <div key={file} className="flex items-center bg-gray-800/50 py-1 pl-1 pr-2 rounded-full">
-                  <button onClick={() => handleRemoveFile(file)} className="p-0.5 hover:bg-gray-700/50 rounded-full text-gray-400 hover:text-white mr-1">
+                <div key={file} className="flex items-center bg-gray-100 py-1 pl-1 pr-2 rounded-full">
+                  <button onClick={() => handleRemoveFile(file)} className="p-0.5 hover:bg-gray-200 rounded-full text-gray-600 hover:text-gray-900 mr-1">
                     <X size={14} />
                   </button>
-                  <span className="text-sm truncate text-gray-300">{file.split('/').pop()}</span>
+                  <span className="text-sm truncate text-gray-700">{file.split('/').pop()}</span>
                 </div>
               ))
             ) : (

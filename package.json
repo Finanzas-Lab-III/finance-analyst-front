@@ -2,6 +2,9 @@
   "name": "finance-analyst-front",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.17.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -10,6 +13,7 @@
   },
   "dependencies": {
     "@handsontable/react": "^15.3.0",
+    "axios": "^1.10.0",
     "handsontable": "^15.3.0",
     "lucide-react": "^0.522.0",
     "next": "15.3.4",
@@ -17,6 +21,7 @@
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "react-spreadsheet": "^0.10.1",
+    "recharts": "^3.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
