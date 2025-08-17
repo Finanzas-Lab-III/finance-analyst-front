@@ -44,7 +44,7 @@ const budgetAreaConfig = {
 
 const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
   const { area } = params;
-  const [activeTab, setActiveTab] = useState("años-anteriores");
+  const [activeTab, setActiveTab] = useState("armado");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<BudgetData | null>(null);
   const router = useRouter();
@@ -222,6 +222,10 @@ const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
     router.push(`/presupuesto/vista-detallada?year=${year}&area=${area}`);
   };
 
+  const handleArmadoClick = () => {
+    router.push('/armado');
+  };
+
   // If area doesn't exist in config, show error
   if (!config) {
     return (
@@ -262,14 +266,14 @@ const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
           {/* Tab Navigation */}
           <div className="flex space-x-1 mb-8 bg-gray-200 rounded-lg p-1">
             <button 
-              onClick={() => setActiveTab("gestión")}
+              onClick={() => setActiveTab("armado")}
               className={`px-4 py-2 rounded-md transition-colors ${
-                activeTab === "gestión" 
+                activeTab === "armado" 
                   ? "bg-blue-600 text-white" 
                   : "text-gray-700 hover:text-gray-900 hover:bg-gray-300"
               }`}
             >
-              Gestión
+              Armado
             </button>
             <button 
               onClick={() => setActiveTab("seguimientos")}
@@ -357,14 +361,14 @@ const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
             </>
           )}
 
-          {activeTab === "gestión" && (
+          {activeTab === "armado" && (
             <>
-              {/* Documentation Section for Gestión */}
+              {/* Documentation Section for Armado */}
               <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-4 text-gray-900">Documentación</h3>
                 <p className="text-gray-600 mb-6">Esta sección contiene los documentos presupuestarios del {config.department} para el año 2025</p>
                 
-                {/* Documents Table - Same as años anteriores but with 2025 */}
+                {/* Documents Table - Same as años anteriores but with 2025 and clickable rows */}
                 <div className="bg-white rounded-lg overflow-hidden border border-gray-200 mb-6">
                   <div className="grid grid-cols-4 gap-4 p-4 bg-gray-100 font-semibold text-gray-900">
                     <div>Documento</div>
@@ -383,7 +387,12 @@ const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
                       if (!budgetData) return null;
                       
                       return (
-                        <div key={year} className="grid grid-cols-4 gap-4 p-4 items-center border-b border-gray-200 last:border-b-0">
+                        <div 
+                          key={year} 
+                          onClick={handleArmadoClick}
+                          className="grid grid-cols-4 gap-4 p-4 items-center border-b border-gray-200 last:border-b-0 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                          title="Haz clic para editar este archivo en el armado"
+                        >
                           <div className="flex items-center">
                             <FileText className="h-5 w-5 text-green-600 mr-2" />
                             <span className="text-gray-900">{budgetData.archivo}</span>
@@ -400,22 +409,6 @@ const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
                           <div className="text-gray-600">{budgetData.ultima_actualizacion}</div>
                           <div className="flex items-center justify-between">
                             <span className="text-gray-900">{budgetData.actualizado_por}</span>
-                            <div className="flex space-x-2">
-                              <button 
-                                onClick={() => handlePreviewClick(year)}
-                                className="text-gray-400 hover:text-blue-600 transition-colors"
-                                title="Vista rápida"
-                              >
-                                <Edit size={16} />
-                              </button>
-                              <button 
-                                onClick={() => handleFullViewClick(year)}
-                                className="text-gray-400 hover:text-blue-600 transition-colors"
-                                title="Vista completa"
-                              >
-                                <ExternalLink size={16} />
-                              </button>
-                            </div>
                           </div>
                         </div>
                       );
@@ -425,21 +418,35 @@ const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
                 
                 {/* Action Buttons */}
                 <div className="flex space-x-4">
-                  <Link
-                    href={`/presupuesto/${area}/crear-nuevo`}
+                  <button
+                    onClick={handleArmadoClick}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
                   >
                     Crear Nuevo Presupuesto
-                  </Link>
-                  <Link
-                    href={`/presupuesto/${area}/editar`}
+                  </button>
+                  <button
+                    onClick={handleArmadoClick}
                     className="px-6 py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors duration-200"
                   >
                     Editar Presupuesto Existente
-                  </Link>
-                  <button className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200">
+                  </button>
+                  <button 
+                    onClick={handleArmadoClick}
+                    className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
+                  >
                     Cargar desde Excel
                   </button>
+                </div>
+
+                {/* Instructions */}
+                <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mt-8">
+                  <h4 className="font-semibold text-blue-900 mb-3">💡 ¿Cómo trabajar con un archivo?</h4>
+                  <div className="text-sm text-blue-800 space-y-2">
+                    <p>1. <strong>Haz clic en cualquier fila</strong> de la tabla para abrir el editor de armado</p>
+                    <p>2. <strong>Carga archivos Excel</strong> para crear o editar presupuestos</p>
+                    <p>3. <strong>Compara con años anteriores</strong> para análisis automático</p>
+                    <p>4. <strong>Usa las herramientas de edición</strong> para modificar datos directamente</p>
+                  </div>
                 </div>
               </div>
             </>
