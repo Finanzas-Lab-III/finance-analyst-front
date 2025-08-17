@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { ArrowLeft, Settings, FileText, BarChart3, History, Calendar, TrendingUp, DollarSign } from 'lucide-react';
 
 interface BudgetOverviewProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function BudgetOverview({ params }: BudgetOverviewProps) {
-  const { id } = params;
+  const { id } = React.use(params);
 
   // Mock data - in a real app this would come from an API
   const budgetData = {

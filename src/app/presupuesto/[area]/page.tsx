@@ -10,7 +10,7 @@ import { fetchFileTree } from '@/api/fileService';
 import { FileSystemNode } from '@/api/fileSystemData';
 
 interface BudgetAreaPageProps {
-  params: { area: string };
+  params: Promise<{ area: string }>;
 }
 
 // Configuration for different budget areas
@@ -43,7 +43,7 @@ const budgetAreaConfig = {
 };
 
 const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
-  const { area } = params;
+  const { area } = React.use(params);
   const [activeTab, setActiveTab] = useState("armado");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<BudgetData | null>(null);

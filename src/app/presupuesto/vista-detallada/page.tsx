@@ -108,7 +108,7 @@ const BudgetDetailedViewPage = () => {
                     Tipo Contratación
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Periodo
+                    Meses
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Remuneración Mensual
@@ -125,16 +125,16 @@ const BudgetDetailedViewPage = () => {
                 {budgetData.items.map((item, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{item.recurso}</div>
+                      <div className="text-sm font-medium text-gray-900">{item.nombre_recurso}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{item.tipo_contratacion}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{item.periodo}</div>
+                      <div className="text-sm text-gray-900">{item.meses}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">${item.remuneracion_mensual.toLocaleString()}</div>
+                      <div className="text-sm text-gray-900">${item.remuneracion_bruta_mensual.toLocaleString()}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">${item.costo_total.toLocaleString()}</div>
