@@ -1,7 +1,6 @@
 import React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import BackofficeHeader from "@/components/backoffice/BackofficeHeader";
-import BackofficeNavigation from "@/components/backoffice/BackofficeNavigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,12 +20,9 @@ export default function BackofficeLayout({
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50`}>
       <BackofficeHeader />
-      <div className="flex">
-        <BackofficeNavigation />
-        <main className="flex-1 p-6">
-          {children}
-        </main>
-      </div>
+      <main className="p-6">
+        {children}
+      </main>
     </div>
   );
 }

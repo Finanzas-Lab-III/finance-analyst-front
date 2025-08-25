@@ -13,7 +13,7 @@ const Page = () => {
     if (userRole === 'director') {
       router.push('/directors-home');
     } else if (userRole === 'finance') {
-      router.push('/backoffice');
+      router.push('/backoffice/budgets');
     }
   }, [userRole, router]);
 
@@ -37,7 +37,7 @@ const Page = () => {
           <div className="flex items-center justify-center mb-6">
             <Building2 className="w-16 h-16 text-blue-600 mr-4" />
             <div>
-              <h1 className="text-5xl font-bold text-gray-900">Sistema de Gestión de Presupuestos</h1>
+              <h1 className="budget-title">Sistema de Gestión de Presupuestos</h1>
               <p className="text-xl text-gray-600 mt-2">Universidad</p>
             </div>
           </div>
@@ -49,7 +49,7 @@ const Page = () => {
           <div className="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto mb-8">
             <div className="flex items-center justify-center mb-4">
               <LogIn className="w-8 h-8 text-blue-600 mr-2" />
-              <h2 className="text-2xl font-bold text-gray-900">Acceso al Sistema</h2>
+              <h2 className="secondary-title">Acceso al Sistema</h2>
             </div>
             <p className="text-gray-600 mb-6">Selecciona tu perfil para continuar</p>
             
@@ -91,7 +91,7 @@ const Page = () => {
                   <Users className="w-8 h-8 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Portal Directores</h2>
+                  <h2 className="secondary-title">Portal Directores</h2>
                   <p className="text-gray-600">Directores de Cátedra</p>
                 </div>
               </div>
@@ -125,7 +125,7 @@ const Page = () => {
                   <BarChart3 className="w-8 h-8 text-green-600" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Portal Finanzas</h2>
+                  <h2 className="secondary-title">Portal Finanzas</h2>
                   <p className="text-gray-600">Equipo de Finanzas</p>
                 </div>
               </div>

@@ -7,15 +7,15 @@ export default function BackofficePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redireccionar automáticamente al dashboard
-    router.push('/backoffice/dashboard');
+    // Redireccionar automáticamente a presupuestos
+    router.push('/backoffice/budgets');
   }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-        <p className="text-gray-600">Redirigiendo al portal de finanzas...</p>
+        <p className="text-gray-600">Redirigiendo a presupuestos...</p>
       </div>
     </div>
   );

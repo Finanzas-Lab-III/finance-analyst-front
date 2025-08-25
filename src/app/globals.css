@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary-blue: #001D9C;
 }
 
 @theme inline {
@@ -10,6 +11,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-montserrat: var(--font-montserrat);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +25,41 @@ html,
 body {
   height: 100%;
   color: #fcfcfc;
+}
+
+/* Override all rounded corners to be square */
+.rounded,
+.rounded-lg,
+.rounded-md,
+.rounded-sm,
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl,
+.rounded-full {
+  border-radius: 0 !important;
+}
+
+/* Custom heading styles for budget titles */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-montserrat), sans-serif !important;
+  color: var(--primary-blue) !important;
+  font-weight: 600;
+}
+
+/* Specific styles for main titles */
+.budget-title,
+.main-title {
+  font-family: var(--font-montserrat), sans-serif !important;
+  color: var(--primary-blue) !important;
+  font-size: 30px !important;
+  font-weight: 600 !important;
+  line-height: 1.2;
+}
+
+/* Secondary titles */
+.secondary-title {
+  font-family: var(--font-montserrat), sans-serif !important;
+  color: var(--primary-blue) !important;
+  font-size: 24px !important;
+  font-weight: 500 !important;
 }
