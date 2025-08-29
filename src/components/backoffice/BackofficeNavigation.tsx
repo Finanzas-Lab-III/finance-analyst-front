@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   Home, 
-  FileText
+  FileText,
+  Users
 } from "lucide-react";
 
 const navigationItems = [
@@ -17,6 +18,11 @@ const navigationItems = [
     name: "Presupuestos",
     href: "/backoffice/budgets", 
     icon: FileText,
+  },
+  {
+    name: "Gestión de Usuarios",
+    href: "/backoffice/users",
+    icon: Users,
   },
 ];
 
