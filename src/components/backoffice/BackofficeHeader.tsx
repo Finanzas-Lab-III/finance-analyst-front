@@ -1,6 +1,8 @@
 "use client"
 import React from "react";
-import { Building2, Users, Bell, Settings } from "lucide-react";
+import { Users, Bell, Settings } from "lucide-react";
+import Image from "next/image";
+
 
 export default function BackofficeHeader() {
   return (
@@ -8,7 +10,7 @@ export default function BackofficeHeader() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <Building2 className="w-8 h-8 text-blue-600" />
+            <Image src="/austral-logo.png" alt="Universidad Austral" width={64} height={64} className="mr-4" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">Portal Finanzas</h1>
               <p className="text-sm text-gray-600">Universidad</p>

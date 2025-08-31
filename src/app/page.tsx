@@ -1,8 +1,10 @@
 "use client"
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Users, BarChart3, LogIn, UserCheck } from "lucide-react";
+import { Users, BarChart3, LogIn, UserCheck } from "lucide-react";
 import { useAuth } from "@/components/AuthContext";
+import Image from "next/image";
+
 
 const Page = () => {
   const router = useRouter();
@@ -35,7 +37,7 @@ const Page = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <div className="flex items-center justify-center mb-6">
-            <Building2 className="w-16 h-16 text-blue-600 mr-4" />
+            <Image src="/austral-logo.png" alt="Universidad Austral" width={64} height={64} className="mr-4" />
             <div>
               <h1 className="budget-title">Sistema de Gestión de Presupuestos</h1>
               <p className="text-xl text-gray-600 mt-2">Universidad</p>
@@ -88,7 +90,7 @@ const Page = () => {
             <div className="p-8">
               <div className="flex items-center mb-6">
                 <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                  <Users className="w-8 h-8 text-blue-600" />
+                  <Image src="/austral-logo.png" alt="Universidad Austral" width={64} height={64} />
                 </div>
                 <div>
                   <h2 className="secondary-title">Portal Directores</h2>
@@ -122,7 +124,7 @@ const Page = () => {
             <div className="p-8">
               <div className="flex items-center mb-6">
                 <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                  <BarChart3 className="w-8 h-8 text-green-600" />
+                  <Image src="/austral-logo.png" alt="Universidad Austral" width={64} height={64} />
                 </div>
                 <div>
                   <h2 className="secondary-title">Portal Finanzas</h2>
