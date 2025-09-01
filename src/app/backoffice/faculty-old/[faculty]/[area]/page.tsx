@@ -281,7 +281,7 @@ function FacultyAreaBudgetsPage() {
   const faculty = decodeURIComponent(params.faculty as string);
   const area = decodeURIComponent(params.area as string);
 
-  // Filter budgets for this specific faculty and area
+  // Filter budgets for this specific faculty-old and area
   const relevantBudgets = mockBudgets.filter(budget => 
     budget.faculty === faculty && budget.area === area
   );

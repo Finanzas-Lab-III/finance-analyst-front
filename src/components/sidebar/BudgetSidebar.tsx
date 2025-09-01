@@ -25,7 +25,7 @@ const BudgetSidebar: React.FC<BudgetSidebarProps> = ({ currentPage }) => {
 
   const navigationItems = [
     {
-      href: '/budget/lab-budget-2025',
+      href: '/faculty-old-year/lab-faculty-old-year-2025',
       icon: Home,
       label: 'Vista General',
       active: false

@@ -66,7 +66,7 @@ interface BudgetComment {
   type: 'general' | 'approval' | 'rejection' | 'revision';
 }
 
-// Mock data for budget detail
+// Mock data for faculty-old-year detail
 const mockBudgetDetail: BudgetDetail = {
   id: "1",
   name: "Presupuesto Laboratorio 2025",

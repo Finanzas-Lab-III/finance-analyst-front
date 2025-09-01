@@ -251,3 +251,78 @@ export async function updateUser(payload: UpdateUserPayload): Promise<any> {
 }
 
 
+// Facultades/Áreas a cargo por usuario
+export interface AreaInChargeDto {
+  id: number;
+  name: string;
+  code: string;
+  type: string;
+  parent_area_id: number | null;
+  parent?: {
+    id: number;
+    name: string;
+  } | null;
+}
+
+export interface FacultyInChargeDto {
+  id: number;
+  name: string;
+  code: string;
+  type: string;
+  parent_area_id: null;
+}
+
+export interface UserFacultiesAreasResponse {
+  areas_in_charge: AreaInChargeDto[];
+  faculties_in_charge: FacultyInChargeDto[];
+}
+
+export async function fetchUserFacultiesAreas(
+  userId: string | number
+): Promise<UserFacultiesAreasResponse> {
+  const url = `${USERS_API_BASE}/api/faculties/${userId}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Error obteniendo facultades/áreas del usuario ${userId}: ${res.status} ${res.statusText}`);
+  }
+  const data = (await res.json()) as UserFacultiesAreasResponse;
+  return {
+    areas_in_charge: Array.isArray(data?.areas_in_charge) ? data.areas_in_charge : [],
+    faculties_in_charge: Array.isArray(data?.faculties_in_charge) ? data.faculties_in_charge : [],
+  };
+}
+
+// Años por área
+export type AreaYearStatus =
+  | "NOT_STARTED"
+  | "BUDGET_STARTED"
+  | "NEEDS_CHANGES"
+  | "PENDING_APPROVAL"
+  | "BUDGET_APPROVED"
+  | "FOLLOW_UP_AVAILABLE";
+
+export interface YearsOfAreaItemDto {
+  area_year_id: number;
+  year: number;
+  isCurrent: boolean;
+  isFuture: boolean;
+  status: AreaYearStatus;
+}
+
+export interface YearsOfAreaResponse {
+  area_id: number;
+  yearsOfArea: YearsOfAreaItemDto[];
+}
+
+export async function fetchYearsOfArea(areaId: number | string): Promise<YearsOfAreaResponse> {
+  const url = `${USERS_API_BASE}/api/yearsOfArea/${areaId}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Error obteniendo años del área ${areaId}: ${res.status} ${res.statusText}`);
+  }
+  const data = (await res.json()) as YearsOfAreaResponse;
+  return {
+    area_id: Number(data?.area_id) || Number(areaId),
+    yearsOfArea: Array.isArray(data?.yearsOfArea) ? data.yearsOfArea : [],
+  };
+}

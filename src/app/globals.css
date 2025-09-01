@@ -39,7 +39,7 @@ body {
   border-radius: 0 !important;
 }
 
-/* Custom heading styles for budget titles */
+/* Custom heading styles for faculty-old-year titles */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-montserrat), sans-serif !important;
   color: var(--primary-blue) !important;

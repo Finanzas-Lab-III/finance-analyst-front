@@ -1,4 +1,4 @@
-// Mock data for budget years 2023, 2024, 2025
+// Mock data for faculty-old-year years 2023, 2024, 2025
 export interface BudgetItem {
   id: number;
   nombre_recurso: string;

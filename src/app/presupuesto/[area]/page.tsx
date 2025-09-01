@@ -13,7 +13,7 @@ interface BudgetAreaPageProps {
   params: Promise<{ area: string }>;
 }
 
-// Configuration for different budget areas
+// Configuration for different faculty-old-year areas
 const budgetAreaConfig = {
   laboratorio: {
     title: "Presupuesto de Laboratorio",
