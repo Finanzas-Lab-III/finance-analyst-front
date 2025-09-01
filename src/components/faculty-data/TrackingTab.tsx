@@ -1,6 +1,6 @@
 "use client"
 import React from "react";
-import { Download, FileText, Eye, MessageSquare } from "lucide-react";
+import { Download, FileText, MessageSquare } from "lucide-react";
 
 export default function TrackingTab() {
   return (
@@ -149,12 +149,6 @@ export default function TrackingTab() {
                   <div>
                     {item.available ? (
                       <div className="flex items-center space-x-1">
-                        <button 
-                          className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
-                          title="Vista rápida"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
                         <button 
                           className="text-gray-600 hover:text-gray-800 p-1 rounded hover:bg-gray-50 transition-colors"
                           title="Comentarios"
