@@ -10,6 +10,15 @@ interface BudgetTabProps {
 }
 
 export default function BudgetTab({ latest, history = [], onOpenUpload }: BudgetTabProps) {
+  const USERS_API_BASE = process.env.NEXT_PUBLIC_USERS_API_URL || "http://localhost:8000";
+
+  const handleDownload = (doc: ArmadoDocument) => {
+    if (!doc?.id) return;
+    const url = `${USERS_API_BASE}/api/archivo/${doc.id}?raw=true`;
+    // Open in a new tab to let the browser handle file download (avoids CORS issues with fetch)
+    window.open(url, "_blank");
+  };
+
   return (
     <div className="space-y-8">
       <h3 className="text-xl font-semibold text-gray-900">Gestión de Presupuesto</h3>
@@ -21,7 +30,11 @@ export default function BudgetTab({ latest, history = [], onOpenUpload }: Budget
             <p className="text-gray-600 text-sm mt-1">Versión actual del presupuesto</p>
           </div>
           <div className="flex space-x-2">
-            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button
+              onClick={() => latest && handleDownload(latest)}
+              disabled={!latest}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <Download className="w-4 h-4" />
               <span>Descargar</span>
             </button>
@@ -77,7 +90,11 @@ export default function BudgetTab({ latest, history = [], onOpenUpload }: Budget
                   <div className="text-right">
                     <p className="text-sm text-gray-900 font-medium truncate max-w-[240px]">{doc.file_key}</p>
                   </div>
-                  <button className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50 transition-colors" title="Descargar">
+                  <button
+                    onClick={() => handleDownload(doc)}
+                    className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50 transition-colors"
+                    title="Descargar"
+                  >
                     <Download className="w-4 h-4" />
                   </button>
                 </div>

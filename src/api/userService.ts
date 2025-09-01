@@ -347,6 +347,26 @@ export async function fetchAreaYearStatus(areaYearId: number | string): Promise<
   };
 }
 
+export async function updateAreaYearStatus(
+  areaYearId: number | string,
+  status: AreaYearStatus
+): Promise<void> {
+  const url = `${USERS_API_BASE}/api/status/${areaYearId}`;
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) {
+    let message = `Error actualizando estado del área-año ${areaYearId}: ${res.status} ${res.statusText}`;
+    try {
+      const data = await res.json();
+      if (data?.detail) message = String(data.detail);
+    } catch {}
+    throw new Error(message);
+  }
+}
+
 // Armado documents for an AreaYear
 export interface ArmadoDocument {
   id: number;
@@ -375,4 +395,39 @@ export async function fetchArmadoDocuments(areaYearId: number | string): Promise
   const docs = Array.isArray(data?.documents) ? data.documents : [];
   // sort desc by created_at
   return docs.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+}
+
+// Seguimiento documents for an AreaYear
+export interface SeguimientoDocument {
+  id: number;
+  type: string; // "SEGUIMIENTO"
+  title: string;
+  area_year_id: number;
+  file_key: string;
+  notes?: string | null;
+  created_at: string; // ISO
+  updated_at?: string; // ISO
+}
+
+export interface SeguimientoDocumentsResponse {
+  area_year_id: number;
+  document_type: string; // "SEGUIMIENTO"
+  documents: SeguimientoDocument[];
+}
+
+export async function fetchSeguimientoDocuments(areaYearId: number | string): Promise<SeguimientoDocument[]> {
+  const url = `${USERS_API_BASE}/api/archivos_seguimiento/area_year/${areaYearId}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Error obteniendo archivos de seguimiento para ${areaYearId}: ${res.status} ${res.statusText}`);
+  }
+  const data = (await res.json()) as SeguimientoDocumentsResponse;
+  const docs = Array.isArray(data?.documents) ? data.documents : [];
+  return docs.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+}
+
+// Build raw download URL for a file by id
+export function buildRawFileUrl(fileId: number | string, raw: boolean = true): string {
+  const rawParam = raw ? "true" : "false";
+  return `${USERS_API_BASE}/api/archivo/${fileId}/?raw=${rawParam}`;
 }

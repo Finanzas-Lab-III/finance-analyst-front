@@ -329,7 +329,7 @@ export default function BudgetDetailPage() {
           )}
 
           {activeTab === 'tracking' && (
-            <TrackingTab />
+            <TrackingTab areaYearId={areaYearId} />
           )}
 
           {activeTab === 'comments' && (
@@ -358,7 +358,17 @@ export default function BudgetDetailPage() {
           getStatusText={getStatusText}
         />
 
-        <UploadBudgetModal open={showUploadModal} onClose={() => setShowUploadModal(false)} />
+        <UploadBudgetModal 
+          open={showUploadModal} 
+          onClose={() => setShowUploadModal(false)} 
+          areaYearId={areaYearId}
+          onUploaded={() => {
+            // refresh documents after upload
+            // The hook useArmadoDocuments depends on areaYearId; re-setting state can force refresh if needed
+            // Simpler approach: reload the page data
+            window.location.reload();
+          }}
+        />
       </div>
     </div>
   );
