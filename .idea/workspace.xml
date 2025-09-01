@@ -4,18 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Feat: refactor of user management page.&#10;Feat: added austral logo">
-      <change afterPath="$PROJECT_DIR$/src/app/backoffice/faculty/[id]/[year]/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/backoffice/faculty/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/userService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/userService.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/archive/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/backoffice/archive/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/budget/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/backoffice/faculty-year/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/faculty/[faculty]/[area]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/backoffice/faculty-old/[faculty]/[area]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/presupuesto/[area]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/presupuesto/[area]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sidebar/BudgetSidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sidebar/BudgetSidebar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data/mockBudgetData.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/mockBudgetData.ts" afterDir="false" />
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Integration: integrated with faculties and areas of an user. Created two pages, one that lists the faculties of an user and one (following that one) that lists the years of a faculty.">
+      <change beforePath="$PROJECT_DIR$/src/app/backoffice/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/backoffice/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,7 +107,15 @@
       <option name="project" value="LOCAL" />
       <updated>1756670069740</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Integration: integrated with faculties and areas of an user. Created two pages, one that lists the faculties of an user and one (following that one) that lists the years of a faculty.">
+      <option name="closed" value="true" />
+      <created>1756687115327</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1756687115327</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -136,6 +135,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Feat: User management." />
     <MESSAGE value="Feat: refactor of user management page.&#10;Feat: added austral logo" />
-    <option name="LAST_COMMIT_MESSAGE" value="Feat: refactor of user management page.&#10;Feat: added austral logo" />
+    <MESSAGE value="Integration: integrated with faculties and areas of an user. Created two pages, one that lists the faculties of an user and one (following that one) that lists the years of a faculty." />
+    <option name="LAST_COMMIT_MESSAGE" value="Integration: integrated with faculties and areas of an user. Created two pages, one that lists the faculties of an user and one (following that one) that lists the years of a faculty." />
   </component>
 </project>

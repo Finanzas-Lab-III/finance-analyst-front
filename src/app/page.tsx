@@ -15,7 +15,7 @@ const Page = () => {
     if (userRole === 'director') {
       router.push('/directors-home');
     } else if (userRole === 'finance') {
-      router.push('/backoffice/budgets');
+      router.push('/backoffice/archive');
     }
   }, [userRole, router]);
 
