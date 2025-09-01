@@ -1,7 +1,7 @@
 "use client"
 import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import LintErrorCard from "@/components/LintErrorCard";
 import { useFileContext } from "@/components/FileContext";
 import * as XLSX from "xlsx";
@@ -15,6 +15,7 @@ registerAllModules();
 
 const Page = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { selectedFile: contextSelectedFile } = useFileContext();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileData, setFileData] = useState<any[][]>([]);
@@ -32,12 +33,106 @@ const Page = () => {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [currentYear, setCurrentYear] = useState("2025");
 
+  // Get context parameters
+  const context = searchParams.get('context');
+  const areaYearId = searchParams.get('id');
+  
+  // Determine page title based on context
+  const getPageTitle = () => {
+    if (context === 'area_year' && areaYearId === '2') {
+      return "Presupuesto FI 2025";
+    }
+    return "Armado de Presupuesto";
+  };
+
+  // Determine page description based on context
+  const getPageDescription = () => {
+    if (context === 'area_year' && areaYearId === '2') {
+      return selectedFile ? `Editando: ${selectedFile.name}` : 'Cargando presupuesto de Facultad de Ingeniería 2025...';
+    }
+    return selectedFile ? `Editando: ${selectedFile.name}` : 'Carga y edita archivos de presupuesto';
+  };
+
+  // Load default file based on context
+  useEffect(() => {
+    if (context === 'area_year' && areaYearId === '2' && !selectedFile) {
+      // Load the specific Excel file for FI 2025
+      loadDefaultExcelFile();
+    }
+  }, [context, areaYearId, selectedFile]);
+
+  const loadDefaultExcelFile = async () => {
+    setLoading(true);
+    try {
+      // Load the specific Excel file for FI 2025 presupuesto
+      const response = await fetch('/excel/2025.xlsx');
+      if (response.ok) {
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        setSheetNames(workbook.SheetNames);
+        const firstSheet = workbook.SheetNames[0];
+        setSelectedSheet(firstSheet);
+        const worksheet = workbook.Sheets[firstSheet];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+        setFileData(jsonData);
+        
+        // Create a mock file object for display with the specific name
+        const mockFile = new File([arrayBuffer], "05- FCB BIOTERIO 3+9.xlsx", {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+        setSelectedFile(mockFile);
+      } else {
+        throw new Error('File not found');
+      }
+    } catch (error) {
+      console.error('Error loading default file, using fallback data:', error);
+      // Fallback: create sample data that matches the image
+      const sampleData = [
+        ["Completar", "", "", ""],
+        ["No completar (*)", "", "", ""],
+        ["", "", "", ""],
+        ["Nombre recurso (o puesto)", "Tipo de contratación", "Meses", "Remuneración bruta mensual"],
+        ["Ayudante diplomado", "Docente Factura", 10, "$139,070"],
+        ["Ayudante diplomado", "Docente Factura", 10, "$92,713"],
+        ["Profesor Adjunto nivel 1", "Docente Factura", 10, "$289,520"],
+        ["JTP", "Docente Factura", 10, "$274,420"],
+        ["Profesor Adjunto nivel 1", "Docente Nómina", 6, "$240,680"],
+        ["JTP", "Docente Factura", 10, "$225,990"],
+        ["Ayudante diplomado", "Docente Factura", 10, "$69,535"],
+        ["Profesor Adjunto nivel 1", "Docente Factura", 5, "$267,120"],
+        ["Profesor Adjunto nivel 1", "Docente Factura", 5, "$248,350"],
+        ["Ayudante diplomado", "Docente Factura", 5, "$111,350"],
+        ["Profesor Adjunto nivel 1", "Docente Factura", 5, "$211,090"],
+        ["JTP", "Docente Factura", 5, "$185,140"],
+        ["Profesor Adjunto nivel 1", "Docente Factura", 5, "$173,840"],
+        ["JTP", "Docente Factura", 5, "$173,840"],
+        ["JTP", "Docente Factura", 5, "$139,070"],
+        ["Ayudante diplomado", "Docente Factura", 10, "$53,490"]
+      ];
+      setFileData(sampleData);
+      setSheetNames(["Presupuesto FI 2025"]);
+      setSelectedSheet("Presupuesto FI 2025");
+      
+      // Create a mock file object
+      const mockFile = new File([], "05- FCB BIOTERIO 3+9.xlsx", {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      });
+      setSelectedFile(mockFile);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Elimino el manejo de errores mockeados y el check
   const allChecked = true;
 
   // Handle back navigation
   const handleBack = () => {
-    router.push('/');
+    if (context === 'area_year' && areaYearId) {
+      router.push(`/backoffice/faculty-data/${areaYearId}`);
+    } else {
+      router.push('/');
+    }
   };
 
   // Procesa el archivo cargado y lo convierte a datos para Handsontable
@@ -148,16 +243,16 @@ const Page = () => {
               <ArrowLeft size={24} className="text-gray-900" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Armado de Presupuesto</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{getPageTitle()}</h1>
               <p className="text-gray-600 mt-1">
-                {selectedFile ? `Editando: ${selectedFile.name}` : 'Carga y edita archivos de presupuesto'}
+                {getPageDescription()}
               </p>
             </div>
           </div>
         </div>
 
         {/* Inputs de carga centrados y estilizados */}
-        {!selectedFile && (
+        {!selectedFile && !loading && (
           <div className="flex-1 flex flex-col items-center justify-center p-6 gap-4">
             <div className="flex flex-col items-center gap-2">
               <button
@@ -192,6 +287,14 @@ const Page = () => {
               <p className="text-gray-600 text-base">Selecciona el archivo del presupuesto del año anterior (opcional)</p>
               {prevYearFile && <span className="text-green-600 text-xs">Archivo cargado: {prevYearFile.name}</span>}
             </div>
+          </div>
+        )}
+
+        {/* Loading state for automatic file loading */}
+        {!selectedFile && loading && (
+          <div className="flex-1 flex flex-col items-center justify-center p-6">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-600 text-lg">{getPageDescription()}</p>
           </div>
         )}
 

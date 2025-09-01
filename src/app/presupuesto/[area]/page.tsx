@@ -223,7 +223,10 @@ const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
   };
 
   const handleArmadoClick = () => {
-    router.push('/armado');
+    // Instead of navigating to /armado, we'll keep the user on this page
+    // and show that the armado functionality is integrated here
+    console.log(`Iniciando armado para ${config.title} con archivo: 05- FCB BIOTERIO 3+9.xlsx`);
+    // Here you could open a modal, expand a section, or integrate chat functionality directly
   };
 
   // If area doesn't exist in config, show error

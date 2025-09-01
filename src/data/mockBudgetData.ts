@@ -22,7 +22,7 @@ export interface BudgetData {
 export const mockBudgetData: Record<string, BudgetData> = {
   "2025": {
     year: "2025",
-    archivo: "2025.xlsx",
+    archivo: "05- FCB BIOTERIO 3+9.xlsx",
     estatus: "En Proceso",
     ultima_actualizacion: "15/12/2024",
     actualizado_por: "Fernando Vassolo",
