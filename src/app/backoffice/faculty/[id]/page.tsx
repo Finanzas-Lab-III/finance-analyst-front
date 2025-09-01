@@ -2,44 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { fetchYearsOfArea, YearsOfAreaItemDto, AreaYearStatus } from "../../../../api/userService";
-
-const statusColor = (status: AreaYearStatus) => {
-  switch (status) {
-    case "NOT_STARTED":
-      return "bg-gray-100 text-gray-800";
-    case "BUDGET_STARTED":
-      return "bg-blue-100 text-blue-800";
-    case "NEEDS_CHANGES":
-      return "bg-yellow-100 text-yellow-800";
-    case "PENDING_APPROVAL":
-      return "bg-purple-100 text-purple-800";
-    case "BUDGET_APPROVED":
-      return "bg-green-100 text-green-800";
-    case "FOLLOW_UP_AVAILABLE":
-      return "bg-teal-100 text-teal-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
-
-const statusLabelEs = (status: AreaYearStatus): string => {
-  switch (status) {
-    case "NOT_STARTED":
-      return "No iniciado";
-    case "BUDGET_STARTED":
-      return "Presupuesto iniciado";
-    case "NEEDS_CHANGES":
-      return "Requiere cambios";
-    case "PENDING_APPROVAL":
-      return "Pendiente de aprobación";
-    case "BUDGET_APPROVED":
-      return "Presupuesto aprobado";
-    case "FOLLOW_UP_AVAILABLE":
-      return "Seguimiento disponible";
-    default:
-      return "Desconocido";
-  }
-};
+import { statusColor, statusLabelEs } from "@/lib/areaYearStatus";
 
 export default function AreaYearsPage() {
   const params = useParams();
@@ -97,7 +60,7 @@ export default function AreaYearsPage() {
               <tr 
                 key={r.area_year_id} 
                 className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => router.push(`/backoffice/faculty/${areaId}/${r.area_year_id}`)}
+                onClick={() => router.push(`/backoffice/faculty-data/${r.area_year_id}`)}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{r.year}</td>
                 <td className="px-6 py-4 whitespace-nowrap">

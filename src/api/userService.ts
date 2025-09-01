@@ -326,3 +326,53 @@ export async function fetchYearsOfArea(areaId: number | string): Promise<YearsOf
     yearsOfArea: Array.isArray(data?.yearsOfArea) ? data.yearsOfArea : [],
   };
 }
+
+export interface AreaYearStatusResponse {
+  status: AreaYearStatus;
+  area: string;
+  year: number | string;
+}
+
+export async function fetchAreaYearStatus(areaYearId: number | string): Promise<AreaYearStatusResponse> {
+  const url = `${USERS_API_BASE}/api/status/${areaYearId}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Error obteniendo estado del área-año ${areaYearId}: ${res.status} ${res.statusText}`);
+  }
+  const data = await res.json();
+  return {
+    status: data?.status as AreaYearStatus,
+    area: String(data?.area ?? ""),
+    year: data?.year ?? "",
+  };
+}
+
+// Armado documents for an AreaYear
+export interface ArmadoDocument {
+  id: number;
+  type: string; // e.g., "ARMADO"
+  title: string;
+  area_year_id: number;
+  file_key: string;
+  notes?: string;
+  created_at: string; // ISO
+  updated_at?: string; // ISO
+}
+
+export interface ArmadoDocumentsResponse {
+  area_year_id: number;
+  document_type: string; // "ARMADO"
+  documents: ArmadoDocument[];
+}
+
+export async function fetchArmadoDocuments(areaYearId: number | string): Promise<ArmadoDocument[]> {
+  const url = `${USERS_API_BASE}/api/archivos_armado/area_year/${areaYearId}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Error obteniendo archivos de armado para ${areaYearId}: ${res.status} ${res.statusText}`);
+  }
+  const data = (await res.json()) as ArmadoDocumentsResponse;
+  const docs = Array.isArray(data?.documents) ? data.documents : [];
+  // sort desc by created_at
+  return docs.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+}

@@ -553,7 +553,7 @@ export default function BudgetDetailPage() {
           {/* Variations Tab */}
           {activeTab === 'variations' && (
             <div className="space-y-4">
-              <h3 className="font-semibold text-gray-900">Historial de Variaciones</h3>
+              <h3 className="font-semibold text-gray-900">Historial de Versiones</h3>
               <div className="space-y-3">
                 {budget.variations.map((variation) => (
                   <div key={variation.id} className="border border-gray-200 rounded-lg p-4">
