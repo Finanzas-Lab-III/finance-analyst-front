@@ -306,7 +306,7 @@ function FacultyAreaBudgetsPage() {
   };
 
   const handleBudgetClick = (budgetId: string) => {
-    router.push(`/backoffice/budget/${budgetId}`);
+    router.push(`/backoffice/faculty-year/${budgetId}`);
   };
 
   return (
