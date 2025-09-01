@@ -227,7 +227,20 @@ export default function BudgetDetailPage() {
   const [newStatus, setNewStatus] = useState<BudgetDetail['status']>(budget.status);
   const { status, area, year } = useAreaYearStatus(areaYearId);
   const headerStatus = (status as any) ?? budget.status;
-  const headerName = `${area || budget.area} ${year || new Date().getFullYear()}`;
+  
+  // Map area names to their abbreviations for display
+  const getAreaDisplayName = (areaName: string) => {
+    const areaMap: Record<string, string> = {
+      'Ingeniería': 'FI',
+      'Facultad de Ingeniería': 'FI',
+      'Laboratorio': 'FI',
+      'Biomédica': 'FI',
+      // Add more mappings as needed
+    };
+    return areaMap[areaName] || areaName;
+  };
+
+  const headerName = `Presupuesto ${getAreaDisplayName(area || budget.area)} ${year || new Date().getFullYear()}`;
   const [activeTab, setActiveTab] = useState<'overview' | 'budget' | 'tracking' | 'comments'>('budget');
   const [newComment, setNewComment] = useState("");
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -325,6 +338,7 @@ export default function BudgetDetailPage() {
               latest={latest}
               history={history}
               onOpenUpload={() => setShowUploadModal(true)}
+              areaYearId={areaYearId}
             />
           )}
 

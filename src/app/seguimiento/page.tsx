@@ -169,7 +169,7 @@ const Page: React.FC = () => {
           {/* Header with back button */}
           <div className="flex items-center mb-8">
             <Link 
-              href="/budget/lab-budget-2025"
+              href="/presupuesto/laboratorio"
               className="p-2 rounded-full hover:bg-gray-100 mr-4 transition-colors duration-200"
             >
               <ArrowLeft size={24} className="text-gray-900" />

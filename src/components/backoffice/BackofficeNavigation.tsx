@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   Home, 
-  FileText,
   Users
 } from "lucide-react";
 
@@ -13,11 +12,6 @@ const navigationItems = [
     name: "Dashboard",
     href: "/backoffice/dashboard",
     icon: Home,
-  },
-  {
-    name: "Presupuestos",
-    href: "/backoffice/budgets", 
-    icon: FileText,
   },
   {
     name: "Gestión de Usuarios",

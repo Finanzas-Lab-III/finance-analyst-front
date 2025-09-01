@@ -38,6 +38,31 @@ export default function AreaYearsPage() {
   const future = items.filter(i => i.isFuture && !i.isCurrent);
   const others = items.filter(i => !i.isCurrent && !i.isFuture).sort((a, b) => b.year - a.year);
 
+  // Helper function to get area display name abbreviation
+  const getAreaDisplayName = (areaId: string) => {
+    // Map area IDs to their abbreviations for display
+    // This is a simplified mapping - in a real app you'd fetch this from the API
+    const areaMap: Record<string, string> = {
+      // Add mappings based on your area IDs
+      'ingenieria': 'FI',
+      'laboratorio': 'FI', 
+      'biomedica': 'FI',
+      'facultad-de-ingenieria': 'FI',
+      // Add more mappings as needed
+    };
+    
+    // Try to extract area name from areaId if it's not directly mapped
+    const lowerAreaId = String(areaId).toLowerCase();
+    for (const [key, value] of Object.entries(areaMap)) {
+      if (lowerAreaId.includes(key)) {
+        return value;
+      }
+    }
+    
+    // Default abbreviation
+    return 'FI';
+  };
+
   const renderTable = (title: string, rows: YearsOfAreaItemDto[]) => (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -51,7 +76,7 @@ export default function AreaYearsPage() {
           </colgroup>
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Año</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presupuesto</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
             </tr>
           </thead>
@@ -62,7 +87,9 @@ export default function AreaYearsPage() {
                 className="hover:bg-gray-50 cursor-pointer"
                 onClick={() => router.push(`/backoffice/faculty-data/${r.area_year_id}`)}
               >
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{r.year}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                  Presupuesto {getAreaDisplayName(areaId || '')} {r.year}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor(r.status)}`}>
                     {statusLabelEs(r.status)}
