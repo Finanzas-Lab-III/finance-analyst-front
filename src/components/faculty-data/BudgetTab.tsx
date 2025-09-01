@@ -2,15 +2,18 @@
 import React from "react";
 import { Download, Upload, FileText } from "lucide-react";
 import { ArmadoDocument } from "@/api/userService";
+import { useRouter } from "next/navigation";
 
 interface BudgetTabProps {
   latest: ArmadoDocument | null | undefined;
   history: ArmadoDocument[] | undefined;
   onOpenUpload: () => void;
+  areaYearId: string | number;
 }
 
-export default function BudgetTab({ latest, history = [], onOpenUpload }: BudgetTabProps) {
+export default function BudgetTab({ latest, history = [], onOpenUpload, areaYearId }: BudgetTabProps) {
   const USERS_API_BASE = process.env.NEXT_PUBLIC_USERS_API_URL || "http://localhost:8000";
+  const router = useRouter();
 
   const handleDownload = (doc: ArmadoDocument) => {
     if (!doc?.id) return;
@@ -48,7 +51,11 @@ export default function BudgetTab({ latest, history = [], onOpenUpload }: Budget
           </div>
         </div>
         {latest ? (
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div
+            className="bg-white rounded-lg p-4 border border-gray-200 cursor-pointer hover:bg-gray-50"
+            onClick={() => router.push(`/armado?context=area_year&id=${areaYearId}`)}
+            title="Abrir presupuesto actual"
+          >
             <div className="flex items-center space-x-3">
               <FileText className="w-5 h-5 text-blue-600" />
               <div>

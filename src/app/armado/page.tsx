@@ -2,19 +2,40 @@
 import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import LintErrorCard from "@/components/LintErrorCard";
 import { useFileContext } from "@/components/FileContext";
-import * as XLSX from "xlsx";
-import { HotTable } from "@handsontable/react";
-import { registerAllModules } from "handsontable/registry";
 import { ArrowLeft } from "lucide-react";
 import "handsontable/dist/handsontable.full.css";
 import axios from "axios";
 
-registerAllModules();
+// Dynamically load heavy modules to speed up initial load
+const DynamicHotTable = dynamic(() => import("@handsontable/react").then(m => m.HotTable), { ssr: false });
+const ensureXLSX = async () => (await import("xlsx"));
+
+// Register Handsontable modules once on client after mount
+// Avoids pulling in handsontable registry at build/SSR time
+// This keeps initial bundle smaller and speeds up first paint
+const useRegisterHandsontableModules = () => {
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mod = await import("handsontable/registry");
+        if (!cancelled) mod.registerAllModules();
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+};
 
 const Page = () => {
   const router = useRouter();
+  useRegisterHandsontableModules();
   const searchParams = useSearchParams();
   const { selectedFile: contextSelectedFile } = useFileContext();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -68,6 +89,7 @@ const Page = () => {
       const response = await fetch('/excel/2025.xlsx');
       if (response.ok) {
         const arrayBuffer = await response.arrayBuffer();
+        const XLSX = await ensureXLSX();
         const workbook = XLSX.read(arrayBuffer, { type: "array" });
         setSheetNames(workbook.SheetNames);
         const firstSheet = workbook.SheetNames[0];
@@ -147,6 +169,7 @@ const Page = () => {
       setLoading(true);
       try {
         const arrayBuffer = await file.arrayBuffer();
+        const XLSX = await ensureXLSX();
         const workbook = XLSX.read(arrayBuffer, { type: "array" });
         setSheetNames(workbook.SheetNames);
         const firstSheet = workbook.SheetNames[0];
@@ -170,6 +193,7 @@ const Page = () => {
     if (file) {
       try {
         const arrayBuffer = await file.arrayBuffer();
+        const XLSX = await ensureXLSX();
         const workbook = XLSX.read(arrayBuffer, { type: "array" });
         const firstSheet = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheet];
@@ -190,6 +214,7 @@ const Page = () => {
     setTimeout(async () => {
       try {
         const arrayBuffer = await selectedFile.arrayBuffer();
+        const XLSX = await ensureXLSX();
         const workbook = XLSX.read(arrayBuffer, { type: "array" });
         const worksheet = workbook.Sheets[sheet];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
@@ -315,7 +340,7 @@ const Page = () => {
               ) : fileData.length > 0 ? (
                 <>
                   <div className="flex-1 min-h-0 overflow-auto p-2">
-                    <HotTable
+                    <DynamicHotTable
                       data={fileData}
                       colHeaders={true}
                       rowHeaders={true}
