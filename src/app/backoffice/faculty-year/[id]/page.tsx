@@ -73,7 +73,7 @@ const mockBudgetDetail: BudgetDetail = {
   faculty: "Ingeniería",
   area: "Laboratorio",
   status: "pending",
-  createdBy: "Dr. Juan Pérez",
+  createdBy: "Santiago Ascasibar",
   createdAt: "2024-01-15",
   lastModified: "2024-01-20",
   originalBudget: "lab_2025_original.xlsx",
@@ -85,7 +85,7 @@ const mockBudgetDetail: BudgetDetail = {
       id: "1",
       name: "Versión inicial",
       createdAt: "2024-01-15",
-      createdBy: "Dr. Juan Pérez",
+      createdBy: "Santiago Ascasibar",
       description: "Presupuesto original presentado por el director",
       fileName: "lab_2025_v1.xlsx"
     },
@@ -140,7 +140,7 @@ const mockComments: BudgetComment[] = [
   },
   {
     id: "2",
-    author: "Dr. Juan Pérez",
+    author: "Santiago Ascasibar",
     content: "Gracias por los comentarios. He reducido un 15% el presupuesto de equipamiento y redistribuido hacia material de laboratorio.",
     createdAt: "2024-01-19T14:15:00Z",
     type: "general"

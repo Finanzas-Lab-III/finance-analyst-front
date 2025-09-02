@@ -39,7 +39,7 @@ const mockEvents: CalendarEvent[] = [
     time: "14:00",
     type: "meeting",
     description: "Revisión de presupuestos pendientes y planificación",
-    participants: ["Dr. Juan Pérez", "Dra. María García", "Dr. Carlos López"]
+    participants: ["Santiago Ascasibar", "Dra. María García", "Dr. Carlos López"]
   },
   {
     id: "3",

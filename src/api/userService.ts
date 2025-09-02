@@ -4,6 +4,7 @@ export interface UserDto {
   apellido: string;
   facultad: string;
   mail: string;
+  areas: string; // Nueva columna derivada de subareas
 }
 
 export interface UserFilters {
@@ -48,12 +49,27 @@ export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> 
           : "—")
       : "—";
 
+    // Derivar áreas desde subareas de cada facultad
+    let areas = "—";
+    try {
+      const allSubareas: string[] = Array.isArray(u?.facultades)
+        ? u.facultades
+            .flatMap((f: any) => Array.isArray(f?.subareas) ? f.subareas : [])
+            .map((s: any) => (typeof s === "string" ? s : (s?.nombre ?? "")))
+            .filter((s: string) => s && s.trim().length > 0)
+        : [];
+      if (allSubareas.length > 0) {
+        areas = allSubareas.join(", ");
+      }
+    } catch {}
+
     return {
       id: u?.id,
       nombre,
       apellido,
       facultad,
       mail: u?.mail ?? "",
+      areas,
     };
   });
 }

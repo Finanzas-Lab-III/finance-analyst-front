@@ -18,7 +18,7 @@ interface Director {
 const mockDirectors: Director[] = [
   {
     id: "1",
-    name: "Dr. Juan Pérez",
+    name: "Santiago Ascasibar",
     email: "juan.perez@universidad.edu",
     phone: "+54 11 1234-5678",
     faculty: "Ingeniería",

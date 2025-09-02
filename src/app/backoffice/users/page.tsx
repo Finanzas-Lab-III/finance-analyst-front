@@ -59,6 +59,7 @@ export default function UsersPage() {
       { key: "nombre", header: "Nombre" },
       { key: "apellido", header: "Apellido" },
       { key: "facultad", header: "Facultad" },
+      { key: "areas", header: "Áreas" },
       { key: "mail", header: "Mail" },
       {
         key: "actions",

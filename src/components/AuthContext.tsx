@@ -1,13 +1,38 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// Simple cookie helpers (client-side only)
+function setCookie(name: string, value: string, days: number = 365) {
+  try {
+    const maxAge = days * 24 * 60 * 60; // seconds
+    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}`;
+  } catch {}
+}
+
+function getCookie(name: string): string | null {
+  try {
+    const cookies = document.cookie ? document.cookie.split(";") : [];
+    for (const c of cookies) {
+      const [k, ...rest] = c.trim().split("=");
+      if (k === name) return decodeURIComponent(rest.join("="));
+    }
+  } catch {}
+  return null;
+}
+
+function deleteCookie(name: string) {
+  try {
+    document.cookie = `${name}=; path=/; max-age=0`;
+  } catch {}
+}
+
 export type UserRole = 'director' | 'finance' | null;
 
 interface User {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: Exclude<UserRole, null>;
   department?: string;
 }
 
@@ -25,7 +50,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const mockUsers: Record<string, User> = {
   'director@universidad.edu': {
     id: '1',
-    name: 'Dr. Juan Pérez',
+    name: 'Santiago Ascasibar',
     email: 'director@universidad.edu',
     role: 'director',
     department: 'Ingeniería'
@@ -39,23 +64,47 @@ const mockUsers: Record<string, User> = {
   }
 };
 
+const DEFAULT_DIRECTOR_ID = '1';
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
 
   useEffect(() => {
-    // Verificar si hay un usuario guardado en localStorage
-    const savedUser = localStorage.getItem('currentUser');
-    const savedRole = localStorage.getItem('testRole') as UserRole;
-    
+    // Restaurar desde cookie primero y luego fallback a localStorage
+    const cookieRole = (getCookie('userRole') as UserRole) || null;
+    const savedUser = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
+    const savedRole = typeof window !== 'undefined' ? (localStorage.getItem('testRole') as UserRole) : null;
+
+    if (cookieRole) {
+      // Usar helper de testing para hidratar usuario falso acorde al rol
+      setTestRole(cookieRole);
+      return;
+    }
+
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
-    
+
     if (savedRole) {
       setUserRole(savedRole);
     }
   }, []);
+
+  // Enforce default director id when role is director
+  useEffect(() => {
+    if (userRole === 'director') {
+      const defaultDirector = Object.values(mockUsers).find(
+        (u) => u.role === 'director' && u.id === DEFAULT_DIRECTOR_ID
+      ) || Object.values(mockUsers).find((u) => u.role === 'director');
+      if (defaultDirector && user?.id !== defaultDirector.id) {
+        setUser(defaultDirector);
+        localStorage.setItem('currentUser', JSON.stringify(defaultDirector));
+        localStorage.setItem('testRole', 'director');
+        setCookie('userRole', 'director');
+      }
+    }
+  }, [userRole]);
 
   const login = async (email: string, password: string): Promise<void> => {
     // Simulación de login
@@ -66,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserRole(user.role);
       localStorage.setItem('currentUser', JSON.stringify(user));
       localStorage.setItem('testRole', user.role);
+      setCookie('userRole', user.role);
     } else {
       throw new Error('Credenciales inválidas');
     }
@@ -76,17 +126,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserRole(null);
     localStorage.removeItem('currentUser');
     localStorage.removeItem('testRole');
+    deleteCookie('userRole');
   };
 
   // Función para testing - cambiar rol rápidamente
   const setTestRole = (role: UserRole) => {
     if (role) {
-      const testUser = Object.values(mockUsers).find(u => u.role === role);
+      let testUser: User | undefined;
+      if (role === 'director') {
+        testUser = Object.values(mockUsers).find(u => u.role === 'director' && u.id === DEFAULT_DIRECTOR_ID);
+        if (!testUser) {
+          testUser = Object.values(mockUsers).find(u => u.role === 'director');
+        }
+      } else {
+        testUser = Object.values(mockUsers).find(u => u.role === role);
+      }
       if (testUser) {
         setUser(testUser);
         setUserRole(role);
         localStorage.setItem('currentUser', JSON.stringify(testUser));
         localStorage.setItem('testRole', role);
+        setCookie('userRole', role);
       }
     } else {
       logout();

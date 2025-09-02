@@ -85,7 +85,10 @@ export default function AreaYearsPage() {
               <tr 
                 key={r.area_year_id} 
                 className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => router.push(`/backoffice/faculty-data/${r.area_year_id}`)}
+                onClick={() => {
+                  const url = `/backoffice/faculty-data/${r.area_year_id}`;
+                  router.push(url);
+                }}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                   Presupuesto {getAreaDisplayName(areaId || '')} {r.year}

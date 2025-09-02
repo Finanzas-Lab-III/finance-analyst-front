@@ -49,7 +49,7 @@ export default function ArchivePage() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center">
           <Archive className="w-8 h-8 mr-3 text-gray-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Accesos a cargo</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Facultades y áreas a cargo</h1>
         </div>
       </div>
 
