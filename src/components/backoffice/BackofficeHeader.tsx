@@ -38,7 +38,7 @@ export default function BackofficeHeader() {
               <button
                 type="button"
                 onClick={() => router.push('/backoffice/usuarios')}
-                className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
               >
                 Usuarios
               </button>
