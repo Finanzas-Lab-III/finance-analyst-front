@@ -1,6 +1,7 @@
 import type { AreaYearStatus } from "@/api/userService";
+// import { DocumentStatus } from "@/api/commentsService"; // Temporarily disabled
 
-export { AreaYearStatus } from "@/api/userService";
+export type { AreaYearStatus } from "@/api/userService";
 
 export const statusColor = (status: AreaYearStatus) => {
   switch (status) {
@@ -39,5 +40,27 @@ export const statusLabelEs = (status: AreaYearStatus): string => {
       return "Desconocido";
   }
 };
+
+// Temporarily disabled - will be restored when comments system is fixed
+/*
+export const areaYearStatusToDocumentStatus = (status: AreaYearStatus): DocumentStatus => {
+  switch (status) {
+    case "NOT_STARTED":
+      return DocumentStatus.NOT_STARTED;
+    case "BUDGET_STARTED":
+      return DocumentStatus.BUDGET_STARTED;
+    case "NEEDS_CHANGES":
+      return DocumentStatus.NEEDS_CHANGES;
+    case "PENDING_APPROVAL":
+      return DocumentStatus.PENDING_APPROVAL;
+    case "BUDGET_APPROVED":
+      return DocumentStatus.BUDGET_APPROVED;
+    case "FOLLOW_UP_AVAILABLE":
+      return DocumentStatus.FOLLOW_UP_AVAILABLE;
+    default:
+      return DocumentStatus.NOT_STARTED;
+  }
+};
+*/
 
 

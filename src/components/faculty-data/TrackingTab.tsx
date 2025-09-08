@@ -8,6 +8,7 @@ import { useAuth } from "@/components/AuthContext";
 
 interface TrackingTabProps {
   areaYearId: string | number;
+  onNavigateToComments?: (documentId: number, month: string, version: string, createdAt: string) => void;
 }
 
 export default function TrackingTab({ areaYearId }: TrackingTabProps) {
@@ -213,10 +214,17 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Aquí iría la funcionalidad de comentarios
+                              if (onNavigateToComments && latest) {
+                                onNavigateToComments(
+                                  latest.id,
+                                  m,
+                                  latestVersion || 'V1',
+                                  latest.created_at
+                                );
+                              }
                             }}
-                            className="text-gray-600 hover:text-gray-800 p-1 rounded hover:bg-gray-50 transition-colors" 
-                            title="Comentarios"
+                            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
+                            title="Agregar comentario sobre este documento mensual"
                           >
                             <MessageSquare className="w-4 h-4" />
                           </button>
@@ -231,9 +239,9 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
                             <Download className="w-4 h-4" />
                           </a>
                           {isFinance && (
-                            <button 
+                            <button
                               onClick={(e) => { e.stopPropagation(); openUpload(m); }}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors" 
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
                               title={`Subir nuevo seguimiento de ${m}`}
                             >
                               <Plus className="w-4 h-4" />
@@ -244,7 +252,7 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
                         <div className="flex items-center justify-between">
                           <span className="text-gray-400 text-sm">Pendiente</span>
                           {isFinance && (
-                            <button 
+                            <button
                               onClick={(e) => { e.stopPropagation(); openUpload(m); }}
                               className="inline-flex items-center text-blue-600 hover:text-blue-800 px-2 py-1 border border-blue-200 rounded hover:bg-blue-50"
                               title={`Subir seguimiento de ${m}`}
