@@ -6,9 +6,10 @@ import { buildRawFileUrl } from "@/api/userService";
 
 interface TrackingTabProps {
   areaYearId: string | number;
+  onNavigateToComments?: (documentId: number, month: string, version: string, createdAt: string) => void;
 }
 
-export default function TrackingTab({ areaYearId }: TrackingTabProps) {
+export default function TrackingTab({ areaYearId, onNavigateToComments }: TrackingTabProps) {
   const { loading, error, bySubarea } = useSeguimientoDocuments(areaYearId);
 
   const sections: Array<{ key: string; title: string; description: string; color: string; iconColor: string }> = [
@@ -174,10 +175,17 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Aquí iría la funcionalidad de comentarios
+                              if (onNavigateToComments && latest) {
+                                onNavigateToComments(
+                                  latest.id,
+                                  m,
+                                  latestVersion || 'V1',
+                                  latest.created_at
+                                );
+                              }
                             }}
-                            className="text-gray-600 hover:text-gray-800 p-1 rounded hover:bg-gray-50 transition-colors" 
-                            title="Comentarios"
+                            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors" 
+                            title="Agregar comentario sobre este documento mensual"
                           >
                             <MessageSquare className="w-4 h-4" />
                           </button>
