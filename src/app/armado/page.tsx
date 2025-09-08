@@ -57,27 +57,74 @@ const Page = () => {
   // Get context parameters
   const context = searchParams.get('context');
   const areaYearId = searchParams.get('id');
+  const fileParam = searchParams.get('file');
   
   // Determine page title based on context
   const getPageTitle = () => {
-    if (context === 'area_year' && areaYearId === '2') {
-      return "Presupuesto FI 2025";
+    if (context === 'area_year' && areaYearId) {
+      // Map area IDs to their names and codes
+      const areaMap: Record<string, { code: string; name: string }> = {
+        '103': { code: 'FI', name: 'Facultad de Ingeniería' },
+        '203': { code: 'FCB', name: 'Facultad de Ciencias Biomédicas' },
+        '303': { code: 'FCE', name: 'Facultad de Ciencias Empresariales' },
+        '403': { code: 'FD', name: 'Facultad de Derecho' },
+        '503': { code: 'FC', name: 'Facultad de Comunicación' },
+        '603': { code: 'FI-SIS', name: 'Departamento de Sistemas' },
+        '703': { code: 'FI-IND', name: 'Departamento de Ingeniería Industrial' },
+        '1': { code: 'FI', name: 'Facultad de Ingeniería' },
+        '2': { code: 'FCB', name: 'Facultad de Ciencias Biomédicas' },
+        '3': { code: 'FCE', name: 'Facultad de Ciencias Empresariales' },
+        '4': { code: 'FD', name: 'Facultad de Derecho' },
+        '5': { code: 'FC', name: 'Facultad de Comunicación' },
+        '6': { code: 'FI-SIS', name: 'Departamento de Sistemas' },
+        '7': { code: 'FI-IND', name: 'Departamento de Ingeniería Industrial' },
+      };
+      
+      const area = areaMap[areaYearId];
+      if (area) {
+        return `Presupuesto ${area.code} 2025`;
+      }
+      return `Presupuesto Área ${areaYearId}`;
     }
     return "Armado de Presupuesto";
   };
 
   // Determine page description based on context
   const getPageDescription = () => {
-    if (context === 'area_year' && areaYearId === '2') {
-      return selectedFile ? `Editando: ${selectedFile.name}` : 'Cargando presupuesto de Facultad de Ingeniería 2025...';
+    if (context === 'area_year' && areaYearId) {
+      // Map area IDs to their names
+      const areaMap: Record<string, { code: string; name: string }> = {
+        '103': { code: 'FI', name: 'Facultad de Ingeniería' },
+        '203': { code: 'FCB', name: 'Facultad de Ciencias Biomédicas' },
+        '303': { code: 'FCE', name: 'Facultad de Ciencias Empresariales' },
+        '403': { code: 'FD', name: 'Facultad de Derecho' },
+        '503': { code: 'FC', name: 'Facultad de Comunicación' },
+        '603': { code: 'FI-SIS', name: 'Departamento de Sistemas' },
+        '703': { code: 'FI-IND', name: 'Departamento de Ingeniería Industrial' },
+        '1': { code: 'FI', name: 'Facultad de Ingeniería' },
+        '2': { code: 'FCB', name: 'Facultad de Ciencias Biomédicas' },
+        '3': { code: 'FCE', name: 'Facultad de Ciencias Empresariales' },
+        '4': { code: 'FD', name: 'Facultad de Derecho' },
+        '5': { code: 'FC', name: 'Facultad de Comunicación' },
+        '6': { code: 'FI-SIS', name: 'Departamento de Sistemas' },
+        '7': { code: 'FI-IND', name: 'Departamento de Ingeniería Industrial' },
+      };
+      
+      const area = areaMap[areaYearId];
+      if (selectedFile) {
+        return `Editando: ${selectedFile.name}`;
+      } else if (area) {
+        return `Presupuesto para equipamiento y personal de ${area.name} para el año 2025`;
+      }
+      return `Cargando presupuesto del área ${areaYearId}...`;
     }
     return selectedFile ? `Editando: ${selectedFile.name}` : 'Carga y edita archivos de presupuesto';
   };
 
   // Load default file based on context
   useEffect(() => {
-    if (context === 'area_year' && areaYearId === '2' && !selectedFile) {
-      // Load the specific Excel file for FI 2025
+    if (context === 'area_year' && areaYearId && !selectedFile) {
+      // Load the specific Excel file
       loadDefaultExcelFile();
     }
   }, [context, areaYearId, selectedFile]);
@@ -85,8 +132,25 @@ const Page = () => {
   const loadDefaultExcelFile = async () => {
     setLoading(true);
     try {
-      // Load the specific Excel file for FI 2025 presupuesto
-      const response = await fetch('/excel/2025.xlsx');
+      // Determine which file to load
+      let filePath = '/excel/2025.xlsx'; // default fallback
+      
+      if (fileParam) {
+        // If file parameter is provided, use it
+        if (fileParam.startsWith('excel/')) {
+          filePath = `/${fileParam}`;
+        } else if (fileParam.startsWith('/')) {
+          filePath = fileParam;
+        } else {
+          filePath = `/${fileParam}`;
+        }
+      } else if (context === 'area_year' && areaYearId) {
+        // Default files based on area
+        filePath = '/excel/2025.xlsx';
+      }
+
+      // Load the specific Excel file
+      const response = await fetch(filePath);
       if (response.ok) {
         const arrayBuffer = await response.arrayBuffer();
         const XLSX = await ensureXLSX();
@@ -98,8 +162,9 @@ const Page = () => {
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
         setFileData(jsonData);
         
-        // Create a mock file object for display with the specific name
-        const mockFile = new File([arrayBuffer], "05- FCB BIOTERIO 3+9.xlsx", {
+        // Create a mock file object for display with the appropriate name
+        const fileName = filePath.split('/').pop() || "presupuesto.xlsx";
+        const mockFile = new File([arrayBuffer], fileName, {
           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         });
         setSelectedFile(mockFile);
