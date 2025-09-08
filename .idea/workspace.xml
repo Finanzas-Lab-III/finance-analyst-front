@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Integration: integrated with faculties and areas of an user. Created two pages, one that lists the faculties of an user and one (following that one) that lists the years of a faculty.">
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/backoffice/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/page.tsx" afterDir="false" />
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: login">
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,18 +20,18 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "FerVassolo"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;FerVassolo&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Finanzas-Lab-III/finance-analyst-front.git",
-    "accountId": "854e0a0f-81b6-480f-a5e7-43cdbba519e3"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Finanzas-Lab-III/finance-analyst-front.git&quot;,
+    &quot;accountId&quot;: &quot;854e0a0f-81b6-480f-a5e7-43cdbba519e3&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -41,20 +40,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/rvassolo/WebstormProjects/lab3/src/app/backoffice/faculty/[id]/[year]",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "/Users/rvassolo/WebstormProjects/lab3/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/rvassolo/WebstormProjects/lab3/src/app/backoffice/faculty/[id]/[year]&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/rvassolo/WebstormProjects/lab3/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/app/backoffice/faculty/[id]/[year]" />
@@ -115,7 +114,47 @@
       <option name="project" value="LOCAL" />
       <updated>1756687115327</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Fix: all the env are NEXT_PUBLIC_SERVICE_URL">
+      <option name="closed" value="true" />
+      <created>1757356130645</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1757356130645</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Fix: all the env are NEXT_PUBLIC_SERVICE_URL">
+      <option name="closed" value="true" />
+      <created>1757356218916</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1757356218916</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Fix: changes for demo">
+      <option name="closed" value="true" />
+      <created>1757357151780</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1757357151781</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Fix: if this doesn't build I'll kill myself">
+      <option name="closed" value="true" />
+      <created>1757357680367</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1757357680367</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feat: login">
+      <option name="closed" value="true" />
+      <created>1757359598658</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1757359598658</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -136,6 +175,10 @@
     <MESSAGE value="Feat: User management." />
     <MESSAGE value="Feat: refactor of user management page.&#10;Feat: added austral logo" />
     <MESSAGE value="Integration: integrated with faculties and areas of an user. Created two pages, one that lists the faculties of an user and one (following that one) that lists the years of a faculty." />
-    <option name="LAST_COMMIT_MESSAGE" value="Integration: integrated with faculties and areas of an user. Created two pages, one that lists the faculties of an user and one (following that one) that lists the years of a faculty." />
+    <MESSAGE value="Fix: all the env are NEXT_PUBLIC_SERVICE_URL" />
+    <MESSAGE value="Fix: changes for demo" />
+    <MESSAGE value="Fix: if this doesn't build I'll kill myself" />
+    <MESSAGE value="feat: login" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: login" />
   </component>
 </project>

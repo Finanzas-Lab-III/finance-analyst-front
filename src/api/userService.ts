@@ -301,10 +301,7 @@ export async function fetchUserFacultiesAreas(
   try {
     const url = `${USERS_API_BASE}/api/faculties/${userId}/`;
     const res = await fetch(url, { 
-      cache: "no-store",
-      headers: {
-        "X-User-Id": "1"
-      }
+      cache: "no-store"
     });
     
     if (!res.ok) {
@@ -576,15 +573,8 @@ export async function fetchSeguimientoDocuments(areaYearId: number | string): Pr
     const data = (await res.json()) as SeguimientoDocumentsResponse;
     const docs = Array.isArray(data?.documents) ? data.documents : [];
     
-    // Temporary: Modify documents to point to readable Excel files
-    const modifiedDocs = docs.map(doc => ({
-      ...doc,
-      file_key: "excel/2025.xlsx", // Point to a file with actual data
-      title: "Seguimiento 6+6 FI 2025 - Datos Presupuestarios",
-      notes: "Seguimiento 6+6 con datos presupuestarios reales para análisis de LLM"
-    }));
-    
-    return modifiedDocs.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    // Return documents as provided by backend to preserve folder/type classification
+    return docs.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   } catch (error) {
     console.warn(`Backend connection failed for seguimiento documents ${areaYearId}, using mock data:`, error);
     const mockDocuments = MOCK_SEGUIMIENTO_DOCUMENTS[String(areaYearId)];

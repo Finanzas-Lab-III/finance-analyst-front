@@ -1,15 +1,24 @@
 "use client"
-import React from "react";
-import { Download, FileText, Eye, MessageSquare, ExternalLink } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Download, FileText, Eye, MessageSquare, ExternalLink, Plus } from "lucide-react";
 import { useSeguimientoDocuments } from "@/hooks/useSeguimientoDocuments";
 import { buildRawFileUrl } from "@/api/userService";
+import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
+import { useAuth } from "@/components/AuthContext";
 
 interface TrackingTabProps {
   areaYearId: string | number;
 }
 
 export default function TrackingTab({ areaYearId }: TrackingTabProps) {
-  const { loading, error, bySubarea } = useSeguimientoDocuments(areaYearId);
+  const { userRole } = useAuth();
+  const isFinance = userRole === 'finance';
+
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploadFolder, setUploadFolder] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const { loading, error, bySubarea } = useSeguimientoDocuments(areaYearId, reloadKey);
 
   const sections: Array<{ key: string; title: string; description: string; color: string; iconColor: string }> = [
     { key: "3plus9", title: "Trimestral (3+9)", description: "3 meses ejecutados + 9 proyectados", color: "blue", iconColor: "text-blue-600" },
@@ -20,6 +29,16 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
   const monthOrder = [
     "enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"
   ];
+
+  const openUpload = (folder: string) => {
+    setUploadFolder(folder);
+    setUploadOpen(true);
+  };
+
+  const handleUploaded = () => {
+    setUploadOpen(false);
+    setReloadKey(k => k + 1);
+  };
 
   // Handler para abrir seguimiento en nueva pestaña
   const handleOpenSeguimiento = (documentId: number, subarea: string, fileKey?: string) => {
@@ -76,7 +95,18 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
                     <div className="text-sm text-gray-500">Cargando…</div>
                   )}
                   {!loading && docs.length === 0 && (
-                    <div className="text-sm text-gray-400">Sin documentos</div>
+                    <div className="text-sm text-gray-400 flex items-center justify-between">
+                      <span>Sin documentos</span>
+                      {isFinance && (
+                        <button
+                          onClick={() => openUpload(s.key)}
+                          className="inline-flex items-center text-blue-600 hover:text-blue-800 px-2 py-1 border border-blue-200 rounded hover:bg-blue-50"
+                          title={`Subir seguimiento ${s.title}`}
+                        >
+                          <Plus className="w-4 h-4 mr-1" /> Nuevo
+                        </button>
+                      )}
+                    </div>
                   )}
                   {!loading && docs.slice(0, 3).map((doc) => (
                     <div 
@@ -110,6 +140,15 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
                         >
                           <Download className="w-4 h-4" />
                         </a>
+                        {isFinance && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openUpload(s.key); }}
+                            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
+                            title={`Subir nuevo ${s.title}`}
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -191,9 +230,29 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
                           >
                             <Download className="w-4 h-4" />
                           </a>
+                          {isFinance && (
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); openUpload(m); }}
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors" 
+                              title={`Subir nuevo seguimiento de ${m}`}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       ) : (
-                        <span className="text-gray-400 text-sm">Pendiente</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-400 text-sm">Pendiente</span>
+                          {isFinance && (
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); openUpload(m); }}
+                              className="inline-flex items-center text-blue-600 hover:text-blue-800 px-2 py-1 border border-blue-200 rounded hover:bg-blue-50"
+                              title={`Subir seguimiento de ${m}`}
+                            >
+                              <Plus className="w-4 h-4 mr-1" /> Nuevo
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -203,6 +262,17 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
           </div>
         </div>
       </div>
+
+      {isFinance && (
+        <UploadBudgetModal
+          open={uploadOpen}
+          onClose={() => setUploadOpen(false)}
+          areaYearId={areaYearId}
+          onUploaded={handleUploaded}
+          variant="SEGUIMIENTO"
+          folder={uploadFolder ?? undefined}
+        />
+      )}
     </div>
   );
 }

@@ -30,7 +30,7 @@ export default function BackofficeHeader() {
             <div className="hidden sm:flex items-center space-x-2">
               <button
                 type="button"
-                onClick={() => router.push('/backoffice/archivo')}
+                onClick={() => router.push('/backoffice/archive')}
                 className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
               >
                 Facultades

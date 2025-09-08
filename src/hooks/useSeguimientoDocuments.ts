@@ -13,15 +13,13 @@ const ALLOWED_SUBAREAS: Set<string> = new Set([
   "enero", "febrero", "marzo", "abril", "mayo", "junio",
   "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
   "3plus9", "6plus6", "9plus3",
-  "control-mensual", "control-trimestral", "general"
+  "general"
 ]);
 
 const SUBAREA_ALIASES: Record<string, string> = {
   "3mas9": "3plus9",
   "6mas6": "6plus6", 
   "9mas3": "9plus3",
-  "control-mensual": "abril", // Map to a specific month for now
-  "control-trimestral": "3plus9",
 };
 
 function canonicalizeSubarea(raw: string | null | undefined): string | null {
@@ -51,63 +49,41 @@ function extractSubareaFromFileKey(fileKey: string): string | null {
 
 // Helper function to extract multiple subareas from document
 function extractSubareasFromDocument(doc: SeguimientoDocument): string[] {
+  // 1) Prefer subarea from folder in file_key if present: {..}/seguimiento/{subarea}/...
+  const byFolder = extractSubareaFromFileKey(doc.file_key || '');
+  if (byFolder) {
+    return [byFolder];
+  }
+
   const subareas: string[] = [];
   const title = doc.title?.toLowerCase() || '';
   const filename = doc.file_key?.split('/').pop()?.toLowerCase() || '';
-  
-  // Detect type from title and filename
-  let is3plus9 = title.includes('3+9') || title.includes('3mas9') || filename.includes('3+9') || filename.includes('3mas9');
-  let is6plus6 = title.includes('6+6') || title.includes('6mas6') || filename.includes('6+6') || filename.includes('6mas6');
-  let is9plus3 = title.includes('9+3') || title.includes('9mas3') || filename.includes('9+3') || filename.includes('9mas3');
-  
-  // If no specific type detected, try to infer from file structure
-  if (!is3plus9 && !is6plus6 && !is9plus3) {
-    const fileKey = doc.file_key?.toLowerCase() || '';
-    if (fileKey.includes('control-mensual') || fileKey.includes('mensual')) {
-      // For monthly control files, assume they are 6+6 type
-      is6plus6 = true;
+
+  // 2) Detect type from title/filename when folder not informative
+  if (title.includes('3+9') || title.includes('3mas9') || filename.includes('3+9') || filename.includes('3mas9')) {
+    return ['3plus9'];
+  }
+  if (title.includes('6+6') || title.includes('6mas6') || filename.includes('6+6') || filename.includes('6mas6')) {
+    return ['6plus6'];
+  }
+  if (title.includes('9+3') || title.includes('9mas3') || filename.includes('9+3') || filename.includes('9mas3')) {
+    return ['9plus3'];
+  }
+
+  // 3) Try to extract a month from the filename
+  const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  for (const month of months) {
+    if (filename.includes(month)) {
+      return [month];
     }
   }
-  
-  if (is3plus9) {
-    subareas.push('3plus9');
-    // 3+9 appears in: Jan, Feb, Mar (executed) + some projected months
-    subareas.push('enero', 'febrero', 'marzo', 'abril', 'mayo');
-  }
-  
-  if (is6plus6) {
-    subareas.push('6plus6');
-    // 6+6 appears in: Jan-Jun (executed) + Jul-Aug (projected)
-    subareas.push('enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto');
-  }
-  
-  if (is9plus3) {
-    subareas.push('9plus3');
-    // 9+3 appears in: Jan-Sep (executed) + Oct-Dec (projected)
-    subareas.push('enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre');
-  }
-  
-  // If still no subareas detected, try to extract specific month from filename
-  if (subareas.length === 0) {
-    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-                   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    for (const month of months) {
-      if (filename.includes(month)) {
-        subareas.push(month);
-        break;
-      }
-    }
-  }
-  
-  // Fallback to general if nothing detected
-  if (subareas.length === 0) {
-    subareas.push('general');
-  }
-  
-  return subareas;
+
+  // 4) Fallback
+  return ['general'];
 }
 
-export function useSeguimientoDocuments(areaYearId?: string | number | null): UseSeguimientoDocumentsResult {
+export function useSeguimientoDocuments(areaYearId?: string | number | null, reloadKey?: number | string): UseSeguimientoDocumentsResult {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [documents, setDocuments] = useState<SeguimientoDocument[]>([]);
@@ -131,7 +107,7 @@ export function useSeguimientoDocuments(areaYearId?: string | number | null): Us
     }
     load();
     return () => { cancelled = true; };
-  }, [areaYearId]);
+  }, [areaYearId, reloadKey]);
 
   const bySubarea = useMemo(() => {
     console.log('🔄 Processing documents in useMemo:', documents);
