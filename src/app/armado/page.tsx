@@ -2,15 +2,17 @@
 import React, { useRef, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
+import NextDynamic from "next/dynamic";
 import LintErrorCard from "@/components/LintErrorCard";
 import { useFileContext } from "@/components/FileContext";
 import { ArrowLeft } from "lucide-react";
 import "handsontable/dist/handsontable.full.css";
 import axios from "axios";
 
+export const dynamic = 'force-dynamic';
+
 // Dynamically load heavy modules to speed up initial load
-const DynamicHotTable = dynamic(() => import("@handsontable/react").then(m => m.HotTable), { ssr: false });
+const DynamicHotTable = NextDynamic(() => import("@handsontable/react").then(m => m.HotTable), { ssr: false });
 const ensureXLSX = async () => (await import("xlsx"));
 
 // Register Handsontable modules once on client after mount
@@ -33,7 +35,7 @@ const useRegisterHandsontableModules = () => {
   }, []);
 };
 
-const Page = () => {
+const ArmadoContent = () => {
   const router = useRouter();
   useRegisterHandsontableModules();
   const searchParams = useSearchParams();
@@ -255,7 +257,6 @@ const Page = () => {
   }, [selectedFile, prevYearFile, currentYear]);
 
   return (
-    <Suspense fallback={null}>
     <div className="flex h-screen bg-white overflow-hidden">
       <div className="flex flex-col flex-1 h-full min-w-0">
         {/* Header with back button */}
@@ -455,8 +456,13 @@ const Page = () => {
         )}
       </div>
     </div>
-    </Suspense>
   );
 };
 
-export default Page; 
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <ArmadoContent />
+    </Suspense>
+  );
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { FileProvider } from "@/components/FileContext";
 
 export default function ArmadoLayout({
@@ -8,7 +8,9 @@ export default function ArmadoLayout({
 }) {
   return (
     <FileProvider>
-      {children}
+      <Suspense fallback={null}>
+        {children}
+      </Suspense>
     </FileProvider>
   );
 } 
