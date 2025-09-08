@@ -1,5 +1,5 @@
 "use client"
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -255,6 +255,7 @@ const Page = () => {
   }, [selectedFile, prevYearFile, currentYear]);
 
   return (
+    <Suspense fallback={null}>
     <div className="flex h-screen bg-white overflow-hidden">
       <div className="flex flex-col flex-1 h-full min-w-0">
         {/* Header with back button */}
@@ -454,6 +455,7 @@ const Page = () => {
         )}
       </div>
     </div>
+    </Suspense>
   );
 };
 
