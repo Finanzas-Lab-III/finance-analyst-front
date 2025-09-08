@@ -1,6 +1,6 @@
 import { ApiResponse, FileSystemNode } from './fileSystemData';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_FILE_SERVICE_URL || 'http://localhost:8010';
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVICE_URL;
 
 export const fetchFileTree = async (): Promise<FileSystemNode[]> => {
   try {

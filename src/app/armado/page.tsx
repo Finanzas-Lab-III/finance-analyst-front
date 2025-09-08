@@ -239,7 +239,7 @@ const Page = () => {
         formData.append("current_year", currentYear);
         formData.append("budget_file", selectedFile);
         formData.append("previous_years_files", prevYearFile);
-        const budgetAnalysisUrl = process.env.NEXT_PUBLIC_BUDGET_ANALYSIS_URL || 'http://localhost:8001';
+        const budgetAnalysisUrl = process.env.NEXT_PUBLIC_SERVICE_URL;
         const response = await axios.post(`${budgetAnalysisUrl}/analyze-budget/`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
