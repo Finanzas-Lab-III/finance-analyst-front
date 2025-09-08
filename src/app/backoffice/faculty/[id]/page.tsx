@@ -41,26 +41,19 @@ export default function AreaYearsPage() {
   // Helper function to get area display name abbreviation
   const getAreaDisplayName = (areaId: string) => {
     // Map area IDs to their abbreviations for display
-    // This is a simplified mapping - in a real app you'd fetch this from the API
-    const areaMap: Record<string, string> = {
-      // Add mappings based on your area IDs
-      'ingenieria': 'FI',
-      'laboratorio': 'FI', 
-      'biomedica': 'FI',
-      'facultad-de-ingenieria': 'FI',
-      // Add more mappings as needed
+    const areaMap: Record<string, { code: string; name: string }> = {
+      '1': { code: 'FI', name: 'Facultad de Ingeniería' },
+      '2': { code: 'FCB', name: 'Facultad de Ciencias Biomédicas' },
+      '3': { code: 'FCE', name: 'Facultad de Ciencias Empresariales' },
+      '4': { code: 'FD', name: 'Facultad de Derecho' },
+      '5': { code: 'FC', name: 'Facultad de Comunicación' },
+      '6': { code: 'FI-SIS', name: 'Departamento de Sistemas' },
+      '7': { code: 'FI-IND', name: 'Departamento de Ingeniería Industrial' },
+      '8': { code: 'FI-BIO', name: 'Departamento de Ingeniería Biomédica' },
     };
     
-    // Try to extract area name from areaId if it's not directly mapped
-    const lowerAreaId = String(areaId).toLowerCase();
-    for (const [key, value] of Object.entries(areaMap)) {
-      if (lowerAreaId.includes(key)) {
-        return value;
-      }
-    }
-    
-    // Default abbreviation
-    return 'FI';
+    const area = areaMap[String(areaId)];
+    return area ? area : { code: 'UA', name: 'Universidad Austral' };
   };
 
   const renderTable = (title: string, rows: YearsOfAreaItemDto[]) => (
@@ -91,7 +84,7 @@ export default function AreaYearsPage() {
                 }}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                  Presupuesto {getAreaDisplayName(areaId || '')} {r.year}
+                  Presupuesto {getAreaDisplayName(areaId || '').code} {r.year}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor(r.status)}`}>
@@ -110,7 +103,10 @@ export default function AreaYearsPage() {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Años del Área</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{getAreaDisplayName(areaId || '').name}</h1>
+            <p className="text-gray-600 mt-1">Código: {getAreaDisplayName(areaId || '').code}</p>
+          </div>
           <button onClick={() => router.back()} className="text-blue-600 hover:text-blue-800 text-sm">Volver</button>
         </div>
       </div>

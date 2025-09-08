@@ -28,6 +28,23 @@ export const fetchFileTree = async (): Promise<FileSystemNode[]> => {
 
 export const fetchFile = async (filePath: string): Promise<Blob> => {
   try {
+    // Handle public Excel files (served from Next.js public folder)
+    if (filePath.startsWith('excel/') || filePath.includes('2023.xlsx') || filePath.includes('2024.xlsx') || filePath.includes('2025.xlsx')) {
+      const publicPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
+      
+      const response = await fetch(publicPath, {
+        method: 'GET',
+        cache: 'no-store' // Ensure we get fresh data
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
+      }
+      
+      return await response.blob();
+    }
+    
+    // Handle backend files (original behavior)
     const response = await fetch(`${API_BASE_URL}/excel/file/${encodeURIComponent(filePath)}`, {
       method: 'GET',
     });

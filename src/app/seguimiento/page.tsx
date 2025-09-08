@@ -55,6 +55,34 @@ const Page: React.FC = () => {
     setSelectedFile(filePath);
   };
 
+  // Nuevo handler para abrir seguimiento en vista detallada
+  const handleOpenSeguimientoDetailed = (file: FileSystemNode) => {
+    // Simular un ID de documento y extraer información del nombre del archivo
+    const mockDocumentId = Math.floor(Math.random() * 1000);
+    const mockAreaYearId = "2"; // Usando un ID fijo por ahora
+    const subarea = extractSubareaFromFileName(file.name);
+    
+    const url = `/seguimiento/vista-detallada?id=${mockDocumentId}&areaYearId=${mockAreaYearId}&subarea=${subarea}&fileName=${encodeURIComponent(file.name)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  // Función para extraer el tipo de seguimiento del nombre del archivo
+  const extractSubareaFromFileName = (fileName: string) => {
+    const nameLower = fileName.toLowerCase();
+    if (nameLower.includes('3+9') || nameLower.includes('3mas9')) return '3plus9';
+    if (nameLower.includes('6+6') || nameLower.includes('6mas6')) return '6plus6';
+    if (nameLower.includes('9+3') || nameLower.includes('9mas3')) return '9plus3';
+    
+    // Check for month names
+    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    for (const month of months) {
+      if (nameLower.includes(month)) return month;
+    }
+    
+    return 'general';
+  };
+
   const formatFileSize = (sizeBytes?: number) => {
     if (!sizeBytes) return 'N/A';
     const sizeMB = sizeBytes / (1024 * 1024);
@@ -134,9 +162,9 @@ const Page: React.FC = () => {
           {fileList.map((file, index) => (
             <div 
               key={index} 
-              onClick={() => handleFileSelect(file.path || '')}
+              onClick={() => handleOpenSeguimientoDetailed(file)}
               className="grid grid-cols-4 gap-4 p-4 items-center border-b border-gray-200 last:border-b-0 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
-              title="Haz clic para analizar este archivo"
+              title="Haz clic para abrir el seguimiento en una nueva pestaña"
             >
               <div className="flex items-center">
                 <FileText className="h-5 w-5 text-green-600 mr-2" />
@@ -234,10 +262,11 @@ const Page: React.FC = () => {
               <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mt-8">
                 <h3 className="font-semibold text-blue-900 mb-3">💡 ¿Cómo analizar un archivo?</h3>
                 <div className="text-sm text-blue-800 space-y-2">
-                  <p>1. <strong>Haz clic en cualquier fila</strong> de la tabla para seleccionar un archivo</p>
-                  <p>2. <strong>El archivo se cargará automáticamente</strong> en el visor de seguimiento</p>
-                  <p>3. <strong>Podrás ver los datos del presupuesto</strong> en formato de hoja de cálculo</p>
+                  <p>1. <strong>Haz clic en cualquier fila</strong> de la tabla para abrir el seguimiento en una nueva pestaña</p>
+                  <p>2. <strong>El archivo se cargará automáticamente</strong> en el visor de seguimiento detallado</p>
+                  <p>3. <strong>Podrás ver los datos del presupuesto</strong> en formato de hoja de cálculo interactivo</p>
                   <p>4. <strong>Usa las herramientas de IA</strong> para obtener insights personalizados sobre el documento</p>
+                  <p>5. <strong>Accede a comentarios y funciones avanzadas</strong> desde la nueva pestaña</p>
                 </div>
               </div>
             )}

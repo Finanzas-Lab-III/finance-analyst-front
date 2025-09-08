@@ -49,14 +49,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Mock users para testing
 const mockUsers: Record<string, User> = {
   'director@universidad.edu': {
-    id: '1',
+    id: '2',
     name: 'Santiago Ascasibar',
     email: 'director@universidad.edu',
     role: 'director',
     department: 'Ingeniería'
   },
   'finanzas@universidad.edu': {
-    id: '2',
+    id: '1',
     name: 'Ana Martínez',
     email: 'finanzas@universidad.edu',
     role: 'finance',
@@ -64,14 +64,14 @@ const mockUsers: Record<string, User> = {
   },
   // Credenciales solicitadas
   'admin@mail.austral.edu.ar': {
-    id: '2',
+    id: '1',
     name: 'Admin Finanzas',
     email: 'admin@mail.austral.edu.ar',
     role: 'finance',
     department: 'Finanzas'
   },
   'director-ing@mail.austral.edu.ar': {
-    id: '1',
+    id: '2',
     name: 'Director Ingeniería',
     email: 'director-ing@mail.austral.edu.ar',
     role: 'director',
@@ -79,7 +79,7 @@ const mockUsers: Record<string, User> = {
   }
 };
 
-const DEFAULT_DIRECTOR_ID = '1';
+const DEFAULT_DIRECTOR_ID = '2';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

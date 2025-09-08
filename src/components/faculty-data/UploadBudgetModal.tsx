@@ -8,9 +8,11 @@ interface UploadBudgetModalProps {
   onClose: () => void;
   areaYearId: string | number;
   onUploaded?: () => void;
+  variant?: 'ARMADO' | 'SEGUIMIENTO';
+  folder?: string | null;
 }
 
-export default function UploadBudgetModal({ open, onClose, areaYearId, onUploaded }: UploadBudgetModalProps) {
+export default function UploadBudgetModal({ open, onClose, areaYearId, onUploaded, variant = 'ARMADO', folder = null }: UploadBudgetModalProps) {
   if (!open) return null;
 
   const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
@@ -45,8 +47,9 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
     try {
       const form = new FormData();
       form.append("file", file);
-      form.append("type", "ARMADO");
+      form.append("type", variant);
       form.append("area_year_id", String(areaYearId));
+      if (folder && folder.trim().length > 0) form.append("folder", folder.trim());
       if (title && title.trim().length > 0) form.append("title", title.trim());
       if (notes && notes.trim().length > 0) form.append("notes", notes.trim());
 
@@ -62,15 +65,17 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
         } catch {}
         throw new Error(message);
       }
-      // After successful upload: if current status is NOT_STARTED, move to PENDING_APPROVAL
-      try {
-        const current = await fetchAreaYearStatus(areaYearId);
-        if ((current.status as AreaYearStatus) === "NOT_STARTED") {
-          await updateAreaYearStatus(areaYearId, "PENDING_APPROVAL");
+      // After successful upload: only update status automatically for ARMADO
+      if (variant === 'ARMADO') {
+        try {
+          const current = await fetchAreaYearStatus(areaYearId);
+          if ((current.status as AreaYearStatus) === "NOT_STARTED") {
+            await updateAreaYearStatus(areaYearId, "PENDING_APPROVAL");
+          }
+        } catch (e) {
+          // Non-blocking: ignore status update error here, but log for debugging
+          console.error("Error updating status after upload", e);
         }
-      } catch (e) {
-        // Non-blocking: ignore status update error here, but log for debugging
-        console.error("Error updating status after upload", e);
       }
 
       onUploaded?.();
@@ -86,7 +91,7 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Subir Nueva Versión</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{variant === 'ARMADO' ? 'Subir Nueva Versión' : 'Subir Seguimiento'}</h3>
           <button 
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
