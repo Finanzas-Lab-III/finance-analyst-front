@@ -1,6 +1,6 @@
 "use client"
 import React from "react";
-import { Download, FileText, Eye, MessageSquare } from "lucide-react";
+import { Download, FileText, Eye, MessageSquare, ExternalLink } from "lucide-react";
 import { useSeguimientoDocuments } from "@/hooks/useSeguimientoDocuments";
 import { buildRawFileUrl } from "@/api/userService";
 
@@ -20,6 +20,22 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
   const monthOrder = [
     "enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"
   ];
+
+  // Handler para abrir seguimiento en nueva pestaña
+  const handleOpenSeguimiento = (documentId: number, subarea: string, fileKey?: string) => {
+    const url = `/seguimiento/vista-detallada?id=${documentId}&areaYearId=${areaYearId}&subarea=${subarea}&fileName=${encodeURIComponent(fileKey || '')}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  // Helper function to get file URL based on file_key
+  const getFileUrl = (doc: any): string => {
+    // If file_key starts with "excel/", it's a public file
+    if (doc.file_key?.startsWith('excel/')) {
+      return `/${doc.file_key}`;
+    }
+    // Otherwise, use the API endpoint
+    return buildRawFileUrl(doc.id);
+  };
 
   return (
     <div className="space-y-8">
@@ -63,14 +79,38 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
                     <div className="text-sm text-gray-400">Sin documentos</div>
                   )}
                   {!loading && docs.slice(0, 3).map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                    <div 
+                      key={doc.id} 
+                      className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => handleOpenSeguimiento(doc.id, s.key, doc.file_key)}
+                      title={`Abrir seguimiento ${s.title}`}
+                    >
                       <div>
                         <p className="font-medium text-gray-900 text-sm truncate" title={doc.title}>{versionById.get(doc.id) ?? "V1"}</p>
                         <p className="text-xs text-gray-600">{new Date(doc.created_at).toLocaleDateString()}</p>
                       </div>
-                      <a href={buildRawFileUrl(doc.id)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 p-1" title="Descargar">
-                        <Download className="w-4 h-4" />
-                      </a>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenSeguimiento(doc.id, s.key, doc.file_key);
+                          }}
+                          className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
+                          title="Abrir en nueva pestaña"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </button>
+                        <a 
+                          href={getFileUrl(doc)} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-colors" 
+                          title="Descargar"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -104,7 +144,12 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
               const latest = docs[0];
               const latestVersion = latest ? `V${docs.length}` : null;
               return (
-                <div key={m} className="px-6 py-4 hover:bg-gray-50">
+                <div 
+                  key={m} 
+                  className={`px-6 py-4 transition-colors ${latest ? 'hover:bg-gray-50 cursor-pointer' : ''}`}
+                  onClick={() => latest && handleOpenSeguimiento(latest.id, m, latest.file_key)}
+                  title={latest ? `Abrir seguimiento de ${m}` : undefined}
+                >
                   <div className="grid grid-cols-5 gap-4 items-center">
                     <div className="flex items-center space-x-2">
                       <FileText className="w-4 h-4 text-green-600" />
@@ -116,13 +161,34 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
                     <div>
                       {latest ? (
                         <div className="flex items-center space-x-1">
-                          <button className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors" title="Vista rápida">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenSeguimiento(latest.id, m, latest.file_key);
+                            }}
+                            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors" 
+                            title="Abrir en nueva pestaña"
+                          >
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button className="text-gray-600 hover:text-gray-800 p-1 rounded hover:bg-gray-50 transition-colors" title="Comentarios">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Aquí iría la funcionalidad de comentarios
+                            }}
+                            className="text-gray-600 hover:text-gray-800 p-1 rounded hover:bg-gray-50 transition-colors" 
+                            title="Comentarios"
+                          >
                             <MessageSquare className="w-4 h-4" />
                           </button>
-                          <a href={latest ? buildRawFileUrl(latest.id) : undefined} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-colors" title="Descargar">
+                          <a 
+                            href={latest ? getFileUrl(latest) : undefined} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-colors" 
+                            title="Descargar"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Download className="w-4 h-4" />
                           </a>
                         </div>

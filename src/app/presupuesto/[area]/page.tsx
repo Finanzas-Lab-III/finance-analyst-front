@@ -8,6 +8,7 @@ import { getBudgetData, getAllBudgetYears, BudgetData } from "@/data/mockBudgetD
 import { useFileContext } from '@/components/FileContext';
 import { fetchFileTree } from '@/api/fileService';
 import { FileSystemNode } from '@/api/fileSystemData';
+import TrackingTab from "@/components/faculty-data/TrackingTab";
 
 interface BudgetAreaPageProps {
   params: Promise<{ area: string }>;
@@ -57,6 +58,15 @@ const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
 
   // Get configuration for this area
   const config = budgetAreaConfig[area as keyof typeof budgetAreaConfig];
+  
+  // Map area to areaYearId (for now, using simple mapping)
+  const getAreaYearId = (area: string): number => {
+    // This should ideally come from an API or configuration
+    // For now, using a simple mapping
+    return 2; // Default to areaYearId 2 for testing
+  };
+  
+  const areaYearId = getAreaYearId(area);
 
   const allBudgetYears = getAllBudgetYears();
   
@@ -456,66 +466,7 @@ const BudgetAreaPage = ({ params }: BudgetAreaPageProps) => {
           )}
 
           {activeTab === "seguimientos" && (
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Seguimiento de Presupuesto</h3>
-              <p className="text-gray-600 mb-6">Monitorea y analiza la ejecución del presupuesto mediante documentos de seguimiento</p>
-              
-              {loading && (
-                <div className="bg-white rounded-lg p-8 text-center border border-gray-200 mb-8">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Cargando archivos disponibles...</p>
-                </div>
-              )}
-
-              {error && (
-                <div className="bg-red-50 rounded-lg p-6 border border-red-200 mb-8">
-                  <p className="text-red-800">{error}</p>
-                  <button 
-                    onClick={() => window.location.reload()} 
-                    className="mt-3 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                  >
-                    Intentar de nuevo
-                  </button>
-                </div>
-              )}
-
-              {!loading && !error && files.length === 0 && (
-                <div className="bg-white rounded-lg p-8 text-center border border-gray-200 mb-8">
-                  <FileText size={48} className="text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-xl font-semibold text-gray-900 mb-2">No hay archivos disponibles</h4>
-                  <p className="text-gray-600">No se encontraron archivos de presupuesto en el sistema.</p>
-                </div>
-              )}
-
-              {!loading && !error && files.length > 0 && (
-                <>
-                  {/* Variaciones presupuestarias */}
-                  {renderFileTable(
-                    variaciones, 
-                    "Variaciones Presupuestarias", 
-                    "Documentos que reflejan cambios y ajustes en el presupuesto durante el período de ejecución"
-                  )}
-
-                  {/* Proyecciones de presupuestos */}
-                  {renderFileTable(
-                    proyecciones, 
-                    "Proyecciones de Presupuestos", 
-                    "Documentos con estimaciones y proyecciones futuras del comportamiento presupuestario"
-                  )}
-
-                  {/* Instructions */}
-                  <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mt-8">
-                    <h4 className="font-semibold text-blue-900 mb-3">💡 ¿Cómo analizar un archivo?</h4>
-                    <div className="text-sm text-blue-800 space-y-2">
-                      <p>1. <strong>Haz clic en cualquier fila</strong> de la tabla para seleccionar un archivo</p>
-                      <p>2. <strong>El archivo se cargará automáticamente</strong> en el visor de seguimiento</p>
-                      <p>3. <strong>Podrás ver los datos del presupuesto</strong> en formato de hoja de cálculo</p>
-                      <p>4. <strong>Usa las herramientas de IA</strong> para obtener insights personalizados sobre el documento</p>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+            <TrackingTab areaYearId={areaYearId} />
           )}
         </div>
       </div>
