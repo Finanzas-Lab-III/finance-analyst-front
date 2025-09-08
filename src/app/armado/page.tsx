@@ -1,16 +1,18 @@
 "use client"
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
+import NextDynamic from "next/dynamic";
 import LintErrorCard from "@/components/LintErrorCard";
 import { useFileContext } from "@/components/FileContext";
 import { ArrowLeft } from "lucide-react";
 import "handsontable/dist/handsontable.full.css";
 import axios from "axios";
 
+export const dynamic = 'force-dynamic';
+
 // Dynamically load heavy modules to speed up initial load
-const DynamicHotTable = dynamic(() => import("@handsontable/react").then(m => m.HotTable), { ssr: false });
+const DynamicHotTable = NextDynamic(() => import("@handsontable/react").then(m => m.HotTable), { ssr: false });
 const ensureXLSX = async () => (await import("xlsx"));
 
 // Register Handsontable modules once on client after mount
@@ -33,7 +35,7 @@ const useRegisterHandsontableModules = () => {
   }, []);
 };
 
-const Page = () => {
+const ArmadoContent = () => {
   const router = useRouter();
   useRegisterHandsontableModules();
   const searchParams = useSearchParams();
@@ -304,7 +306,7 @@ const Page = () => {
         formData.append("current_year", currentYear);
         formData.append("budget_file", selectedFile);
         formData.append("previous_years_files", prevYearFile);
-        const budgetAnalysisUrl = process.env.NEXT_PUBLIC_BUDGET_ANALYSIS_URL || 'http://localhost:8001';
+        const budgetAnalysisUrl = process.env.NEXT_PUBLIC_SERVICE_URL;
         const response = await axios.post(`${budgetAnalysisUrl}/analyze-budget/`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
@@ -522,4 +524,10 @@ const Page = () => {
   );
 };
 
-export default Page; 
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <ArmadoContent />
+    </Suspense>
+  );
+}

@@ -82,9 +82,7 @@ This application uses environment variables to configure API endpoints. Create a
 
 ```env
 # API Configuration
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000          # Main AI analysis API
-NEXT_PUBLIC_FILE_SERVICE_URL=http://localhost:8010      # File service API  
-NEXT_PUBLIC_BUDGET_ANALYSIS_URL=http://localhost:8001   # Budget analysis API
+NEXT_PUBLIC_SERVICE_URL=http://localhost:8000          # Main AI analysis API
 ```
 
 Copy `.env.example` to `.env.local` and modify the URLs according to your backend service configuration.

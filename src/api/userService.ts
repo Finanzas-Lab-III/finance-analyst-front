@@ -15,7 +15,7 @@ export interface UserFilters {
   mail?: string;
 }
 
-const USERS_API_BASE = process.env.NEXT_PUBLIC_USERS_API_URL || "http://localhost:8000";
+const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
 
 export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> {
   const base = `${USERS_API_BASE}/api/admin/users/`;

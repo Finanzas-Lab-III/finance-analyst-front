@@ -61,6 +61,21 @@ const mockUsers: Record<string, User> = {
     email: 'finanzas@universidad.edu',
     role: 'finance',
     department: 'Finanzas'
+  },
+  // Credenciales solicitadas
+  'admin@mail.austral.edu.ar': {
+    id: '2',
+    name: 'Admin Finanzas',
+    email: 'admin@mail.austral.edu.ar',
+    role: 'finance',
+    department: 'Finanzas'
+  },
+  'director-ing@mail.austral.edu.ar': {
+    id: '1',
+    name: 'Director Ingeniería',
+    email: 'director-ing@mail.austral.edu.ar',
+    role: 'director',
+    department: 'Ingeniería'
   }
 };
 
@@ -110,12 +125,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Simulación de login
     const user = mockUsers[email];
     
-    if (user && password === 'password') { // Password simple para testing
+    if (user && password === 'password123') { // Password simple para testing
       setUser(user);
       setUserRole(user.role);
       localStorage.setItem('currentUser', JSON.stringify(user));
       localStorage.setItem('testRole', user.role);
       setCookie('userRole', user.role);
+      setCookie('userId', user.id);
     } else {
       throw new Error('Credenciales inválidas');
     }
@@ -127,6 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('currentUser');
     localStorage.removeItem('testRole');
     deleteCookie('userRole');
+    deleteCookie('userId');
   };
 
   // Función para testing - cambiar rol rápidamente
@@ -147,6 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('currentUser', JSON.stringify(testUser));
         localStorage.setItem('testRole', role);
         setCookie('userRole', role);
+        setCookie('userId', testUser.id);
       }
     } else {
       logout();

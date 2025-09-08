@@ -13,7 +13,7 @@ interface UploadBudgetModalProps {
 export default function UploadBudgetModal({ open, onClose, areaYearId, onUploaded }: UploadBudgetModalProps) {
   if (!open) return null;
 
-  const USERS_API_BASE = process.env.NEXT_PUBLIC_USERS_API_URL || "http://localhost:8000";
+  const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState<string>("");

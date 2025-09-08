@@ -26,7 +26,7 @@ This document explains how to deploy the Finance Analyst Frontend to Vercel.
 3. **Environment Variables**:
    Set the following environment variables in the Vercel dashboard:
    ```
-   NEXT_PUBLIC_API_BASE_URL=https://your-ai-analysis-api.com
+   NEXT_PUBLIC_SERVICE_URL=https://your-ai-analysis-api.com
    NEXT_PUBLIC_FILE_SERVICE_URL=https://your-file-service-api.com
    NEXT_PUBLIC_BUDGET_ANALYSIS_URL=https://your-budget-analysis-api.com
    ```
@@ -54,9 +54,9 @@ This document explains how to deploy the Finance Analyst Frontend to Vercel.
 
 4. **Set Environment Variables**:
    ```bash
-   vercel env add NEXT_PUBLIC_API_BASE_URL
-   vercel env add NEXT_PUBLIC_FILE_SERVICE_URL
-   vercel env add NEXT_PUBLIC_BUDGET_ANALYSIS_URL
+   vercel env add NEXT_PUBLIC_SERVICE_URL
+   vercel env add NEXT_PUBLIC_SERVICE_URL
+   vercel env add NEXT_PUBLIC_SERVICE_URL
    ```
 
 5. **Redeploy with Environment Variables**:
