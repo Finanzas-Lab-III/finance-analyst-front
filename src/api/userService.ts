@@ -457,6 +457,27 @@ export async function updateAreaYearStatus(
   }
 }
 
+// Some backends expect POST to set the initial status
+export async function createAreaYearStatus(
+  areaYearId: number | string,
+  status: AreaYearStatus
+): Promise<void> {
+  const url = `${USERS_API_BASE}/api/status/${areaYearId}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) {
+    let message = `Error creando estado del área-año ${areaYearId}: ${res.status} ${res.statusText}`;
+    try {
+      const data = await res.json();
+      if (data?.detail) message = String(data.detail);
+    } catch {}
+    throw new Error(message);
+  }
+}
+
 // Armado documents for an AreaYear
 export interface ArmadoDocument {
   id: number;
