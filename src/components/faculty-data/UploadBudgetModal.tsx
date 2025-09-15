@@ -1,7 +1,7 @@
 "use client"
 import React, { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
-import { AreaYearStatus, fetchAreaYearStatus, updateAreaYearStatus } from "@/api/userService";
+import { AreaYearStatus, fetchAreaYearStatus, updateAreaYearStatus, createAreaYearStatus } from "@/api/userService";
 
 interface UploadBudgetModalProps {
   open: boolean;
@@ -70,7 +70,8 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
         try {
           const current = await fetchAreaYearStatus(areaYearId);
           if ((current.status as AreaYearStatus) === "NOT_STARTED") {
-            await updateAreaYearStatus(areaYearId, "PENDING_APPROVAL");
+            // Set initial status to BUDGET_STARTED using POST as requested
+            await createAreaYearStatus(areaYearId, "BUDGET_STARTED");
           }
         } catch (e) {
           // Non-blocking: ignore status update error here, but log for debugging
