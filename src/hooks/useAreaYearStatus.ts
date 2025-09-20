@@ -1,13 +1,14 @@
 "use client"
 import { useEffect, useState } from "react";
-import { AreaYearStatus, fetchAreaYearStatus } from "@/api/userService";
+import { AreaYearStatus, fetchAreaYearStatus, AreaYearStatusResponse } from "@/api/userService";
 
 export interface UseAreaYearStatusResult {
   loading: boolean;
   error: string | null;
   status: AreaYearStatus | null;
-  area: string;
+  area: string; // display area or faculty based on backend
   year: string | number;
+  faculty: string; // derived faculty display name
 }
 
 export function useAreaYearStatus(areaYearId?: string | number | null): UseAreaYearStatusResult {
@@ -15,6 +16,7 @@ export function useAreaYearStatus(areaYearId?: string | number | null): UseAreaY
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<AreaYearStatus | null>(null);
   const [area, setArea] = useState<string>("");
+  const [faculty, setFaculty] = useState<string>("");
   const [year, setYear] = useState<string | number>("");
 
   useEffect(() => {
@@ -24,10 +26,15 @@ export function useAreaYearStatus(areaYearId?: string | number | null): UseAreaY
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchAreaYearStatus(areaYearId);
+        const data: AreaYearStatusResponse = await fetchAreaYearStatus(areaYearId);
         if (cancelled) return;
         setStatus(data.status);
-        setArea(data.area);
+        // Derive faculty and area display using new shape
+        const hasParent = !!data.parent_area;
+        const computedFaculty = hasParent ? (data.parent_area?.name || "") : (data.area_name || data.area?.name || "");
+        const computedArea = hasParent ? (data.area_name || data.area?.name || "") : "";
+        setFaculty(computedFaculty);
+        setArea(computedArea);
         setYear(data.year);
       } catch (e: any) {
         if (cancelled) return;
@@ -40,7 +47,7 @@ export function useAreaYearStatus(areaYearId?: string | number | null): UseAreaY
     return () => { cancelled = true; };
   }, [areaYearId]);
 
-  return { loading, error, status, area, year };
+  return { loading, error, status, area, year, faculty };
 }
 
 

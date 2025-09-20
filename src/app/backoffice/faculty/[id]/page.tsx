@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchYearsOfArea, YearsOfAreaItemDto, AreaYearStatus } from "../../../../api/userService";
+import { fetchYearsOfArea, YearsOfAreaItemDto } from "../../../../api/userService";
 import { statusColor, statusLabelEs } from "@/lib/areaYearStatus";
 
 export default function AreaYearsPage() {
@@ -12,6 +12,7 @@ export default function AreaYearsPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<YearsOfAreaItemDto[]>([]);
+  const [areaName, setAreaName] = useState<string>("");
 
   useEffect(() => {
     let cancelled = false;
@@ -23,6 +24,7 @@ export default function AreaYearsPage() {
         const data = await fetchYearsOfArea(areaId);
         if (cancelled) return;
         setItems(Array.isArray(data.yearsOfArea) ? data.yearsOfArea : []);
+        setAreaName(data?.area_name || "");
       } catch (e: any) {
         if (cancelled) return;
         setError(e?.message ? String(e.message) : "Error cargando años del área");
@@ -38,23 +40,7 @@ export default function AreaYearsPage() {
   const future = items.filter(i => i.isFuture && !i.isCurrent);
   const others = items.filter(i => !i.isCurrent && !i.isFuture).sort((a, b) => b.year - a.year);
 
-  // Helper function to get area display name abbreviation
-  const getAreaDisplayName = (areaId: string) => {
-    // Map area IDs to their abbreviations for display
-    const areaMap: Record<string, { code: string; name: string }> = {
-      '1': { code: 'FI', name: 'Facultad de Ingeniería' },
-      '2': { code: 'FCB', name: 'Facultad de Ciencias Biomédicas' },
-      '3': { code: 'FCE', name: 'Facultad de Ciencias Empresariales' },
-      '4': { code: 'FD', name: 'Facultad de Derecho' },
-      '5': { code: 'FC', name: 'Facultad de Comunicación' },
-      '6': { code: 'FI-SIS', name: 'Departamento de Sistemas' },
-      '7': { code: 'FI-IND', name: 'Departamento de Ingeniería Industrial' },
-      '8': { code: 'FI-BIO', name: 'Departamento de Ingeniería Biomédica' },
-    };
-    
-    const area = areaMap[String(areaId)];
-    return area ? area : { code: 'UA', name: 'Universidad Austral' };
-  };
+  const resolvedAreaName = areaName || (areaId ? `Área ${areaId}` : "Área");
 
   const renderTable = (title: string, rows: YearsOfAreaItemDto[]) => (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -84,7 +70,7 @@ export default function AreaYearsPage() {
                 }}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                  Presupuesto {getAreaDisplayName(areaId || '').code} {r.year}
+                  Presupuesto {resolvedAreaName} {r.year}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor(r.status)}`}>
@@ -104,8 +90,7 @@ export default function AreaYearsPage() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{getAreaDisplayName(areaId || '').name}</h1>
-            <p className="text-gray-600 mt-1">Código: {getAreaDisplayName(areaId || '').code}</p>
+            <h1 className="text-3xl font-bold text-gray-900">{resolvedAreaName}</h1>
           </div>
           <button onClick={() => router.back()} className="text-blue-600 hover:text-blue-800 text-sm">Volver</button>
         </div>

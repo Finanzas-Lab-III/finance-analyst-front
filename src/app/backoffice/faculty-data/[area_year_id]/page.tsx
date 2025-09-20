@@ -227,22 +227,17 @@ export default function BudgetDetailPage() {
   const [budget] = useState<BudgetDetail>(mockBudgetDetail);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState<BudgetDetail['status']>(budget.status);
-  const { status, area, year } = useAreaYearStatus(areaYearId);
+  const { status, area, year, faculty } = useAreaYearStatus(areaYearId);
   const headerStatus = (status as any) ?? budget.status;
   
-  // Map area names to their abbreviations for display
-  const getAreaDisplayName = (areaName: string) => {
-    const areaMap: Record<string, string> = {
-      'Ingeniería': 'FI',
-      'Facultad de Ingeniería': 'FI',
-      'Laboratorio': 'FI',
-      'Biomédica': 'FI',
-      // Add more mappings as needed
-    };
-    return areaMap[areaName] || areaName;
-  };
-
-  const headerName = `Presupuesto ${getAreaDisplayName(area || budget.area)} ${year || new Date().getFullYear()}`;
+  // Title format: "Presupuesto {facultyOrArea} {year}"
+  const headerName = `Presupuesto ${faculty || area || budget.area} ${year || new Date().getFullYear()}`;
+  const headerDescription = (() => {
+    const displayYear = year || new Date().getFullYear();
+    if (faculty) return `Presupuesto del ${displayYear} para ${faculty}`;
+    if (area) return `Presupuesto del ${displayYear} para ${area}`;
+    return "";
+  })();
   const [activeTab, setActiveTab] = useState<'overview' | 'budget' | 'tracking' | 'comments'>('budget');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDocumentSnapshot, setShowDocumentSnapshot] = useState(false);
@@ -334,9 +329,9 @@ export default function BudgetDetailPage() {
 
       <BudgetHeader
         name={headerName}
-        description={budget.description}
-        faculty={budget.faculty}
-        area={budget.area}
+        description={headerDescription}
+        faculty={faculty || (area ? "" : budget.faculty)}
+        area={area || ""}
         status={String(headerStatus)}
         lastModifiedISO={budget.lastModified}
         getStatusText={(s) => areaYearStatusLabel(s as any)}
