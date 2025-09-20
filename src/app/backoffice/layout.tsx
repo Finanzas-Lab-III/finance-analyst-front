@@ -1,6 +1,7 @@
 import React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import BackofficeHeader from "@/components/backoffice/BackofficeHeader";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,11 +19,13 @@ export default function BackofficeLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50`}>
-      <BackofficeHeader />
-      <main className="p-6">
-        {children}
-      </main>
-    </div>
+    <ProtectedRoute requiredRole="ADMINISTRADOR">
+      <div className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50`}>
+        <BackofficeHeader />
+        <main className="p-6">
+          {children}
+        </main>
+      </div>
+    </ProtectedRoute>
   );
 }
