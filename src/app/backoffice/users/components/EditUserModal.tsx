@@ -37,7 +37,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ id, onClose, onUpdated })
         const fid = Array.isArray(detail.facultad_ids) && detail.facultad_ids.length > 0 ? detail.facultad_ids[0] : null;
         setFacultadId(fid);
         setEsDecano((detail.scope as DirectorScope) === "SELF_AND_DESCENDANTS");
-        setSubareaIds(Array.isArray(detail.subarea_ids) ? detail.subarea_ids : []);
+        const initialSubareas = Array.isArray(detail.subarea_ids) ? detail.subarea_ids : [];
+        setSubareaIds(initialSubareas);
       })
       .catch((e) => {
         console.error(e);
@@ -76,22 +77,31 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ id, onClose, onUpdated })
     }
     try {
       setSubmitting(true);
+      
+      let payload;
       if (rolDirector) {
         const scope: DirectorScope = esDecano ? "SELF_AND_DESCENDANTS" : "SELF_ONLY";
-        await updateUser({
+        payload = {
           id,
-          rol: "DIRECTOR",
-          nombre: nombre.trim(),
-          apellido: apellido.trim(),
+          rol: "DIRECTOR" as const,
+          nombre_apellido: `${nombre.trim()} ${apellido.trim()}`.trim(),
           email: email.trim(),
           facultad_ids: facultadId ? [facultadId] : [],
           subarea_ids: subareaIds,
           scope,
-        });
+        };
       } else {
-        await updateUser({ id, rol: "ADMINISTRADOR", nombre: nombre.trim(), apellido: apellido.trim(), email: email.trim() });
+        payload = { 
+          id, 
+          rol: "ADMINISTRADOR" as const, 
+          nombre_apellido: `${nombre.trim()} ${apellido.trim()}`.trim(),
+          email: email.trim() 
+        };
       }
+      
+      await updateUser(payload);
       toast.success("Usuario actualizado exitosamente");
+      
       onUpdated();
       onClose();
     } catch (err: any) {
@@ -214,46 +224,77 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ id, onClose, onUpdated })
 
               {facultadId && (
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-700">Sub-áreas</label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      className="w-full text-left rounded-md border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50 text-gray-900"
-                      disabled={submitting}
-                      onClick={(e) => {
-                        const menu = (e.currentTarget.nextSibling as HTMLDivElement);
-                        if (menu) menu.classList.toggle("hidden");
-                      }}
-                    >
-                      {subareaIds.length > 0
-                        ? currentSubareas.filter(s => subareaIds.includes(s.id)).map(s => s.nombre).join(", ")
-                        : "Seleccionar"}
-                    </button>
-                    <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg hidden">
-                      <div className="max-h-48 overflow-auto py-1">
-                        {currentSubareas.map((s) => {
-                          const checked = subareaIds.includes(s.id);
+                  <label className="mb-1 block text-xs font-medium text-gray-700">Sub-áreas asignadas</label>
+                  
+                  {/* Mostrar sub-áreas actuales como chips removibles */}
+                  {subareaIds.length > 0 && (
+                    <div className="mb-3">
+                      <div className="flex flex-wrap gap-2">
+                        {subareaIds.map((subareaId) => {
+                          const subarea = currentSubareas.find(s => s.id === subareaId);
+                          if (!subarea) return null;
                           return (
-                            <label key={s.id} className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-gray-50 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={(e) => {
-                                  setSubareaIds((prev) => e.target.checked
-                                    ? Array.from(new Set([...prev, s.id]))
-                                    : prev.filter((x) => x !== s.id)
-                                  );
+                            <div key={subareaId} className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full">
+                              <span>{subarea.nombre}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSubareaIds(prev => prev.filter(id => id !== subareaId));
                                 }}
+                                className="text-blue-600 hover:text-blue-800 ml-1"
                                 disabled={submitting}
-                              />
-                              {s.nombre}
-                            </label>
+                              >
+                                ✕
+                              </button>
+                            </div>
                           );
                         })}
                       </div>
+                      <p className="mt-1 text-[11px] text-gray-600">Haga clic en ✕ para remover un área asignada.</p>
                     </div>
+                  )}
+
+                  {/* Selector para agregar nuevas sub-áreas */}
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-700">Agregar sub-áreas</label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        className="w-full text-left rounded-md border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50 text-gray-900"
+                        disabled={submitting}
+                        onClick={(e) => {
+                          const menu = (e.currentTarget.nextSibling as HTMLDivElement);
+                          if (menu) menu.classList.toggle("hidden");
+                        }}
+                      >
+                        Seleccionar sub-áreas adicionales
+                      </button>
+                      <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg hidden">
+                        <div className="max-h-48 overflow-auto py-1">
+                          {currentSubareas.map((s) => {
+                            const isAlreadySelected = subareaIds.includes(s.id);
+                            return (
+                              <label key={s.id} className={`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer ${isAlreadySelected ? 'bg-gray-100 text-gray-500' : 'text-gray-800 hover:bg-gray-50'}`}>
+                                <input
+                                  type="checkbox"
+                                  checked={isAlreadySelected}
+                                  onChange={(e) => {
+                                    if (e.target.checked && !isAlreadySelected) {
+                                      setSubareaIds(prev => Array.from(new Set([...prev, s.id])));
+                                    }
+                                  }}
+                                  disabled={submitting || isAlreadySelected}
+                                />
+                                <span className={isAlreadySelected ? 'line-through' : ''}>{s.nombre}</span>
+                                {isAlreadySelected && <span className="text-xs">(ya asignada)</span>}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="mt-1 text-[11px] text-gray-600">Seleccione sub-áreas adicionales de la facultad (opcional si es decano).</p>
                   </div>
-                  <p className="mt-1 text-[11px] text-gray-600">Seleccione una o varias sub-áreas de la facultad (opcional si es decano).</p>
                 </div>
               )}
             </div>

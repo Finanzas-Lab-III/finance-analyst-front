@@ -86,8 +86,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ onClose, onCreated })
       if (rolDirector) {
         const scope: DirectorScope = esDecano ? "SELF_AND_DESCENDANTS" : "SELF_ONLY";
         await createDirector({
-          nombre: nombre.trim(),
-          apellido: apellido.trim(),
+          nombre_apellido: `${nombre.trim()} ${apellido.trim()}`.trim(),
           email: email.trim(),
           facultad_ids: facultadId ? [facultadId] : [],
           subarea_ids: subareaIds,
@@ -95,7 +94,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ onClose, onCreated })
           isDean: esDecano,
         });
       } else {
-        await createUser({ rol: "ADMINISTRADOR", nombre: nombre.trim(), apellido: apellido.trim(), email: email.trim() });
+        await createUser({ 
+          rol: "ADMINISTRADOR", 
+          nombre_apellido: `${nombre.trim()} ${apellido.trim()}`.trim(),
+          email: email.trim() 
+        });
       }
       toast.success("Usuario creado exitosamente");
       onCreated();

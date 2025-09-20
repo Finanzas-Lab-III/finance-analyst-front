@@ -15,7 +15,7 @@ export interface UserFilters {
   mail?: string;
 }
 
-const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
+const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL || "http://localhost:8000";
 
 export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> {
   const base = `${USERS_API_BASE}/api/admin/users/`;
@@ -25,6 +25,7 @@ export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> 
   if (filters.mail) params.set("mail", filters.mail);
   const query = params.toString();
   const url = query ? `${base}?${query}` : base;
+  
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
     throw new Error(`Error fetching users: ${res.status} ${res.statusText}`);
@@ -95,13 +96,13 @@ export async function deleteUser(id: string | number): Promise<void> {
 
 export type CreateUserPayload = {
   rol: "ADMINISTRADOR" | "DIRECTOR";
-  nombre: string;
-  apellido: string;
+  nombre_apellido: string;
   email: string;
 };
 
 export async function createUser(payload: CreateUserPayload): Promise<any> {
   const url = `${USERS_API_BASE}/api/admin/users/`;
+  
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -148,8 +149,7 @@ export async function fetchFacultades(): Promise<FacultadDto[]> {
 }
 
 export interface CreateDirectorPayload {
-  nombre: string;
-  apellido: string;
+  nombre_apellido: string;
   email: string;
   facultad_ids: number[];
   scope: DirectorScope;
@@ -160,6 +160,7 @@ export interface CreateDirectorPayload {
 export async function createDirector(payload: CreateDirectorPayload): Promise<any> {
   const url = `${USERS_API_BASE}/api/admin/users/`;
   const body = { rol: "DIRECTOR", ...payload };
+  
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -216,11 +217,13 @@ export async function fetchUserDetail(id: number | string): Promise<UserDetailDt
         .filter((n: any) => Number.isFinite(n))
     : (Array.isArray(raw?.facultad_ids) ? raw.facultad_ids : undefined);
 
-  const subarea_ids: number[] | undefined = Array.isArray(raw?.subareas)
-    ? raw.subareas
+  // Extract subarea_ids from facultades.subareas structure
+  const subarea_ids: number[] | undefined = Array.isArray(raw?.facultades)
+    ? raw.facultades
+        .flatMap((f: any) => Array.isArray(f?.subareas) ? f.subareas : [])
         .map((s: any) => (typeof s?.id === "number" ? s.id : Number(s?.id)))
         .filter((n: any) => Number.isFinite(n))
-    : (Array.isArray(raw?.subarea_ids) ? raw.subarea_ids : undefined);
+    : undefined;
 
   const detail: UserDetailDto = {
     id: raw?.id,
@@ -239,9 +242,8 @@ export async function fetchUserDetail(id: number | string): Promise<UserDetailDt
 export interface UpdateUserPayload {
   id: number | string;
   rol: "ADMINISTRADOR" | "DIRECTOR";
-  nombre: string;
-  apellido: string;
-  email: string;
+  nombre_apellido?: string;
+  email?: string;
   facultad_ids?: number[];
   subarea_ids?: number[];
   scope?: DirectorScope;
@@ -249,11 +251,13 @@ export interface UpdateUserPayload {
 
 export async function updateUser(payload: UpdateUserPayload): Promise<any> {
   const url = `${USERS_API_BASE}/api/admin/users/`;
+  
   const res = await fetch(url, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+  
   if (!res.ok) {
     let message = `Error actualizando usuario: ${res.status} ${res.statusText}`;
     try {
@@ -263,12 +267,12 @@ export async function updateUser(payload: UpdateUserPayload): Promise<any> {
     throw new Error(message);
   }
   try {
-    return await res.json();
+    const result = await res.json();
+    return result;
   } catch {
     return null;
   }
 }
-
 
 // Facultades/Áreas a cargo por usuario
 export interface AreaInChargeDto {

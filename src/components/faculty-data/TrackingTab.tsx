@@ -11,7 +11,7 @@ interface TrackingTabProps {
   onNavigateToComments?: (documentId: number, month: string, version: string, createdAt: string) => void;
 }
 
-export default function TrackingTab({ areaYearId }: TrackingTabProps) {
+export default function TrackingTab({ areaYearId, onNavigateToComments }: TrackingTabProps) {
   const { userRole } = useAuth();
   const isFinance = userRole === 'finance';
 

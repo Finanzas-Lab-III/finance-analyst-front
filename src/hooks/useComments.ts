@@ -26,7 +26,7 @@ export function useComments({ documentId, documentStatus, currentUserId }: UseCo
     try {
       setLoading(true);
       setError(null);
-      const response = await commentsService.getCommentsByDocument(documentId, true);
+      const response = await commentsService.getCommentsByDocument(documentId);
       setComments(response.comments.sort((a, b) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       ));
