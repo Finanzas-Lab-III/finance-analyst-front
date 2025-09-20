@@ -92,6 +92,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ onClose, onCreated })
           facultad_ids: facultadId ? [facultadId] : [],
           subarea_ids: subareaIds,
           scope,
+          isDean: esDecano,
         });
       } else {
         await createUser({ rol: "ADMINISTRADOR", nombre: nombre.trim(), apellido: apellido.trim(), email: email.trim() });
