@@ -25,13 +25,15 @@ import TabManager from "@/components/TabManager";
 import OverviewTab from "@/components/faculty-data/OverviewTab";
 import BudgetTab from "@/components/faculty-data/BudgetTab";
 import TrackingTab from "@/components/faculty-data/TrackingTab";
-import CommentsTab from "@/components/faculty-data/CommentsTab";
+import IntegratedComments from "@/components/IntegratedComments";
 import DocumentSnapshotModal from "@/components/faculty-data/DocumentSnapshotModal";
 import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
 import { useAreaYearStatus } from "@/hooks/useAreaYearStatus";
 import { statusColor as areaYearStatusColor, statusLabelEs as areaYearStatusLabel } from "@/lib/areaYearStatus";
+import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "@/lib/commentsHelpers";
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
 import { useArmadoDocuments } from "@/hooks/useArmadoDocuments";
+import { useAuth } from "@/components/AuthContext";
 
 interface BudgetDetail {
   id: string;
@@ -220,32 +222,34 @@ const getStatusColor = (status: BudgetDetail['status']) => {
 export default function BudgetDetailPage() {
   const params = useParams() as { area_year_id?: string };
   const areaYearId = params.area_year_id as string;
+  const { user } = useAuth();
   
   const [budget] = useState<BudgetDetail>(mockBudgetDetail);
-  const [comments] = useState<BudgetComment[]>(mockComments);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState<BudgetDetail['status']>(budget.status);
-  const { status, area, year } = useAreaYearStatus(areaYearId);
+  const { status, area, year, faculty } = useAreaYearStatus(areaYearId);
   const headerStatus = (status as any) ?? budget.status;
   
-  // Map area names to their abbreviations for display
-  const getAreaDisplayName = (areaName: string) => {
-    const areaMap: Record<string, string> = {
-      'Ingeniería': 'FI',
-      'Facultad de Ingeniería': 'FI',
-      'Laboratorio': 'FI',
-      'Biomédica': 'FI',
-      // Add more mappings as needed
-    };
-    return areaMap[areaName] || areaName;
-  };
-
-  const headerName = `Presupuesto ${getAreaDisplayName(area || budget.area)} ${year || new Date().getFullYear()}`;
+  // Title format: "Presupuesto {facultyOrArea} {year}"
+  const headerName = `Presupuesto ${faculty || area || budget.area} ${year || new Date().getFullYear()}`;
+  const headerDescription = (() => {
+    const displayYear = year || new Date().getFullYear();
+    if (faculty) return `Presupuesto del ${displayYear} para ${faculty}`;
+    if (area) return `Presupuesto del ${displayYear} para ${area}`;
+    return "";
+  })();
   const [activeTab, setActiveTab] = useState<'overview' | 'budget' | 'tracking' | 'comments'>('budget');
-  const [newComment, setNewComment] = useState("");
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDocumentSnapshot, setShowDocumentSnapshot] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<BudgetVariation | null>(null);
+  const [commentContext, setCommentContext] = useState<{
+    monthlyDocument?: {
+      documentId: number;
+      month: string;
+      version: string;
+      createdAt: string;
+    };
+  }>({});
   const { latest, history } = useArmadoDocuments(areaYearId);
 
   const handleStatusChange = () => {
@@ -255,17 +259,27 @@ export default function BudgetDetailPage() {
     // Actualizar el estado del presupuesto
   };
 
-  const handleCommentSubmit = () => {
-    if (newComment.trim()) {
-      // Aquí implementarías la lógica para enviar el comentario
-      console.log("Nuevo comentario:", newComment);
-      setNewComment("");
-    }
-  };
-
   const handleViewSnapshot = (variation: BudgetVariation) => {
     setSelectedVariation(variation);
     setShowDocumentSnapshot(true);
+  };
+
+  // Handler para navegar a comentarios con contexto de documento mensual
+  const handleNavigateToComments = (documentId: number, month: string, version: string, createdAt: string) => {
+    setCommentContext({
+      monthlyDocument: {
+        documentId,
+        month,
+        version,
+        createdAt
+      }
+    });
+    setActiveTab('comments');
+  };
+
+  // Handler para limpiar el contexto
+  const handleClearCommentContext = () => {
+    setCommentContext({});
   };
 
   const getCommentTypeColor = (type: BudgetComment['type']) => {
@@ -295,7 +309,7 @@ export default function BudgetDetailPage() {
     // { id: 'overview', label: 'Resumen' },
     { id: 'budget', label: 'Presupuesto' },
     { id: 'tracking', label: 'Seguimientos' },
-    { id: 'comments', label: 'Comentarios', badgeCount: comments.length },
+    { id: 'comments', label: 'Comentarios' },
   ] as const;
 
   return (
@@ -315,9 +329,9 @@ export default function BudgetDetailPage() {
 
       <BudgetHeader
         name={headerName}
-        description={budget.description}
-        faculty={budget.faculty}
-        area={budget.area}
+        description={headerDescription}
+        faculty={faculty || (area ? "" : budget.faculty)}
+        area={area || ""}
         status={String(headerStatus)}
         lastModifiedISO={budget.lastModified}
         getStatusText={(s) => areaYearStatusLabel(s as any)}
@@ -343,16 +357,33 @@ export default function BudgetDetailPage() {
           )}
 
           {activeTab === 'tracking' && (
-            <TrackingTab areaYearId={areaYearId} />
+            <TrackingTab 
+              areaYearId={areaYearId} 
+              onNavigateToComments={handleNavigateToComments}
+            />
           )}
 
-          {activeTab === 'comments' && (
-            <CommentsTab 
-              comments={comments as any} 
-              newComment={newComment} 
-              setNewComment={setNewComment} 
-              onSubmit={handleCommentSubmit}
-            />
+          {activeTab === 'comments' && user && (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-2">
+                <MessageSquare className="w-5 h-5 text-gray-600" />
+                <h3 className="font-semibold text-gray-900">Comentarios y Comunicación</h3>
+              </div>
+
+              <IntegratedComments
+                documentId={commentContext.monthlyDocument?.documentId || getDocumentIdFromAreaYearId(areaYearId)}
+                documentStatus={mapAreaYearStatusToDocumentStatus(status || 'NOT_STARTED')}
+                currentUserId={parseInt(user.id)}
+                currentUserName={user.name}
+                canEdit={true}
+                canDelete={true}
+                monthlyDocumentContext={commentContext.monthlyDocument}
+                onCommentSubmitted={() => {
+                  console.log('Comment submitted');
+                }}
+                onClearContext={handleClearCommentContext}
+              />
+            </div>
           )}
         </div>
 

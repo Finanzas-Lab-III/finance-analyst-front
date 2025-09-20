@@ -154,6 +154,7 @@ export interface CreateDirectorPayload {
   facultad_ids: number[];
   scope: DirectorScope;
   subarea_ids?: number[];
+  isDean?: boolean;
 }
 
 export async function createDirector(payload: CreateDirectorPayload): Promise<any> {
@@ -339,6 +340,7 @@ export interface YearsOfAreaItemDto {
 
 export interface YearsOfAreaResponse {
   area_id: number;
+  area_name?: string;
   yearsOfArea: YearsOfAreaItemDto[];
 }
 
@@ -369,6 +371,7 @@ export async function fetchYearsOfArea(areaId: number | string): Promise<YearsOf
     const data = (await res.json()) as YearsOfAreaResponse;
     return {
       area_id: Number(data?.area_id) || Number(areaId),
+      area_name: data?.area_name,
       yearsOfArea: Array.isArray(data?.yearsOfArea) ? data.yearsOfArea : [],
     };
   } catch (error) {
@@ -391,10 +394,20 @@ export async function fetchYearsOfArea(areaId: number | string): Promise<YearsOf
   }
 }
 
+export interface AreaSummaryDto {
+  id: number;
+  name: string;
+  type?: string;
+}
+
 export interface AreaYearStatusResponse {
   status: AreaYearStatus;
-  area: string;
   year: number | string;
+  // Best-effort name for the area related to this area_year
+  area_name?: string;
+  // Optional detailed objects when provided by backend
+  area?: AreaSummaryDto | null;
+  parent_area?: AreaSummaryDto | null;
 }
 
 export async function fetchAreaYearStatus(areaYearId: number | string): Promise<AreaYearStatusResponse> {
@@ -406,33 +419,65 @@ export async function fetchAreaYearStatus(areaYearId: number | string): Promise<
       console.warn(`Backend API failed for area-year status ${areaYearId} (${res.status}), using mock data`);
       const mockData = MOCK_AREA_YEAR_STATUS[String(areaYearId)];
       if (mockData) {
-        return mockData;
+        return {
+          status: mockData.status as AreaYearStatus,
+          year: mockData.year,
+          area_name: mockData.area,
+          area: null,
+          parent_area: null,
+        } as AreaYearStatusResponse;
       }
       // Default mock data if area-year not found
       return {
         status: "BUDGET_APPROVED",
-        area: "Universidad Austral",
+        area_name: "Universidad Austral",
         year: 2025,
+        area: null,
+        parent_area: null,
       };
     }
     
     const data = await res.json();
+    // Supports both legacy and new response shapes
+    const year = (data?.year_id ?? data?.year) as number | string;
+    const area_name: string | undefined = data?.area_name ?? data?.area?.name ?? (typeof data?.area === 'string' ? data.area : undefined);
+    const area = (typeof data?.area === 'object' && data?.area) ? {
+      id: Number(data.area.id),
+      name: String(data.area.name),
+      type: data.area.type ? String(data.area.type) : undefined,
+    } as AreaSummaryDto : null;
+    const parent_area = (typeof data?.parent_area === 'object' && data?.parent_area) ? {
+      id: Number(data.parent_area.id),
+      name: String(data.parent_area.name),
+      type: data.parent_area.type ? String(data.parent_area.type) : undefined,
+    } as AreaSummaryDto : null;
+
     return {
       status: data?.status as AreaYearStatus,
-      area: String(data?.area ?? ""),
-      year: data?.year ?? "",
+      year: year ?? "",
+      area_name,
+      area,
+      parent_area,
     };
   } catch (error) {
     console.warn(`Backend connection failed for area-year status ${areaYearId}, using mock data:`, error);
     const mockData = MOCK_AREA_YEAR_STATUS[String(areaYearId)];
     if (mockData) {
-      return mockData;
+      return {
+        status: mockData.status as AreaYearStatus,
+        year: mockData.year,
+        area_name: mockData.area,
+        area: null,
+        parent_area: null,
+      } as AreaYearStatusResponse;
     }
     // Default mock data if area-year not found
     return {
       status: "BUDGET_APPROVED",
-      area: "Universidad Austral", 
+      area_name: "Universidad Austral", 
       year: 2025,
+      area: null,
+      parent_area: null,
     };
   }
 }
@@ -449,6 +494,27 @@ export async function updateAreaYearStatus(
   });
   if (!res.ok) {
     let message = `Error actualizando estado del área-año ${areaYearId}: ${res.status} ${res.statusText}`;
+    try {
+      const data = await res.json();
+      if (data?.detail) message = String(data.detail);
+    } catch {}
+    throw new Error(message);
+  }
+}
+
+// Some backends expect POST to set the initial status
+export async function createAreaYearStatus(
+  areaYearId: number | string,
+  status: AreaYearStatus
+): Promise<void> {
+  const url = `${USERS_API_BASE}/api/status/${areaYearId}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) {
+    let message = `Error creando estado del área-año ${areaYearId}: ${res.status} ${res.statusText}`;
     try {
       const data = await res.json();
       if (data?.detail) message = String(data.detail);
