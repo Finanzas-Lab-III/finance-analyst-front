@@ -130,6 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserRole(user.role);
       localStorage.setItem('currentUser', JSON.stringify(user));
       localStorage.setItem('testRole', user.role);
+      // Set the userRole cookie which determines the page type
       setCookie('userRole', user.role);
       setCookie('userId', user.id);
     } else {

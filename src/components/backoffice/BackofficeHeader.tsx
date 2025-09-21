@@ -10,7 +10,7 @@ export default function BackofficeHeader() {
   const { userRole, user } = useAuth();
   const router = useRouter();
   const isDirector = userRole === 'director';
-  const profileTitle = isDirector ? (user?.name || 'Director') : 'Equipo Finanzas';
+  const profileTitle = isDirector ? (user?.name || 'Director') : (user?.name || 'Equipo Finanzas');
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
