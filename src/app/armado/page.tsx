@@ -1,9 +1,7 @@
 "use client"
 import React, { useRef, useState, useEffect, Suspense } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import NextDynamic from "next/dynamic";
-import LintErrorCard from "@/components/LintErrorCard";
 import { useFileContext } from "@/components/FileContext";
 import { ArrowLeft } from "lucide-react";
 import "handsontable/dist/handsontable.full.css";
