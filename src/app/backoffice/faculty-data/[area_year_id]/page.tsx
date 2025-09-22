@@ -34,6 +34,7 @@ import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
 import { useArmadoDocuments } from "@/hooks/useArmadoDocuments";
 import { useAuth } from "@/components/AuthContext";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface BudgetDetail {
   id: string;
@@ -222,7 +223,8 @@ const getStatusColor = (status: BudgetDetail['status']) => {
 export default function BudgetDetailPage() {
   const params = useParams() as { area_year_id?: string };
   const areaYearId = params.area_year_id as string;
-  const { user } = useAuth();
+  const { user: mockUser } = useAuth(); // Keep for backward compatibility if needed
+  const { user: realUser, loading: userLoading, error: userError } = useCurrentUser();
   
   const [budget] = useState<BudgetDetail>(mockBudgetDetail);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
@@ -363,7 +365,7 @@ export default function BudgetDetailPage() {
             />
           )}
 
-          {activeTab === 'comments' && user && (
+          {activeTab === 'comments' && realUser && !userLoading && (
             <div className="space-y-6">
               <div className="flex items-center space-x-2">
                 <MessageSquare className="w-5 h-5 text-gray-600" />
@@ -373,8 +375,8 @@ export default function BudgetDetailPage() {
               <IntegratedComments
                 documentId={commentContext.monthlyDocument?.documentId || getDocumentIdFromAreaYearId(areaYearId)}
                 documentStatus={mapAreaYearStatusToDocumentStatus(status || 'NOT_STARTED')}
-                currentUserId={parseInt(user.id)}
-                currentUserName={user.name}
+                currentUserId={realUser.id}
+                currentUserName={realUser.name}
                 canEdit={true}
                 canDelete={true}
                 monthlyDocumentContext={commentContext.monthlyDocument}
@@ -383,6 +385,23 @@ export default function BudgetDetailPage() {
                 }}
                 onClearContext={handleClearCommentContext}
               />
+            </div>
+          )}
+
+          {activeTab === 'comments' && userLoading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-gray-500">Cargando información del usuario...</div>
+            </div>
+          )}
+
+          {activeTab === 'comments' && userError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="text-red-700">
+                <strong>Error:</strong> {userError}
+              </div>
+              <div className="text-sm text-red-600 mt-1">
+                No se pueden cargar los comentarios sin información del usuario.
+              </div>
             </div>
           )}
         </div>
