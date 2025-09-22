@@ -1,6 +1,6 @@
-// Comments Service API - Mock Implementation
+// Comments Service API - Real Backend Implementation
 const BASE_URL = "http://localhost:8000/api/comments";
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 export enum DocumentStatus {
   NOT_STARTED = "NOT_STARTED",
@@ -28,6 +28,8 @@ export interface CreateCommentRequest {
   user_id: number;
   document_id: number;
   document_status: DocumentStatus;
+  user_name?: string;
+  user_email?: string;
 }
 
 export interface CommentsResponse {
@@ -111,7 +113,71 @@ class CommentsService {
       throw new Error("Mock endpoint not implemented");
     }
     
-    throw new Error("Real API not implemented");
+    // Real API implementation
+    const fullUrl = BASE_URL + url;
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+    };
+
+    const requestOptions: RequestInit = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options?.headers,
+      },
+    };
+
+    console.log(`📡 Comments API Request: ${options?.method || 'GET'} ${fullUrl}`);
+    if (options?.body) {
+      console.log('📦 Request body:', options.body);
+    }
+
+    try {
+      const response = await fetch(fullUrl, requestOptions);
+      
+      console.log(`📡 Comments API Response: ${response.status} ${response.statusText}`);
+      
+      if (!response.ok) {
+        // Try to parse error response
+        let errorData: ErrorResponse;
+        try {
+          errorData = await response.json() as ErrorResponse;
+          console.error('❌ API Error Response:', errorData);
+        } catch {
+          errorData = { 
+            detail: `HTTP Error ${response.status}: ${response.statusText}` 
+          };
+        }
+        
+        throw new Error(errorData.detail || `HTTP Error ${response.status}`);
+      }
+
+      // Handle successful responses
+      if (response.status === 204 || options?.method === "DELETE") {
+        console.log('✅ Comments API: Delete successful (no content)');
+        return undefined as T;
+      }
+
+      const data = await response.json();
+      console.log('✅ Comments API Response data:', data);
+      return data as T;
+      
+    } catch (error) {
+      console.error('❌ Comments API Error:', error);
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('No se puede conectar con el servidor de comentarios. Verifica que el backend esté ejecutándose en http://localhost:8000');
+      }
+      
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
+  }
+
+  async healthCheck(): Promise<{ status: string }> {
+    return this.request<{ status: string }>("/health/");
   }
 
   async createComment(data: CreateCommentRequest): Promise<Comment> {

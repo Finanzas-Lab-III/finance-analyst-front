@@ -57,7 +57,7 @@ const mockUsers: Record<string, User> = {
   },
   'finanzas@universidad.edu': {
     id: '1',
-    name: 'Ana Martínez',
+    name: 'Equipo Finanzas',
     email: 'finanzas@universidad.edu',
     role: 'finance',
     department: 'Finanzas'
@@ -65,7 +65,7 @@ const mockUsers: Record<string, User> = {
   // Credenciales solicitadas
   'admin@mail.austral.edu.ar': {
     id: '1',
-    name: 'Admin Finanzas',
+    name: 'Equipo Finanzas',
     email: 'admin@mail.austral.edu.ar',
     role: 'finance',
     department: 'Finanzas'
@@ -76,6 +76,22 @@ const mockUsers: Record<string, User> = {
     email: 'director-ing@mail.austral.edu.ar',
     role: 'director',
     department: 'Ingeniería'
+  },
+  // Usuario actual para testing
+  'ramiro@austral.edu.ar': {
+    id: '3',
+    name: 'Ramiro Castro Martinez',
+    email: 'ramiro@austral.edu.ar',
+    role: 'director',
+    department: 'Ingeniería'
+  },
+  // Usuario actual real del sistema (Equipo Finanzas)
+  'equipofinanzas@austral.edu.ar': {
+    id: '4',
+    name: 'Equipo Finanzas',
+    email: 'equipofinanzas@austral.edu.ar',
+    role: 'finance',
+    department: 'Finanzas'
   }
 };
 
@@ -104,6 +120,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (savedRole) {
       setUserRole(savedRole);
     }
+
+    // Si no hay usuario configurado, establecer "Equipo Finanzas" por defecto
+    if (!cookieRole && !savedUser && !savedRole) {
+      const equipoFinanzas = Object.values(mockUsers).find(u => u.name === 'Equipo Finanzas');
+      if (equipoFinanzas) {
+        setUser(equipoFinanzas);
+        setUserRole('finance');
+        localStorage.setItem('currentUser', JSON.stringify(equipoFinanzas));
+        localStorage.setItem('testRole', 'finance');
+        setCookie('userRole', 'finance');
+        setCookie('userId', equipoFinanzas.id);
+      }
+    }
   }, []);
 
   // Enforce default director id when role is director
@@ -119,7 +148,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCookie('userRole', 'director');
       }
     }
-  }, [userRole]);
+    // Enforce "Equipo Finanzas" when role is finance
+    if (userRole === 'finance') {
+      const equipoFinanzas = Object.values(mockUsers).find(
+        (u) => u.role === 'finance' && u.name === 'Equipo Finanzas'
+      ) || Object.values(mockUsers).find((u) => u.role === 'finance');
+      if (equipoFinanzas && user?.name !== 'Equipo Finanzas') {
+        setUser(equipoFinanzas);
+        localStorage.setItem('currentUser', JSON.stringify(equipoFinanzas));
+        localStorage.setItem('testRole', 'finance');
+        setCookie('userRole', 'finance');
+      }
+    }
+  }, [userRole, user]);
 
   const login = async (email: string, password: string): Promise<void> => {
     // Simulación de login
@@ -154,6 +195,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         testUser = Object.values(mockUsers).find(u => u.role === 'director' && u.id === DEFAULT_DIRECTOR_ID);
         if (!testUser) {
           testUser = Object.values(mockUsers).find(u => u.role === 'director');
+        }
+      } else if (role === 'finance') {
+        // Siempre usar "Equipo Finanzas" para finance
+        testUser = Object.values(mockUsers).find(u => u.role === 'finance' && u.name === 'Equipo Finanzas');
+        if (!testUser) {
+          testUser = Object.values(mockUsers).find(u => u.role === 'finance');
         }
       } else {
         testUser = Object.values(mockUsers).find(u => u.role === role);

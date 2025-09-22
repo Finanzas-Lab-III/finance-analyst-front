@@ -5,6 +5,8 @@ interface UseCommentsOptions {
   documentId: number;
   documentStatus: DocumentStatus;
   currentUserId: number;
+  currentUserName: string;
+  currentUserEmail?: string;
 }
 
 interface UseCommentsReturn {
@@ -17,7 +19,7 @@ interface UseCommentsReturn {
   refresh: () => Promise<void>;
 }
 
-export function useComments({ documentId, documentStatus, currentUserId }: UseCommentsOptions): UseCommentsReturn {
+export function useComments({ documentId, documentStatus, currentUserId, currentUserName, currentUserEmail }: UseCommentsOptions): UseCommentsReturn {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,14 +28,19 @@ export function useComments({ documentId, documentStatus, currentUserId }: UseCo
     try {
       setLoading(true);
       setError(null);
+      
+      console.log(`🔄 Cargando comentarios para documento ${documentId}...`);
       const response = await commentsService.getCommentsByDocument(documentId);
+      console.log(`✅ Comentarios cargados: ${response.comments.length} comentarios`);
+      
       setComments(response.comments.sort((a, b) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       ));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error loading comments';
+      console.error('❌ Error fetching comments:', err);
       setError(errorMessage);
-      console.error('Error fetching comments:', err);
+      // Don't clear existing comments on error, just set the error
     } finally {
       setLoading(false);
     }
@@ -49,23 +56,32 @@ export function useComments({ documentId, documentStatus, currentUserId }: UseCo
     }
 
     try {
+      console.log(`➕ Creando comentario para documento ${documentId}...`);
+      console.log('👤 Usuario:', currentUserName, '(ID:', currentUserId, ')');
+      
       const newCommentData: CreateCommentRequest = {
         content: content.trim(),
         user_id: currentUserId,
         document_id: documentId,
         document_status: documentStatus,
+        user_name: currentUserName,
+        user_email: currentUserEmail,
       };
 
+      console.log('📦 Datos del comentario a enviar:', newCommentData);
+
       const newComment = await commentsService.createComment(newCommentData);
+      console.log('✅ Comentario creado exitosamente:', newComment);
       
       // Add the new comment to the beginning of the list (most recent first)
       setComments(prev => [newComment, ...prev]);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error creating comment';
+      console.error('❌ Error creating comment:', err);
       setError(errorMessage);
       throw err;
     }
-  }, [documentId, documentStatus, currentUserId]);
+  }, [documentId, documentStatus, currentUserId, currentUserName, currentUserEmail]);
 
   const updateComment = useCallback(async (commentId: number, content: string) => {
     if (!content.trim()) {
