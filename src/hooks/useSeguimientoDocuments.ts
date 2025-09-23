@@ -73,9 +73,20 @@ function extractSubareasFromDocument(doc: SeguimientoDocument): string[] {
   // 3) Try to extract a month from the filename
   const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
                   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  
+  // Check for text month names
   for (const month of months) {
     if (filename.includes(month)) {
       return [month];
+    }
+  }
+  
+  // Check for numeric format (MMYYYY)
+  const numericMatch = filename.match(/(\d{2})(?:20)?\d{2}/);
+  if (numericMatch) {
+    const monthNum = parseInt(numericMatch[1], 10);
+    if (monthNum >= 1 && monthNum <= 12) {
+      return [months[monthNum - 1]];
     }
   }
 
