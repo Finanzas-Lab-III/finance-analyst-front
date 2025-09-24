@@ -40,25 +40,11 @@ const SeguimientoDetailedViewContent = () => {
         const decodedFileName = decodeURIComponent(fileName);
         
         // Build the file path
-        let filePath = '';
-        if (decodedFileName.startsWith('excel/')) {
-          filePath = `/${decodedFileName}`;
-        } else if (decodedFileName.startsWith('data/')) {
-          filePath = `/${decodedFileName}`;
-        } else if (decodedFileName.endsWith('.xlsx') || decodedFileName.endsWith('.XLSX')) {
-          // Check if it might be in the data directory first
-          if (decodedFileName.includes('FCB') || decodedFileName.includes('BIOTERIO') || decodedFileName.includes('En-Abr')) {
-            filePath = `/data/2025/${decodedFileName}`;
-          } else {
-            filePath = `/excel/${decodedFileName}`;
-          }
-        } else {
-          // Default to budget file for seguimientos
-          filePath = '/data/2025/05- FCB BIOTERIO 3+9.xlsx';
-        }
+        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+        let filePath = `/excel/file/${decodedFileName}`;
 
         // Fetch the Excel file
-        const response = await fetch(filePath, {
+        const response = await fetch(API_BASE + filePath, {
           method: 'GET',
           cache: 'no-store'
         });
@@ -185,16 +171,6 @@ const SeguimientoDetailedViewContent = () => {
                     <span>{fileName || `Seguimiento ${getSubareaDisplayName(subarea || 'general')}`}</span>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Comentarios
-                </button>
-                <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  <Bot className="h-4 w-4 mr-2" />
-                  Consultar IA
-                </button>
               </div>
             </div>
 
