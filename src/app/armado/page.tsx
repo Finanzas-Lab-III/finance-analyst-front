@@ -134,79 +134,52 @@ const ArmadoContent = () => {
   const loadDefaultExcelFile = async () => {
     setLoading(true);
     try {
-      // Determine which file to load
-      let filePath = '/excel/2025.xlsx'; // default fallback
+      // Determine the file path for the Excel file download endpoint
+      let filePath: string;
+      let API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
       
       if (fileParam) {
-        // If file parameter is provided, use it
-        if (fileParam.startsWith('excel/')) {
-          filePath = `/${fileParam}`;
-        } else if (fileParam.startsWith('/')) {
-          filePath = fileParam;
-        } else {
-          filePath = `/${fileParam}`;
-        }
+        // If file parameter is provided, use it directly with the correct path format
+        filePath = fileParam;
       } else if (context === 'area_year' && areaYearId) {
-        // Default files based on area
-        filePath = '/excel/2025.xlsx';
+        // Default files based on area and current year
+        filePath = `${areaYearId}/presupuesto/${currentYear}.xlsx`;
+      } else {
+        throw new Error('No file path specified');
       }
 
-      // Load the specific Excel file
-      const response = await fetch(filePath);
-      if (response.ok) {
-        const arrayBuffer = await response.arrayBuffer();
-        const XLSX = await ensureXLSX();
-        const workbook = XLSX.read(arrayBuffer, { type: "array" });
-        setSheetNames(workbook.SheetNames);
-        const firstSheet = workbook.SheetNames[0];
-        setSelectedSheet(firstSheet);
-        const worksheet = workbook.Sheets[firstSheet];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-        setFileData(jsonData);
-        
-        // Create a mock file object for display with the appropriate name
-        const fileName = filePath.split('/').pop() || "presupuesto.xlsx";
-        const mockFile = new File([arrayBuffer], fileName, {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        });
-        setSelectedFile(mockFile);
-      } else {
-        throw new Error('File not found');
+      // Load the specific Excel file from the download endpoint
+      const response = await fetch(`${API_BASE}/api/excel/file/${filePath}/`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
       }
-    } catch (error) {
-      console.error('Error loading default file, using fallback data:', error);
-      // Fallback: create sample data that matches the image
-      const sampleData = [
-        ["Completar", "", "", ""],
-        ["No completar (*)", "", "", ""],
-        ["", "", "", ""],
-        ["Nombre recurso (o puesto)", "Tipo de contratación", "Meses", "Remuneración bruta mensual"],
-        ["Ayudante diplomado", "Docente Factura", 10, "$139,070"],
-        ["Ayudante diplomado", "Docente Factura", 10, "$92,713"],
-        ["Profesor Adjunto nivel 1", "Docente Factura", 10, "$289,520"],
-        ["JTP", "Docente Factura", 10, "$274,420"],
-        ["Profesor Adjunto nivel 1", "Docente Nómina", 6, "$240,680"],
-        ["JTP", "Docente Factura", 10, "$225,990"],
-        ["Ayudante diplomado", "Docente Factura", 10, "$69,535"],
-        ["Profesor Adjunto nivel 1", "Docente Factura", 5, "$267,120"],
-        ["Profesor Adjunto nivel 1", "Docente Factura", 5, "$248,350"],
-        ["Ayudante diplomado", "Docente Factura", 5, "$111,350"],
-        ["Profesor Adjunto nivel 1", "Docente Factura", 5, "$211,090"],
-        ["JTP", "Docente Factura", 5, "$185,140"],
-        ["Profesor Adjunto nivel 1", "Docente Factura", 5, "$173,840"],
-        ["JTP", "Docente Factura", 5, "$173,840"],
-        ["JTP", "Docente Factura", 5, "$139,070"],
-        ["Ayudante diplomado", "Docente Factura", 10, "$53,490"]
-      ];
-      setFileData(sampleData);
-      setSheetNames(["Presupuesto FI 2025"]);
-      setSelectedSheet("Presupuesto FI 2025");
+
+      const arrayBuffer = await response.arrayBuffer();
+      const XLSX = await ensureXLSX();
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
       
-      // Create a mock file object
-      const mockFile = new File([], "05- FCB BIOTERIO 3+9.xlsx", {
+      // Set sheet information
+      setSheetNames(workbook.SheetNames);
+      const firstSheet = workbook.SheetNames[0];
+      setSelectedSheet(firstSheet);
+      
+      // Parse the first sheet
+      const worksheet = workbook.Sheets[firstSheet];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+      setFileData(jsonData);
+      
+      // Create a File object for display
+      const fileName = filePath.split('/').pop() || "presupuesto.xlsx";
+      const file = new File([arrayBuffer], fileName, {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       });
-      setSelectedFile(mockFile);
+      setSelectedFile(file);
+    } catch (error) {
+      console.error('Error loading file:', error);
+      setProcessingError('No se pudo cargar el archivo. Por favor, intente nuevamente.');
+      setFileData([]);
+      setSheetNames([]);
+      setSelectedSheet(null);
     } finally {
       setLoading(false);
     }
