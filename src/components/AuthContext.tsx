@@ -46,40 +46,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users para testing
-const mockUsers: Record<string, User> = {
-  'director@universidad.edu': {
-    id: '2',
-    name: 'Santiago Ascasibar',
-    email: 'director@universidad.edu',
-    role: 'director',
-    department: 'Ingeniería'
-  },
-  'finanzas@universidad.edu': {
-    id: '1',
-    name: 'Ana Martínez',
-    email: 'finanzas@universidad.edu',
-    role: 'finance',
-    department: 'Finanzas'
-  },
-  // Credenciales solicitadas
-  'admin@mail.austral.edu.ar': {
-    id: '1',
-    name: 'Admin Finanzas',
-    email: 'admin@mail.austral.edu.ar',
-    role: 'finance',
-    department: 'Finanzas'
-  },
-  'director-ing@mail.austral.edu.ar': {
-    id: '2',
-    name: 'Director Ingeniería',
-    email: 'director-ing@mail.austral.edu.ar',
-    role: 'director',
-    department: 'Ingeniería'
-  }
-};
-
-const DEFAULT_DIRECTOR_ID = '2';
+// API endpoint for authentication
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const AUTH_API_URL = '/api/auth/login/';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -108,33 +77,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Enforce default director id when role is director
   useEffect(() => {
-    if (userRole === 'director') {
-      const defaultDirector = Object.values(mockUsers).find(
-        (u) => u.role === 'director' && u.id === DEFAULT_DIRECTOR_ID
-      ) || Object.values(mockUsers).find((u) => u.role === 'director');
-      if (defaultDirector && user?.id !== defaultDirector.id) {
-        setUser(defaultDirector);
-        localStorage.setItem('currentUser', JSON.stringify(defaultDirector));
-        localStorage.setItem('testRole', 'director');
-        setCookie('userRole', 'director');
-      }
+    // Keep track of role changes
+    if (userRole && user) {
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      localStorage.setItem('testRole', userRole);
+      setCookie('userRole', userRole);
     }
-  }, [userRole]);
+  }, [userRole, user]);
 
   const login = async (email: string, password: string): Promise<void> => {
-    // Simulación de login
-    const user = mockUsers[email];
-    
-    if (user && password === 'password123') { // Password simple para testing
+    try {
+      const response = await fetch(API_BASE + AUTH_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Credenciales inválidas');
+        }
+        throw new Error('Error en el servidor');
+      }
+
+      const data = await response.json();
+      const { user } = data;
+      
       setUser(user);
       setUserRole(user.role);
       localStorage.setItem('currentUser', JSON.stringify(user));
       localStorage.setItem('testRole', user.role);
-      // Set the userRole cookie which determines the page type
       setCookie('userRole', user.role);
       setCookie('userId', user.id);
-    } else {
-      throw new Error('Credenciales inválidas');
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Error en el servidor');
     }
   };
 
@@ -147,29 +125,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     deleteCookie('userId');
   };
 
-  // Función para testing - cambiar rol rápidamente
+  // Function for testing - quickly change role
   const setTestRole = (role: UserRole) => {
-    if (role) {
-      let testUser: User | undefined;
-      if (role === 'director') {
-        testUser = Object.values(mockUsers).find(u => u.role === 'director' && u.id === DEFAULT_DIRECTOR_ID);
-        if (!testUser) {
-          testUser = Object.values(mockUsers).find(u => u.role === 'director');
-        }
-      } else {
-        testUser = Object.values(mockUsers).find(u => u.role === role);
-      }
-      if (testUser) {
-        setUser(testUser);
-        setUserRole(role);
-        localStorage.setItem('currentUser', JSON.stringify(testUser));
-        localStorage.setItem('testRole', role);
-        setCookie('userRole', role);
-        setCookie('userId', testUser.id);
-      }
-    } else {
+    if (!role) {
       logout();
+      return;
     }
+    
+    // In a real implementation, this should be removed or replaced with proper role management
+    console.warn('setTestRole is deprecated and should not be used in production');
   };
 
   return (
