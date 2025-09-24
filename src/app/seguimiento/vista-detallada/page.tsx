@@ -41,7 +41,7 @@ const SeguimientoDetailedViewContent = () => {
         
         // Build the file path
         const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-        let filePath = `/excel/file/${decodedFileName}`;
+        let filePath = `/api/excel/file/${decodedFileName}`;
 
         // Fetch the Excel file
         const response = await fetch(API_BASE + filePath, {
