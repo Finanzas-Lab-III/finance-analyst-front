@@ -156,55 +156,55 @@ export default function LoginPage() {
             
             <div className="mt-4 text-xs text-gray-400 space-y-1">
               <p>
-                <strong>Director:</strong>{' '}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail('director@universidad.edu');
-                    setPassword('password123');
-                  }}
-                  className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
-                >
-                  director@universidad.edu / password123
-                </button>
-              </p>
-              <p>
-                <strong>Finance:</strong>{' '}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail('finanzas@universidad.edu');
-                    setPassword('password123');
-                  }}
-                  className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
-                >
-                  finanzas@universidad.edu / password123
-                </button>
-              </p>
-              <p>
                 <strong>Admin:</strong>{' '}
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail('admin@mail.austral.edu.ar');
-                    setPassword('password123');
+                    setEmail('admin.finanzas@ejemplo.com');
+                    setPassword('admin123');
                   }}
                   className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
                 >
-                  admin@mail.austral.edu.ar / password123
+                  admin.finanzas@ejemplo.com / admin123
                 </button>
               </p>
               <p>
-                <strong>Director Ing:</strong>{' '}
+                <strong>Director Ingeniería:</strong>{' '}
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail('director-ing@mail.austral.edu.ar');
-                    setPassword('password123');
+                    setEmail('director.ingenieria@ejemplo.com');
+                    setPassword('director123');
                   }}
                   className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
                 >
-                  director-ing@mail.austral.edu.ar / password123
+                  director.ingenieria@ejemplo.com / director123
+                </button>
+              </p>
+              <p>
+                <strong>Director Ciencias:</strong>{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('director.ciencias@ejemplo.com');
+                    setPassword('director123');
+                  }}
+                  className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
+                >
+                  director.ciencias@ejemplo.com / director123
+                </button>
+              </p>
+              <p>
+                <strong>Director Informática:</strong>{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('director.informatica@ejemplo.com');
+                    setPassword('director123');
+                  }}
+                  className="text-blue-400 hover:text-blue-300 underline cursor-pointer"
+                >
+                  director.informatica@ejemplo.com / director123
                 </button>
               </p>
             </div>
