@@ -1,23 +1,79 @@
 "use client"
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Download, FileText, Eye, MessageSquare, ExternalLink, Plus } from "lucide-react";
 import { useSeguimientoDocuments } from "@/hooks/useSeguimientoDocuments";
 import { buildRawFileUrl } from "@/api/userService";
 import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
 import { useAuth } from "@/components/AuthContext";
+import BudgetVariationChart from "@/components/BudgetVariationChart";
 
 interface TrackingTabProps {
   areaYearId: string | number;
   onNavigateToComments?: (documentId: number, month: string, version: string, createdAt: string) => void;
 }
 
-export default function TrackingTab({ areaYearId }: TrackingTabProps) {
+export default function TrackingTab({ areaYearId, onNavigateToComments }: TrackingTabProps) {
   const { userRole } = useAuth();
   const isFinance = userRole === 'finance';
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadFolder, setUploadFolder] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [monthlyData, setMonthlyData] = useState<any>(() => {
+    // Try to load cached data from localStorage on component mount
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem(`budget-variation-${areaYearId}`);
+      if (cached) {
+        try {
+          const { data, timestamp } = JSON.parse(cached);
+          // Check if cache is less than 24 hours old
+          if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+            return data;
+          }
+        } catch (e) {
+          console.error('Error parsing cached data:', e);
+        }
+      }
+    }
+    return null;
+  });
+  const [isLoadingMonthly, setIsLoadingMonthly] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Fetch monthly budget variation data
+  useEffect(() => {
+    const fetchMonthlyData = async () => {
+      // Don't fetch if we already have cached data
+      if (monthlyData) return;
+
+      setIsLoadingMonthly(true);
+      setLoadError(null);
+      
+      try {        
+        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const response = await fetch(`${API_BASE}/api/monthly_budget_variation_summaries/${areaYearId}/`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setMonthlyData(data.monthly_summaries);
+          // Cache the data with timestamp
+          localStorage.setItem(`budget-variation-${areaYearId}`, JSON.stringify({
+            data: data.monthly_summaries,
+            timestamp: Date.now()
+          }));
+        } else {
+          setLoadError(data.message || 'Error loading budget variation data');
+        }
+      } catch (error) {
+        console.error('Error fetching monthly budget data:', error);
+        setLoadError('Error loading budget variation data. Please try again later.');
+      } finally {
+        setIsLoadingMonthly(false);
+      }
+    };
+
+    fetchMonthlyData();
+  }, [areaYearId, monthlyData]);
 
   const { loading, error, bySubarea } = useSeguimientoDocuments(areaYearId, reloadKey);
 
@@ -62,6 +118,54 @@ export default function TrackingTab({ areaYearId }: TrackingTabProps) {
       <div className="mb-8">
         <h3 className="text-2xl font-bold text-gray-900">Seguimientos Presupuestarios</h3>
         <p className="text-gray-600 mt-2">Documentos de seguimiento y análisis presupuestario organizados por períodos</p>
+      </div>
+
+      {/* Budget Variation Chart */}
+      <div className="relative">
+        {isLoadingMonthly ? (
+          <div className="bg-white rounded-lg shadow p-8 flex flex-col items-center justify-center min-h-[200px]">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600">Cargando datos de variación presupuestaria...</p>
+            <p className="text-sm text-gray-500 mt-2">Esta operación puede tomar unos momentos</p>
+          </div>
+        ) : loadError ? (
+          <div className="bg-red-50 rounded-lg shadow p-8">
+            <p className="text-red-600">{loadError}</p>
+            <button 
+              onClick={() => {
+                setMonthlyData(null); // Clear cached data to force reload
+                localStorage.removeItem(`budget-variation-${areaYearId}`);
+              }}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Reintentar carga
+            </button>
+          </div>
+        ) : monthlyData ? (
+          <div className="relative">
+            <BudgetVariationChart
+              data={monthlyData}
+              formatCurrency={value => new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS',
+                minimumFractionDigits: 0
+              }).format(value)}
+            />
+            <button 
+              onClick={() => {
+                setMonthlyData(null); // Clear cached data to force reload
+                localStorage.removeItem(`budget-variation-${areaYearId}`);
+              }}
+              className="absolute top-4 right-4 px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors flex items-center"
+              title="Actualizar datos"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Actualizar
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 border-2 border-blue-200">
