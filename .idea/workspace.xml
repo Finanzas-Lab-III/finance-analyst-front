@@ -4,16 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: Azure middleware">
-      <change afterPath="$PROJECT_DIR$/src/hooks/useAuthorized.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/login-api.ts" afterDir="false" />
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: integrated top bar with user data">
+      <change afterPath="$PROJECT_DIR$/src/lib/user-api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/types/profile.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/analytics/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/archivo/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/directors/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-old/[faculty]/[area]/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-year/[id]/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/layout.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/users/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/users/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/session/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/session/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/backoffice/BackofficeHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/backoffice/BackofficeHeader.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/login-api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/login-api.ts" afterDir="false" />
     </list>
-    <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="">
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-    </list>
+    <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="commit not" />
     <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,8 +57,8 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/rvassolo/WebstormProjects/lab3/src/app/(auth)",
+    "git-widget-placeholder": "22-sep-fer",
+    "last_opened_file_path": "/Users/rvassolo/WebstormProjects/lab3/src/lib",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -64,6 +70,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/lib" />
       <recent name="$PROJECT_DIR$/src/app/(auth)" />
       <recent name="$PROJECT_DIR$/src/app/backoffice/faculty/[id]/[year]" />
     </key>
@@ -104,7 +111,7 @@
       <workItem from="1756502918947" duration="2369000" />
       <workItem from="1758196830704" duration="16627000" />
       <workItem from="1758739518957" duration="3010000" />
-      <workItem from="1759023091288" duration="11458000" />
+      <workItem from="1759023091288" duration="20522000" />
     </task>
     <task id="LOCAL-00001" summary="Feat: User management.">
       <option name="closed" value="true" />
@@ -202,7 +209,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759084319429</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="feat: Made the jwt to be http only and corrected authentication.">
+      <option name="closed" value="true" />
+      <created>1759085833873</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1759085833873</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -243,6 +258,9 @@
     <MESSAGE value="feat: first version for Armado" />
     <MESSAGE value="feat: armado using exceljs and colors" />
     <MESSAGE value="feat: Azure middleware" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: Azure middleware" />
+    <MESSAGE value="feat: Made the jwt to be http only and corrected authentication." />
+    <MESSAGE value="commit not" />
+    <MESSAGE value="feat: integrated top bar with user data" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: integrated top bar with user data" />
   </component>
 </project>

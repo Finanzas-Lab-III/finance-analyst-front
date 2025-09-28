@@ -5,9 +5,9 @@ import Input from "@/components/Input";
 import { deleteUser, fetchUsers, UserDto } from "@/api/userService";
 import { toast } from "react-toastify";
 import { Search, Filter, X } from "lucide-react";
-import RowActions from "@/app/backoffice/users/components/RowActions";
-import CreateUserModal from "@/app/backoffice/users/components/CreateUserModal";
-import EditUserModal from "@/app/backoffice/users/components/EditUserModal";
+import RowActions from "@/app/(with_auth)/backoffice/users/components/RowActions";
+import CreateUserModal from "@/app/(with_auth)/backoffice/users/components/CreateUserModal";
+import EditUserModal from "@/app/(with_auth)/backoffice/users/components/EditUserModal";
 
 export default function UsersPage() {
   type FilterKey = "nombre_apellido" | "facultad" | "mail";
