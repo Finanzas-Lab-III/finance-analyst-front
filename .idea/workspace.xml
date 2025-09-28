@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: integrated top bar with user data">
-      <change afterPath="$PROJECT_DIR$/src/lib/user-api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/profile.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/analytics/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/archivo/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/directors/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-old/[faculty]/[area]/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-year/[id]/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/layout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/users/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/users/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/backoffice/BackofficeHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/backoffice/BackofficeHeader.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/login-api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/login-api.ts" afterDir="false" />
-    </list>
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: integrated top bar with user data" />
     <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="commit not" />
     <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -111,7 +97,7 @@
       <workItem from="1756502918947" duration="2369000" />
       <workItem from="1758196830704" duration="16627000" />
       <workItem from="1758739518957" duration="3010000" />
-      <workItem from="1759023091288" duration="20522000" />
+      <workItem from="1759023091288" duration="20906000" />
     </task>
     <task id="LOCAL-00001" summary="Feat: User management.">
       <option name="closed" value="true" />
@@ -217,7 +203,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759085833873</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="feat: integrated top bar with user data">
+      <option name="closed" value="true" />
+      <created>1759103669381</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1759103669381</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
