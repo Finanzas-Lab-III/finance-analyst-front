@@ -12,10 +12,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@azure/msal-browser": "4.23.0",
+    "@azure/msal-react": "3.0.19",
     "@handsontable/react": "^15.3.0",
     "axios": "^1.10.0",
-    "handsontable": "^15.3.0",
     "exceljs": "^4.4.0",
+    "handsontable": "^15.3.0",
     "lucide-react": "^0.522.0",
     "next": "15.3.4",
     "react": "^19.0.0",

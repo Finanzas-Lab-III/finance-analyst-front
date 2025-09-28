@@ -144,30 +144,6 @@ const mockBudgetDetail: BudgetDetail = {
   ]
 };
 
-const mockComments: BudgetComment[] = [
-  {
-    id: "1",
-    author: "Ana Martínez (Finanzas)",
-    content: "Revisé el presupuesto inicial. Los costos de personal están dentro del rango esperado, pero necesitamos ajustar los gastos de equipamiento.",
-    createdAt: "2024-01-18T10:30:00Z",
-    type: "revision"
-  },
-  {
-    id: "2",
-    author: "Santiago Ascasibar",
-    content: "Gracias por los comentarios. He reducido un 15% el presupuesto de equipamiento y redistribuido hacia material de laboratorio.",
-    createdAt: "2024-01-19T14:15:00Z",
-    type: "general"
-  },
-  {
-    id: "3",
-    author: "Carlos González (Finanzas)",
-    content: "La nueva versión se ve mucho mejor. Aprobado para el siguiente trimestre con las modificaciones realizadas.",
-    createdAt: "2024-01-20T09:45:00Z",
-    type: "approval"
-  }
-];
-
 const getStatusIcon = (status: BudgetDetail['status']) => {
   switch (status) {
     case 'pending':

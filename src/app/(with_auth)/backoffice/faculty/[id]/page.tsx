@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchYearsOfArea, YearsOfAreaItemDto } from "../../../../api/userService";
+import { fetchYearsOfArea, YearsOfAreaItemDto } from "@/api/userService";
 import { statusColor, statusLabelEs } from "@/lib/areaYearStatus";
 
 export default function AreaYearsPage() {

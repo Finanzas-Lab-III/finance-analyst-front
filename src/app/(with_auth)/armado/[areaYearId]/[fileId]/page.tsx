@@ -1,19 +1,20 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { FileProvider } from '@/components/FileContext'
-import AIAgentSidebar from '@/components/sidebar/ai-agent-sidebar/AIAgentSidebar'
 import {useArmadoSheet} from "@/components/armado/hooks/useArmadoSheets";
 import ArmadoHeader from '@/components/armado/components/ArmadoHeader'
 import ArmadoToolbar from '@/components/armado/components/ArmadoToolbar'
 import ArmadoSheetTabs from '@/components/armado/components/ArmadoSheetTabs'
 import ArmadoGrid from '@/components/armado/components/ArmadoGrid'
 import ArmadoSidebar from "@/components/armado/components/ArmadoSidebar";
+import { useArmadoAI } from '@/components/armado/hooks/useArmadoAI'
 
 export default function ArmadoDocumentPage_Example() {
-  // --- get fileId from the URL ---
-  const params = useParams() as { id?: string }
-  const fileId = params?.id
+  // --- get params from the URL ---
+  const params = useParams() as { areaYearId?: string; fileId?: string }
+  const areaYearId = params?.areaYearId
+  const fileId = params?.fileId
 
 
   const {
@@ -35,15 +36,10 @@ export default function ArmadoDocumentPage_Example() {
     getColumnLetter,
   } = useArmadoSheet(fileId)
 
-  const
-  {
-    analysisResults,
-    analysisLoading,
-    analysisError,
-    showDisclaimer,
-    setShowDisclaimer,
-    allChecked,
-  } = useArmadoAI(fileId)
+  const { analysisResults, analysisLoading, analysisError } = useArmadoAI(areaYearId)
+
+  const [showDisclaimer, setShowDisclaimer] = useState(true)
+  const allChecked = Array.isArray(analysisResults) ? analysisResults.length > 0 : false
 
   return (
     <FileProvider>

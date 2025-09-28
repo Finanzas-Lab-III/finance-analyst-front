@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 type AnalysisItem = {
   message?: string;
@@ -27,6 +27,31 @@ export default function ArmadoSidebar({
   allChecked: boolean;
   onSubmit?: () => void;
 }) {
+  const [checked, setChecked] = useState<boolean[]>([])
+
+  useEffect(() => {
+    if (Array.isArray(analysisResults)) {
+      setChecked(new Array(analysisResults.length).fill(false))
+    } else {
+      setChecked([])
+    }
+  }, [analysisResults])
+
+  const toggleChecked = (idx: number) => {
+    setChecked((prev) => {
+      const next = prev.slice()
+      next[idx] = !next[idx]
+      return next
+    })
+  }
+
+  const localAllChecked = Array.isArray(analysisResults)
+    && analysisResults.length > 0
+    && checked.length === analysisResults.length
+    && checked.every(Boolean)
+
+  const enableSubmit = localAllChecked || allChecked
+
   return (
     <aside className="w-[320px] bg-white text-gray-900 h-full flex flex-col border-l border-gray-200">
       <div className="p-4">
@@ -36,7 +61,7 @@ export default function ArmadoSidebar({
       </div>
 
       <div className="flex-1 overflow-y-auto px-4">
-        {analysisLoading && <div className="mt-4 text-blue-600">Analizando presupuesto...</div>}
+        {analysisLoading && <div className="mt-4 text-blue-600">Analizando presupuesto. Esto puede tardar unos minutos.</div>}
         {analysisError && <div className="mt-4 text-red-600">{analysisError}</div>}
 
         {!analysisLoading && !analysisError && (
@@ -45,6 +70,14 @@ export default function ArmadoSidebar({
               <div className="mt-4 flex flex-col gap-3">
                 {analysisResults.map((result: AnalysisItem, idx: number) => (
                   <div key={idx} className="bg-gray-50 border-l-4 border-blue-500 rounded shadow p-3">
+                    <div className="flex items-start gap-2">
+                      <input
+                        type="checkbox"
+                        className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                        checked={checked[idx] || false}
+                        onChange={() => toggleChecked(idx)}
+                      />
+                      <div className={`flex-1 ${checked[idx] ? 'line-through text-gray-400' : ''}`}>
                     {result.message && (
                       <div className="font-semibold text-base mb-1 text-gray-900">{result.message}</div>
                     )}
@@ -54,6 +87,8 @@ export default function ArmadoSidebar({
                     {result.comments && (
                       <div className="text-sm text-gray-500">{result.comments}</div>
                     )}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -91,9 +126,9 @@ export default function ArmadoSidebar({
 
           <button
             className={`w-full py-2 mt-2 rounded text-white font-semibold transition-colors ${
-              allChecked ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
+              enableSubmit ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
             }`}
-            disabled={!allChecked}
+            disabled={!enableSubmit}
             onClick={onSubmit}
           >
             Enviar

@@ -2,8 +2,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Archive } from "lucide-react";
-import { useAuth } from "../../../components/AuthContext";
-import { fetchUserFacultiesAreas, AreaInChargeDto, FacultyInChargeDto } from "../../../api/userService";
+import { useAuth } from "@/components/AuthContext";
+import { fetchUserFacultiesAreas, AreaInChargeDto, FacultyInChargeDto } from "@/api/userService";
 
 export default function ArchivePage() {
   const router = useRouter();
