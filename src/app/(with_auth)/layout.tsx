@@ -1,19 +1,27 @@
-import React from "react";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+"use client";
+import useAuthorized from "@/hooks/useAuthorized";
+import {Loader} from "lucide-react";
 
-export default function WithAuthLayout({
-  children,
-}: Readonly<{
+const WithAuthLayout = ({
+                          children,
+                        }: Readonly<{
   children: React.ReactNode;
-}>) {
-  const token = cookies().get("token")?.value;
-  if (!token) {
-    redirect("/login");
+}>) => {
+  const { isLoading, isAuthorized } = useAuthorized();
+
+  if (isLoading || !isAuthorized) {
+    return (
+      <main className="h-screen calendar-gradient grid place-content-center">
+        <Loader color="#00DEDA" />
+      </main>
+    );
   }
+
   return (
-    <>{children}</>
+    <>
+      {children}
+    </>
   );
-}
+};
 
-
+export default WithAuthLayout;

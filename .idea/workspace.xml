@@ -4,51 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: armado using exceljs and colors">
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/(auth)/login/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/api/session/route.ts" afterDir="false" />
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: Azure middleware">
+      <change afterPath="$PROJECT_DIR$/src/hooks/useAuthorized.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/login-api.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/commentsService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/commentsService.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/armado/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/armado/[areaYearId]/[fileId]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/analytics/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/analytics/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/archive/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/archive/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/archivo/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/archivo/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/calendar/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/calendar/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/dashboard/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/directors/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/directors/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/faculty-data/[area_year_id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-data/[area_year_id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/faculty-old/[faculty]/[area]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-old/[faculty]/[area]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/faculty-year/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-year/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/faculty/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/users/components/CreateUserModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/users/components/CreateUserModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/users/components/EditUserModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/users/components/EditUserModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/users/components/RowActions.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/users/components/RowActions.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/users/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/users/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/backoffice/usuarios/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/usuarios/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/directors-home/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/presupuesto/[area]/layout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/presupuesto/[area]/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/presupuesto/vista-detallada/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/seguimiento/layout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/seguimiento/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/seguimiento/vista-detallada/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/test-budget-flow/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/test-excel/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/armado/components/ArmadoSidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/armado/components/ArmadoSidebar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/BudgetTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/BudgetTab.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data/2023.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/2023.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data/2024.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/2024.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data/2025.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/2025.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/session/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/session/route.ts" afterDir="false" />
     </list>
-    <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="" />
+    <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="">
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+    </list>
+    <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -121,6 +87,7 @@
     <task active="true" id="Default" summary="Default task">
       <changelist id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="" />
       <changelist id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="" />
+      <changelist id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
       <created>1750436349741</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -137,7 +104,7 @@
       <workItem from="1756502918947" duration="2369000" />
       <workItem from="1758196830704" duration="16627000" />
       <workItem from="1758739518957" duration="3010000" />
-      <workItem from="1759023091288" duration="9292000" />
+      <workItem from="1759023091288" duration="11458000" />
     </task>
     <task id="LOCAL-00001" summary="Feat: User management.">
       <option name="closed" value="true" />
@@ -227,7 +194,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758563745807</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="feat: Azure middleware">
+      <option name="closed" value="true" />
+      <created>1759084319429</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1759084319429</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -267,6 +242,7 @@
     <MESSAGE value="feat: tickets for 15 sept" />
     <MESSAGE value="feat: first version for Armado" />
     <MESSAGE value="feat: armado using exceljs and colors" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: armado using exceljs and colors" />
+    <MESSAGE value="feat: Azure middleware" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Azure middleware" />
   </component>
 </project>

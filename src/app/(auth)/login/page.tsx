@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { InteractionStatus, RedirectRequest } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
@@ -11,6 +11,7 @@ function LoginInner() {
   const { instance, inProgress, accounts } = useMsal();
   const params = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const startedLoginRef = useRef(false);
 
   const hashInfo = useMemo(() => {
     if (typeof window === "undefined") return { hasError: false, error: null as string | null };
@@ -48,6 +49,11 @@ function LoginInner() {
       return;
     }
 
+    // If the URL contains an auth hash (e.g., after redirect), let MSAL handle it first
+    if (typeof window !== "undefined" && window.location.hash) {
+      return;
+    }
+
     if (accounts.length > 0 && inProgress === InteractionStatus.None) {
       const account = accounts[0];
       // Acquire Azure access token and persist it server-side as HttpOnly cookie
@@ -81,7 +87,8 @@ function LoginInner() {
       doLogout();
       return;
     }
-    if (inProgress === InteractionStatus.None && accounts.length === 0) {
+    if (inProgress === InteractionStatus.None && accounts.length === 0 && !startedLoginRef.current) {
+      startedLoginRef.current = true;
       doLogin();
     }
   }, [accounts, inProgress, router, doLogin, doLogout, hashInfo.hasError, hashInfo.error, params]);

@@ -70,6 +70,15 @@ export async function POST(req: NextRequest) {
   return res;
 }
 
+export async function GET(req: NextRequest) {
+  const hasToken = Boolean(req.cookies.get("token")?.value);
+  const hasSession = Boolean(req.cookies.get("session")?.value);
+  if (hasToken || hasSession) {
+    return NextResponse.json({ ok: true });
+  }
+  return NextResponse.json({ ok: false }, { status: 401 });
+}
+
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });
   res.cookies.set({ ...getCookieOptions(0), name: "token", value: "" });

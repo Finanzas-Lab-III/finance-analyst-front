@@ -19,7 +19,7 @@ export const msalConfig: Configuration = {
     clientId: clientId || "",
     authority: envAuthority || (tenantId ? `https://login.microsoftonline.com/${tenantId}` : "https://login.microsoftonline.com/common"),
     redirectUri: redirectUri || (typeof window !== "undefined" ? `${window.location.origin}/login` : undefined),
-    navigateToLoginRequestUrl: true,
+    navigateToLoginRequestUrl: false,
   },
   cache: {
     cacheLocation: "localStorage",
