@@ -56,6 +56,7 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
       const res = await fetch(`${USERS_API_BASE}/api/upload`, {
         method: "POST",
         body: form,
+        headers: { 'ngrok-skip-browser-warning': 'true' },
       });
       if (!res.ok) {
         let message = `Error subiendo archivo: ${res.status} ${res.statusText}`;
