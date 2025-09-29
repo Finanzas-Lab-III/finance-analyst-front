@@ -2,12 +2,11 @@ import { NavBarData } from "@/types/profile";
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_SERVICE_URL, // https://<subdominio>.ngrok-free.dev
+  // Use same-origin requests so Next.js rewrites proxy to the backend and avoid CORS
+  baseURL: "",
   withCredentials: true,
   headers: {
-    Accept: "application/json",
-    "ngrok-skip-browser-warning": "1",
-    "X-User-Id": "1",
+    'Accept': 'application/json',
   },
 });
 
