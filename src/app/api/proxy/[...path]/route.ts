@@ -14,8 +14,8 @@ async function forward(req: NextRequest, { params }: { params: { path: string[] 
 
   const path = Array.isArray(params.path) ? params.path.join("/") : String(params.path ?? "");
 
-  // Build target URL, preserving query string
-  const targetUrl = new URL(`/api/${path}`, BACKEND_BASE_URL);
+  // Build target URL (do NOT force a leading /api here). The incoming path already includes any required prefix like `api/`.
+  const targetUrl = new URL(`/${path}`, BACKEND_BASE_URL);
   const incomingUrl = new URL(req.url);
   for (const [k, v] of incomingUrl.searchParams.entries()) {
     targetUrl.searchParams.append(k, v);
@@ -24,6 +24,15 @@ async function forward(req: NextRequest, { params }: { params: { path: string[] 
   // Clone headers, forward cookies and add ngrok header
   const headers = new Headers(req.headers);
   headers.set("ngrok-skip-browser-warning", "1");
+
+  // Bridge auth: if we have an app session token cookie, forward it as Bearer token unless already provided
+  try {
+    const tokenCookie = req.cookies.get("token")?.value;
+    const hasAuthHeader = !!headers.get("authorization");
+    if (tokenCookie && !hasAuthHeader) {
+      headers.set("authorization", `Bearer ${tokenCookie}`);
+    }
+  } catch {}
 
   // Some hop-by-hop headers should not be forwarded
   headers.delete("host");
