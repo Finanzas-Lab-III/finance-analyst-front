@@ -15,7 +15,7 @@ interface UploadBudgetModalProps {
 export default function UploadBudgetModal({ open, onClose, areaYearId, onUploaded, variant = 'ARMADO', folder = null }: UploadBudgetModalProps) {
   if (!open) return null;
 
-  const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
+  const USERS_API_BASE = "/api/proxy";
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState<string>("");

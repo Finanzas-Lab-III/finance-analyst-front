@@ -55,7 +55,7 @@ const AIAgentSidebar: React.FC = () => {
 
     try {
       // Determine endpoint based on whether selected file contains "+"
-      const baseUrl = process.env.NEXT_PUBLIC_SERVICE_URL;
+      const baseUrl = "/api/proxy";
       const endpoint = selectedFile && selectedFile.includes('+') 
         ? `${baseUrl}/analyze/projection`
         : `${baseUrl}/analyze/budget_variation`;
