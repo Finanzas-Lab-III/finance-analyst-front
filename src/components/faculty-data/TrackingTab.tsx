@@ -51,7 +51,9 @@ export default function TrackingTab({ areaYearId, onNavigateToComments }: Tracki
       
       try {        
         const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-        const response = await fetch(`${API_BASE}/api/monthly_budget_variation_summaries/${areaYearId}/`);
+        const response = await fetch(`${API_BASE}/api/monthly_budget_variation_summaries/${areaYearId}/`, {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
         const data = await response.json();
         
         if (data.success) {

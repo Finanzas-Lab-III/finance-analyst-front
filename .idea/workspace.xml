@@ -4,7 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: integrated top bar with user data" />
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: integrated top bar with user data">
+      <change beforePath="$PROJECT_DIR$/src/api/fileService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/fileService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/userService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/userService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/seguimiento/vista-detallada/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/seguimiento/vista-detallada/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/AuthContext.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/AuthContext.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/armado/hooks/useArmadoAI.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/armado/hooks/useArmadoAI.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/armado/hooks/useArmadoSheets.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/armado/hooks/useArmadoSheets.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/TrackingTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/TrackingTab.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/UploadBudgetModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/UploadBudgetModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sidebar/ai-agent-sidebar/AIAgentSidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sidebar/ai-agent-sidebar/AIAgentSidebar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/login-api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/login-api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/user-api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/user-api.ts" afterDir="false" />
+    </list>
     <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="commit not" />
     <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -40,20 +52,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "22-sep-fer",
-    "last_opened_file_path": "/Users/rvassolo/WebstormProjects/lab3/src/lib",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "/Users/rvassolo/WebstormProjects/lab3/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;22-sep-fer&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/rvassolo/WebstormProjects/lab3/src/lib&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/rvassolo/WebstormProjects/lab3/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/lib" />

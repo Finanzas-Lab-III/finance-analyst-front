@@ -32,6 +32,7 @@ export function useArmadoAI(areaYearId?: string): UseArmadoAIResult {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
           },
           body: JSON.stringify({}),
           cache: 'no-store',
