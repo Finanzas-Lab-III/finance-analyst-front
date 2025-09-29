@@ -8,6 +8,7 @@ export const fetchFileTree = async (): Promise<FileSystemNode[]> => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
     });
     
@@ -47,6 +48,9 @@ export const fetchFile = async (filePath: string): Promise<Blob> => {
     // Handle backend files (original behavior)
     const response = await fetch(`${API_BASE_URL}/excel/file/${encodeURIComponent(filePath)}`, {
       method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      },
     });
     
     if (!response.ok) {

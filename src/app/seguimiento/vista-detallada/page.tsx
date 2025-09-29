@@ -46,7 +46,8 @@ const SeguimientoDetailedViewContent = () => {
         // Fetch the Excel file
         const response = await fetch(API_BASE + filePath, {
           method: 'GET',
-          cache: 'no-store'
+          cache: 'no-store',
+          headers: { 'ngrok-skip-browser-warning': 'true' }
         });
 
         if (!response.ok) {

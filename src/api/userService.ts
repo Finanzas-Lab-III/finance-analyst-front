@@ -25,7 +25,7 @@ export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> 
   if (filters.mail) params.set("mail", filters.mail);
   const query = params.toString();
   const url = query ? `${base}?${query}` : base;
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
   if (!res.ok) {
     throw new Error(`Error fetching users: ${res.status} ${res.statusText}`);
   }
@@ -80,7 +80,7 @@ export async function deleteUser(id: string | number): Promise<void> {
   const url = `${USERS_API_BASE}/api/admin/users/`;
   const res = await fetch(url, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
     body: JSON.stringify({ id: String(id) }),
   });
   if (!res.ok) {
@@ -104,7 +104,7 @@ export async function createUser(payload: CreateUserPayload): Promise<any> {
   const url = `${USERS_API_BASE}/api/admin/users/`;
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
@@ -138,7 +138,7 @@ export type DirectorScope = "SELF_AND_DESCENDANTS" | "SELF_ONLY";
 
 export async function fetchFacultades(): Promise<FacultadDto[]> {
   const url = `${USERS_API_BASE}/api/areas/facultades/`;
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
   if (!res.ok) {
     throw new Error(`Error obteniendo facultades: ${res.status} ${res.statusText}`);
   }
@@ -193,7 +193,7 @@ export interface UserDetailDto {
 
 export async function fetchUserDetail(id: number | string): Promise<UserDetailDto> {
   const url = `${USERS_API_BASE}/api/admin/users/${id}/`;
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
   if (!res.ok) {
     throw new Error(`Error obteniendo usuario ${id}: ${res.status} ${res.statusText}`);
   }
@@ -251,7 +251,7 @@ export async function updateUser(payload: UpdateUserPayload): Promise<any> {
   const url = `${USERS_API_BASE}/api/admin/users/`;
   const res = await fetch(url, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
@@ -302,7 +302,8 @@ export async function fetchUserFacultiesAreas(
   try {
     const url = `${USERS_API_BASE}/api/faculties/${userId}/`;
     const res = await fetch(url, { 
-      cache: "no-store"
+      cache: "no-store",
+      headers: { 'ngrok-skip-browser-warning': 'true' }
     });
     
     if (!res.ok) {
@@ -347,7 +348,7 @@ export interface YearsOfAreaResponse {
 export async function fetchYearsOfArea(areaId: number | string): Promise<YearsOfAreaResponse> {
   try {
     const url = `${USERS_API_BASE}/api/yearsOfArea/${areaId}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
     
     if (!res.ok) {
       console.warn(`Backend API failed for years of area ${areaId} (${res.status}), using mock data`);
@@ -413,7 +414,7 @@ export interface AreaYearStatusResponse {
 export async function fetchAreaYearStatus(areaYearId: number | string): Promise<AreaYearStatusResponse> {
   try {
     const url = `${USERS_API_BASE}/api/status/${areaYearId}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
     
     if (!res.ok) {
       console.warn(`Backend API failed for area-year status ${areaYearId} (${res.status}), using mock data`);
@@ -489,7 +490,7 @@ export async function updateAreaYearStatus(
   const url = `${USERS_API_BASE}/api/status/${areaYearId}`;
   const res = await fetch(url, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
     body: JSON.stringify({ status }),
   });
   if (!res.ok) {
@@ -510,7 +511,7 @@ export async function createAreaYearStatus(
   const url = `${USERS_API_BASE}/api/status/${areaYearId}`;
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
     body: JSON.stringify({ status }),
   });
   if (!res.ok) {
@@ -544,7 +545,7 @@ export interface ArmadoDocumentsResponse {
 export async function fetchArmadoDocuments(areaYearId: number | string): Promise<ArmadoDocument[]> {
   try {
     const url = `${USERS_API_BASE}/api/archivos_armado/area_year/${areaYearId}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
     
     if (!res.ok) {
       console.warn(`Backend API failed for armado documents ${areaYearId} (${res.status}), using mock data`);
@@ -613,7 +614,7 @@ export interface SeguimientoDocumentsResponse {
 export async function fetchSeguimientoDocuments(areaYearId: number | string): Promise<SeguimientoDocument[]> {
   try {
     const url = `${USERS_API_BASE}/api/archivos_seguimiento/area_year/${areaYearId}/`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
     
     if (!res.ok) {
       console.warn(`Backend API failed for seguimiento documents ${areaYearId} (${res.status}), using mock data`);

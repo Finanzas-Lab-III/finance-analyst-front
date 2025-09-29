@@ -24,7 +24,7 @@ export function useArmadoSheet(fileId?: string) {
       setError(null)
       try {
         const url = buildRawFileUrl(fileId, true)
-        const res = await fetch(url, { cache: 'no-store' })
+        const res = await fetch(url, { cache: 'no-store', headers: { 'ngrok-skip-browser-warning': 'true' } })
         if (!res.ok) {
           throw new Error(`No se pudo descargar el archivo (${res.status})`)
         }
