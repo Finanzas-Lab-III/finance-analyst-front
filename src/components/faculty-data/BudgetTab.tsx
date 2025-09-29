@@ -12,7 +12,7 @@ interface BudgetTabProps {
 }
 
 export default function BudgetTab({ latest, history = [], onOpenUpload, areaYearId }: BudgetTabProps) {
-  const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
+  const USERS_API_BASE = "/api/proxy";
   const router = useRouter();
 
   const handleDownload = (doc: ArmadoDocument) => {
