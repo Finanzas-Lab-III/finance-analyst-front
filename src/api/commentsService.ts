@@ -1,5 +1,5 @@
 // Comments Service API - Mock Implementation
-const BASE_URL = "http://localhost:8000/api/comments"\;
+const BASE_URL = "http://localhost:8000/api/comments";
 const USE_MOCK_DATA = true;
 
 export enum DocumentStatus {

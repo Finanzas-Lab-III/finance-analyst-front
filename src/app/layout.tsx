@@ -2,6 +2,7 @@ import React from "react";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthContext";
+import MsalProviderWrapper from "@/components/MsalProviderWrapper";
 import ToastProvider from "@/components/ToastProvider";
 
 const geistSans = Geist({
@@ -30,10 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased bg-gray-900`}
       >
-        <AuthProvider>
-          {children}
-          <ToastProvider />
-        </AuthProvider>
+        <MsalProviderWrapper>
+          <AuthProvider>
+            {children}
+            <ToastProvider />
+          </AuthProvider>
+        </MsalProviderWrapper>
       </body>
     </html>
   );
