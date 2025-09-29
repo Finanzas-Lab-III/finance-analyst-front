@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="feat: integrated top bar with user data" />
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="fix: trying to fix cors error">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/userService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/userService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/seguimiento/vista-detallada/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/seguimiento/vista-detallada/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/TrackingTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/TrackingTab.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/user-api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/user-api.ts" afterDir="false" />
+    </list>
     <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="commit not" />
     <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -97,7 +104,7 @@
       <workItem from="1756502918947" duration="2369000" />
       <workItem from="1758196830704" duration="16627000" />
       <workItem from="1758739518957" duration="3010000" />
-      <workItem from="1759023091288" duration="20906000" />
+      <workItem from="1759023091288" duration="24244000" />
     </task>
     <task id="LOCAL-00001" summary="Feat: User management.">
       <option name="closed" value="true" />
@@ -211,7 +218,31 @@
       <option name="project" value="LOCAL" />
       <updated>1759103669381</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="feat: merged dev">
+      <option name="closed" value="true" />
+      <created>1759103851910</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1759103851910</updated>
+    </task>
+    <task id="LOCAL-00016" summary="feat: change NEXT_PUBLIC_AZURE_AD_AUTHORITY to AZURE_AD_AUTHORITY">
+      <option name="closed" value="true" />
+      <created>1759104625526</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1759104625526</updated>
+    </task>
+    <task id="LOCAL-00017" summary="fix: trying to fix cors error">
+      <option name="closed" value="true" />
+      <created>1759114265988</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1759114265988</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -255,6 +286,9 @@
     <MESSAGE value="feat: Made the jwt to be http only and corrected authentication." />
     <MESSAGE value="commit not" />
     <MESSAGE value="feat: integrated top bar with user data" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: integrated top bar with user data" />
+    <MESSAGE value="feat: merged dev" />
+    <MESSAGE value="feat: change NEXT_PUBLIC_AZURE_AD_AUTHORITY to AZURE_AD_AUTHORITY" />
+    <MESSAGE value="fix: trying to fix cors error" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: trying to fix cors error" />
   </component>
 </project>

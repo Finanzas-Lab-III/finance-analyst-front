@@ -15,7 +15,8 @@ export interface UserFilters {
   mail?: string;
 }
 
-const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
+// Use same-origin; Next.js rewrites proxy to backend
+const USERS_API_BASE = "";
 
 export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> {
   const base = `${USERS_API_BASE}/api/admin/users/`;

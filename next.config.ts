@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
       throw new Error('NEXT_PUBLIC_API_URL is not defined');
     }
     return [
+      // Keep internal session endpoints handled by Next.js, not proxied
+      {
+        source: '/api/session',
+        destination: '/api/session',
+      },
       {
         source: '/api/:path*',
         destination: `${process.env.NEXT_PUBLIC_SERVICE_URL}/api/:path*`,

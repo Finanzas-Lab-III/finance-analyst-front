@@ -28,7 +28,7 @@ export function useArmadoAI(areaYearId?: string): UseArmadoAIResult {
       setAnalysisLoading(true)
       setAnalysisError(null)
       try {
-        const res = await fetch(`http://localhost:8000/api/armado/${encodeURIComponent(areaYearId as string)}` , {
+        const res = await fetch(`/api/armado/${encodeURIComponent(areaYearId as string)}` , {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
