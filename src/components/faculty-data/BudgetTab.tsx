@@ -54,7 +54,8 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
           <div
             className="bg-white rounded-lg p-4 border border-gray-200 cursor-pointer hover:bg-gray-50"
             onClick={() => {
-              const url = `/armado?context=area_year&id=${areaYearId}&file=${encodeURIComponent(latest.file_key)}`;
+              if (!latest?.id) return;
+              const url = `/armado/${areaYearId}/${latest.id}`;
               window.open(url, "_blank", "noopener,noreferrer");
             }}
             title="Abrir presupuesto actual"
