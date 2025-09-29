@@ -527,6 +527,9 @@ export async function createAreaYearStatus(
   }
 }
 
+// Import document status types
+import { DocumentStatus } from './documentStatusService';
+
 // Armado documents for an AreaYear
 export interface ArmadoDocument {
   id: number;
@@ -535,6 +538,7 @@ export interface ArmadoDocument {
   area_year_id: number;
   file_key: string;
   notes?: string;
+  status?: DocumentStatus; // Document status from backend
   created_at: string; // ISO
   updated_at?: string; // ISO
 }
@@ -604,6 +608,7 @@ export interface SeguimientoDocument {
   area_year_id: number;
   file_key: string;
   notes?: string | null;
+  status?: DocumentStatus; // Document status from backend
   created_at: string; // ISO
   updated_at?: string; // ISO
 }

@@ -4,7 +4,9 @@ import { Download, FileText, Eye, MessageSquare, ExternalLink, Plus } from "luci
 import { useSeguimientoDocuments } from "@/hooks/useSeguimientoDocuments";
 import { buildRawFileUrl } from "@/api/userService";
 import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
+import DocumentStatusIndicator from "@/components/DocumentStatusIndicator";
 import { useAuth } from "@/components/AuthContext";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface TrackingTabProps {
   areaYearId: string | number;
@@ -13,6 +15,7 @@ interface TrackingTabProps {
 
 export default function TrackingTab({ areaYearId, onNavigateToComments }: TrackingTabProps) {
   const { userRole } = useAuth();
+  const { user } = useCurrentUser();
   const isFinance = userRole === 'finance';
 
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -201,6 +204,14 @@ export default function TrackingTab({ areaYearId, onNavigateToComments }: Tracki
                     <div>
                       {latest ? (
                         <div className="flex items-center space-x-1">
+                          {/* Document Status Indicator */}
+                          <DocumentStatusIndicator 
+                            documentId={latest.id}
+                            currentUserId={user?.id ? Number(user.id) : undefined}
+                            userRole={isFinance ? 'FINANCE' : 'DIRECTOR'}
+                            compact={true}
+                          />
+                          
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();

@@ -3,6 +3,8 @@ import React from "react";
 import { Download, Upload, FileText } from "lucide-react";
 import { ArmadoDocument } from "@/api/userService";
 import { useRouter } from "next/navigation";
+import DocumentStatusIndicator from "@/components/DocumentStatusIndicator";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface BudgetTabProps {
   latest: ArmadoDocument | null | undefined;
@@ -14,6 +16,7 @@ interface BudgetTabProps {
 export default function BudgetTab({ latest, history = [], onOpenUpload, areaYearId }: BudgetTabProps) {
   const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
   const router = useRouter();
+  const { user } = useCurrentUser();
 
   const handleDownload = (doc: ArmadoDocument) => {
     if (!doc?.id) return;
@@ -21,6 +24,17 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
     // Open in a new tab to let the browser handle file download (avoids CORS issues with fetch)
     window.open(url, "_blank");
   };
+
+  // Determine user role based on user data
+  const getUserRole = (): 'DIRECTOR' | 'FINANCE' | 'ADMIN' => {
+    if (!user) return 'DIRECTOR'; // Default fallback
+    // This logic should be adjusted based on your user role system
+    if (user.role === 'ADMINISTRADOR') return 'ADMIN';
+    if (user.name?.toLowerCase().includes('finanz')) return 'FINANCE';
+    return 'DIRECTOR';
+  };
+
+  const userRole = getUserRole();
 
   return (
     <div className="space-y-8">
@@ -61,11 +75,21 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
           >
             <div className="flex items-center space-x-3">
               <FileText className="w-5 h-5 text-blue-600" />
-              <div>
+              <div className="flex-1">
                 <p className="text-gray-900 font-medium">{latest.title || latest.file_key}</p>
                 <p className="text-gray-600 text-sm">{new Date(latest.created_at).toLocaleDateString('es-AR')}</p>
                 {latest.notes && <p className="text-xs text-gray-500 mt-1">{latest.notes}</p>}
               </div>
+            </div>
+            
+            {/* Document Status */}
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <DocumentStatusIndicator 
+                documentId={latest.id}
+                currentUserId={user?.id ? Number(user.id) : undefined}
+                userRole={userRole}
+                compact={true}
+              />
             </div>
           </div>
         ) : (
@@ -87,11 +111,21 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                       <span className="text-blue-600 font-medium text-sm">v{index + 1 + 1}</span>
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <h5 className="font-medium text-gray-900">{doc.title || doc.file_key}</h5>
                       {doc.notes && <p className="text-sm text-gray-600 mt-1">{doc.notes}</p>}
                       <div className="flex items-center mt-2 text-xs text-gray-500">
                         {new Date(doc.created_at).toLocaleDateString('es-AR')}
+                      </div>
+                      
+                      {/* Document Status for history */}
+                      <div className="mt-2">
+                        <DocumentStatusIndicator 
+                          documentId={doc.id}
+                          currentUserId={user?.id ? Number(user.id) : undefined}
+                          userRole={userRole}
+                          compact={true}
+                        />
                       </div>
                     </div>
                   </div>

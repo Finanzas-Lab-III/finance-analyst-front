@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   Home, 
-  Users
+  Users,
+  FileCheck
 } from "lucide-react";
 
 const navigationItems = [
@@ -17,6 +18,11 @@ const navigationItems = [
     name: "Gestión de Usuarios",
     href: "/backoffice/users",
     icon: Users,
+  },
+  {
+    name: "Revisión de Documentos",
+    href: "/backoffice/document-review",
+    icon: FileCheck,
   },
 ];
 
