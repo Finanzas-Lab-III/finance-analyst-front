@@ -280,7 +280,7 @@ const SeguimientoDetailedViewContent = () => {
         </div>
 
         {/* AI Agent Sidebar */}
-        <AIAgentSidebar />
+        <AIAgentSidebar excelFilePath={decodeURIComponent(fileName || '')} />
       </div>
     </main>
   );

@@ -303,7 +303,7 @@ const Page: React.FC = () => {
             </div>
           </div>
         </div>
-        {selectedFile && <AIAgentSidebar />}
+        {selectedFile && <AIAgentSidebar excelFilePath={selectedFile} />}
       </div>
     </main>
   );
