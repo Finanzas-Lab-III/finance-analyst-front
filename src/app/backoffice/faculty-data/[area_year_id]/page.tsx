@@ -28,7 +28,8 @@ import TrackingTab from "@/components/faculty-data/TrackingTab";
 import IntegratedComments from "@/components/IntegratedComments";
 import DocumentSnapshotModal from "@/components/faculty-data/DocumentSnapshotModal";
 import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
-import { useAreaYearDocuments, useAreaYearStatus } from "@/hooks/useAreaYearDocuments";
+import { useAreaYearDocuments } from "@/hooks/useAreaYearDocuments";
+import { useAreaYearStatus } from "@/hooks/useAreaYearStatus";
 import { statusColor as areaYearStatusColor, statusLabelEs as areaYearStatusLabel, AreaYearStatus } from "@/lib/areaYearStatus";
 import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "@/lib/commentsHelpers";
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
@@ -78,15 +79,13 @@ interface BudgetComment {
   content: string;
   createdAt: string;
   type: 'general' | 'approval' | 'rejection' | 'revision';
-}
-
-// Mock data for faculty-old-year detail
+}  // Mock data for faculty-old-year detail
 const mockBudgetDetail: BudgetDetail = {
   id: "1",
   name: "Presupuesto Laboratorio 2025",
   faculty: "Ingeniería",
   area: "Laboratorio",
-  status: "pending",
+  status: "in_review", // Changed from "pending" to better represent the actual status
   createdBy: "Santiago Ascasibar",
   createdAt: "2024-01-15",
   lastModified: "2024-01-20",
@@ -247,13 +246,42 @@ export default function BudgetDetailPage() {
   const [budget] = useState<BudgetDetail>(mockBudgetDetail);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState<BudgetDetail['status']>(budget.status);
-  const { status, areaName, year, parentArea } = useAreaYearStatus({ areaYearId });
+  const { status, area, year, faculty } = useAreaYearStatus(areaYearId);
   const { armadoDocuments, loading: documentsLoading } = useAreaYearDocuments({ areaYearId });
-  const headerStatus = (status as any) ?? budget.status;
   
-  // Determine faculty and area names
-  const faculty = parentArea?.name || '';
-  const area = areaName || '';
+  // Determine effective status: prioritize area-year status, fallback to budget status, and map appropriately
+  const effectiveStatus = status || (() => {
+    // Map local budget statuses to area-year statuses for consistency
+    switch (budget.status) {
+      case 'pending':
+        return 'PENDING_APPROVAL';
+      case 'approved':
+        return 'BUDGET_APPROVED';
+      case 'rejected':
+        return 'NEEDS_CHANGES';
+      case 'in_review':
+        return 'PENDING_APPROVAL';
+      case 'draft':
+        return 'BUDGET_STARTED';
+      default:
+        return 'PENDING_APPROVAL';
+    }
+  })();
+  
+  const headerStatus = effectiveStatus;
+  
+  // Debug logging for status resolution
+  console.log('🔍 Status Resolution Debug:', {
+    areaYearId,
+    areaYearStatus: status,
+    budgetStatus: budget.status,
+    effectiveStatus,
+    headerStatus,
+    statusLabel: areaYearStatusLabel(effectiveStatus as any),
+    statusColor: areaYearStatusColor(effectiveStatus as any)
+  });
+  
+  // Determine faculty and area names (these are already computed by useAreaYearStatus)
   
   // Title format: "Presupuesto {facultyOrArea} {year}"
   const headerName = `Presupuesto ${faculty || area || budget.area} ${year || new Date().getFullYear()}`;
@@ -272,6 +300,9 @@ export default function BudgetDetailPage() {
     version: string;
     createdAt: string;
     documentId: number;
+    title?: string;
+    fileKey?: string;
+    notes?: string;
   } | null>(null);
   
   // Use the latest armado document if available
@@ -296,6 +327,9 @@ export default function BudgetDetailPage() {
     version: string;
     createdAt: string;
     documentId: number;
+    title?: string;
+    fileKey?: string;
+    notes?: string;
   }) => {
     setActiveTab('comments');
     // Si hay contexto del mes, establecer el estado para pre-llenar el comentario
@@ -374,7 +408,7 @@ export default function BudgetDetailPage() {
       <BudgetHeader
         name={headerName}
         description={headerDescription}
-        faculty={faculty || (area ? "" : budget.faculty)}
+        faculty={faculty || ""}
         area={area || ""}
         status={String(headerStatus)}
         lastModifiedISO={budget.lastModified}

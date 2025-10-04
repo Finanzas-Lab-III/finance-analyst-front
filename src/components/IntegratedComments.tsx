@@ -1,9 +1,9 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import { MessageSquare, Send, Edit2, Trash2, AlertCircle, User, Clock, CheckCircle, XCircle, Loader2, FileText, Calendar, X } from "lucide-react";
+import { MessageSquare, Send, Edit2, Trash2, AlertCircle, User, Clock, CheckCircle, XCircle, Loader2, FileText, Calendar, X, Download } from "lucide-react";
 import { useComments } from "@/hooks/useComments";
 import { DocumentStatus, Comment, commentsService } from "@/api/commentsService";
-import { formatRelativeTime, getUserInitials, getDocumentStatusLabel } from "@/lib/commentUtils";
+import { formatRelativeTime, getUserInitials, getDocumentStatusLabel, getDocumentTypeLabel, downloadFile } from "@/lib/commentUtils";
 
 interface IntegratedCommentsProps {
   documentId: number;
@@ -18,6 +18,9 @@ interface IntegratedCommentsProps {
     version: string;
     createdAt: string;
     documentId: number;
+    title?: string;
+    fileKey?: string;
+    notes?: string;
   } | null;
   onClearContext?: () => void;
 }
@@ -39,6 +42,7 @@ export default function IntegratedComments({
     currentUserId,
     currentUserName,
     currentUserEmail: `${currentUserName.toLowerCase().replace(/\s+/g, '.')}@austral.edu.ar`,
+    monthlyContext,
   });
 
   const [newComment, setNewComment] = useState("");
@@ -47,6 +51,7 @@ export default function IntegratedComments({
   const [editContent, setEditContent] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+  const [downloadingDocumentId, setDownloadingDocumentId] = useState<number | null>(null);
 
   // Check backend connection status
   useEffect(() => {
@@ -68,19 +73,11 @@ export default function IntegratedComments({
   // Pre-llenar comentario con contexto de seguimiento mensual
   useEffect(() => {
     if (monthlyContext && !newComment) {
-      const monthNames: Record<string, string> = {
-        enero: 'Enero', febrero: 'Febrero', marzo: 'Marzo', abril: 'Abril',
-        mayo: 'Mayo', junio: 'Junio', julio: 'Julio', agosto: 'Agosto',
-        septiembre: 'Septiembre', octubre: 'Octubre', noviembre: 'Noviembre', diciembre: 'Diciembre'
-      };
-      
-      const monthDisplay = monthNames[monthlyContext.month] || monthlyContext.month.charAt(0).toUpperCase() + monthlyContext.month.slice(1);
-      const dateDisplay = new Date(monthlyContext.createdAt).toLocaleDateString('es-AR');
-      
-      const contextComment = `📋 **Comentario sobre seguimiento mensual de ${monthDisplay}**\n🗓️ Documento: ${monthlyContext.version} (${dateDisplay})\n\n💬 `;
+      // Simple marker for tracking comments - the visual context is now provided by the metadata panel
+      const contextComment = `💬 `;
       
       setNewComment(contextComment);
-    } else if (!monthlyContext && newComment.includes('📋 **Comentario sobre seguimiento mensual')) {
+    } else if (!monthlyContext && newComment.includes('💬') && newComment.trim() === '💬') {
       // Limpiar comentario pre-llenado si se quita el contexto mensual
       setNewComment("");
     }
@@ -178,6 +175,35 @@ export default function IntegratedComments({
 
   const canUserDeleteComment = (comment: Comment) => {
     return canDelete && comment.user_id === currentUserId;
+  };
+
+  const handleDownloadDocument = async (documentId: number, filename?: string) => {
+    try {
+      setDownloadingDocumentId(documentId);
+      const response = await commentsService.downloadDocument(documentId);
+      
+      if (response.blob) {
+        const finalFilename = response.filename || filename || `document_${documentId}.pdf`;
+        downloadFile(response.blob, finalFilename);
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Error al descargar el documento. Por favor, inténtelo de nuevo.');
+    } finally {
+      setDownloadingDocumentId(null);
+    }
+  };
+
+  const getStatusBadgeColor = (status: DocumentStatus) => {
+    const colorMap: Record<DocumentStatus, string> = {
+      [DocumentStatus.NOT_STARTED]: 'bg-gray-100 text-gray-800',
+      [DocumentStatus.BUDGET_STARTED]: 'bg-blue-100 text-blue-800',
+      [DocumentStatus.NEEDS_CHANGES]: 'bg-yellow-100 text-yellow-800',
+      [DocumentStatus.PENDING_APPROVAL]: 'bg-orange-100 text-orange-800',
+      [DocumentStatus.BUDGET_APPROVED]: 'bg-green-100 text-green-800',
+      [DocumentStatus.FOLLOW_UP_AVAILABLE]: 'bg-purple-100 text-purple-800',
+    };
+    return colorMap[status] || 'bg-gray-100 text-gray-800';
   };
 
   if (loading && comments.length === 0) {
@@ -348,7 +374,48 @@ export default function IntegratedComments({
                     <span className="text-sm text-gray-500">
                       {formatRelativeTime(comment.created_at)}
                     </span>
+                    
+                    {/* Document Status Badge - ONLY for SEGUIMIENTO documents */}
+                    {comment.document_metadata && comment.document_metadata.document_type === 'SEGUIMIENTO' && (
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(comment.document_status)}`}>
+                        {getDocumentStatusLabel(comment.document_status)}
+                      </span>
+                    )}
+                    
+                    {/* Download icon for SEGUIMIENTO documents ONLY */}
+                    {comment.document_metadata && comment.document_metadata.document_type === 'SEGUIMIENTO' && (
+                      <button
+                        onClick={() => handleDownloadDocument(
+                          comment.document_metadata!.document_area_year_id,
+                          comment.document_metadata!.document_title
+                        )}
+                        disabled={downloadingDocumentId === comment.document_metadata.document_area_year_id}
+                        className="inline-flex items-center px-2 py-1 text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 rounded transition-colors disabled:opacity-50"
+                        title={`Descargar documento: ${comment.document_metadata.document_title}`}
+                      >
+                        {downloadingDocumentId === comment.document_metadata.document_area_year_id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Download className="w-3 h-3" />
+                        )}
+                        <span className="ml-1">Descargar</span>
+                      </button>
+                    )}
                   </div>
+                  
+                  {/* Document metadata info - ONLY for SEGUIMIENTO documents */}
+                  {comment.document_metadata && comment.document_metadata.document_type === 'SEGUIMIENTO' && (
+                    <div className="mb-2 p-2 bg-gray-50 rounded-md">
+                      <div className="text-xs text-gray-600">
+                        <span className="font-medium">Documento:</span> {getDocumentTypeLabel(comment.document_metadata.document_type)} - {comment.document_metadata.document_title}
+                        {comment.document_metadata.document_notes && (
+                          <span className="block mt-1">
+                            <span className="font-medium">Notas:</span> {comment.document_metadata.document_notes}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {editingCommentId === comment.id ? (
                     <div className="space-y-2">

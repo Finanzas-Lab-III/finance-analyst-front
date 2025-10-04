@@ -1,6 +1,6 @@
 // Comments Service API - Real Backend Implementation
 const BASE_URL = "http://localhost:8000/api/comments";
-const USE_MOCK_DATA = false;
+const USE_MOCK_DATA = true;
 
 export enum DocumentStatus {
   NOT_STARTED = "NOT_STARTED",
@@ -21,6 +21,15 @@ export interface Comment {
   document_status: DocumentStatus;
   user_name?: string;
   user_email?: string;
+  document_metadata?: {
+    document_type: string;
+    document_title: string;
+    document_file_key: string;
+    document_notes?: string;
+    document_area_year_id: number;
+    document_created_at: string;
+    document_updated_at: string;
+  } | null;
 }
 
 export interface CreateCommentRequest {
@@ -30,6 +39,16 @@ export interface CreateCommentRequest {
   document_status: DocumentStatus;
   user_name?: string;
   user_email?: string;
+  // Optional document metadata for tracking comments
+  tracking_document_info?: {
+    title: string;
+    month: string;
+    version: string;
+    file_key?: string;
+    notes?: string;
+    area_year_id: number;
+    created_at: string;
+  };
 }
 
 export interface CommentsResponse {
@@ -41,7 +60,18 @@ export interface ErrorResponse {
   errors?: Record<string, any>;
 }
 
-const mockComments: Comment[] = [
+export interface DownloadResponse {
+  url?: string;
+  blob?: Blob;
+  filename?: string;
+}
+
+// localStorage key for persisting comments
+const COMMENTS_STORAGE_KEY = 'mockComments';
+const NEXT_ID_STORAGE_KEY = 'nextCommentId';
+
+// Initial mock comments
+const initialMockComments: Comment[] = [
   {
     id: 1,
     content: "El presupuesto se ve bien estructurado.",
@@ -52,10 +82,95 @@ const mockComments: Comment[] = [
     document_status: DocumentStatus.PENDING_APPROVAL,
     user_name: "Ana Martínez",
     user_email: "ana.martinez@austral.edu.ar"
+    // NO document_metadata - this is a regular comment
+  },
+  {
+    id: 2,
+    content: "💬 Comentario de prueba sobre documento específico",
+    created_at: "2024-12-15T13:45:00.000Z",
+    updated_at: "2024-12-15T13:45:00.000Z", 
+    user_id: 1,
+    document_id: 1001,
+    document_status: DocumentStatus.BUDGET_APPROVED,
+    user_name: "Equipo Finanzas",
+    user_email: "finanzas@austral.edu.ar",
+    document_metadata: {
+      document_type: "SEGUIMIENTO",
+      document_title: "Seguimiento Marzo 2025 V2",
+      document_file_key: "seguimiento_marzo_2025_v2.xlsx",
+      document_notes: "Documento de seguimiento mensual actualizado",
+      document_area_year_id: 1002,
+      document_created_at: "2025-03-15T10:00:00.000Z",
+      document_updated_at: "2025-03-15T10:00:00.000Z"
+    }
   }
 ];
 
-let nextCommentId = 2;
+// Helper functions for localStorage persistence
+function loadCommentsFromStorage(): Comment[] {
+  if (typeof window === 'undefined') return [...initialMockComments];
+  
+  try {
+    const stored = localStorage.getItem(COMMENTS_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as Comment[];
+      console.log('📥 Comentarios cargados desde localStorage:', parsed.length);
+      return parsed;
+    }
+  } catch (error) {
+    console.warn('⚠️ Error cargando comentarios desde localStorage:', error);
+  }
+  
+  // Si no hay datos guardados, usar los iniciales y guardarlos
+  const comments = [...initialMockComments];
+  saveCommentsToStorage(comments);
+  return comments;
+}
+
+function saveCommentsToStorage(comments: Comment[]): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(COMMENTS_STORAGE_KEY, JSON.stringify(comments));
+    console.log('💾 Comentarios guardados en localStorage:', comments.length);
+  } catch (error) {
+    console.warn('⚠️ Error guardando comentarios en localStorage:', error);
+  }
+}
+
+function loadNextIdFromStorage(): number {
+  if (typeof window === 'undefined') return 3;
+  
+  try {
+    const stored = localStorage.getItem(NEXT_ID_STORAGE_KEY);
+    if (stored) {
+      const id = parseInt(stored);
+      if (!isNaN(id)) {
+        console.log('📥 NextCommentId cargado desde localStorage:', id);
+        return id;
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ Error cargando nextCommentId desde localStorage:', error);
+  }
+  
+  return 3; // Default value
+}
+
+function saveNextIdToStorage(id: number): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(NEXT_ID_STORAGE_KEY, id.toString());
+    console.log('💾 NextCommentId guardado en localStorage:', id);
+  } catch (error) {
+    console.warn('⚠️ Error guardando nextCommentId en localStorage:', error);
+  }
+}
+
+// Load comments and nextId from localStorage or use defaults
+let mockComments = loadCommentsFromStorage();
+let nextCommentId = loadNextIdFromStorage();
 
 class CommentsService {
   private async request<T>(url: string, options?: RequestInit): Promise<T> {
@@ -77,6 +192,16 @@ class CommentsService {
         console.log('🔧 Mock POST - Creating new comment');
         console.log('🔧 Mock POST - nextCommentId before:', nextCommentId);
         const body = JSON.parse(options.body as string) as CreateCommentRequest;
+        console.log('🔧 Mock POST - Request body:', JSON.stringify(body, null, 2));
+        
+        // Detect tracking comment by checking if it starts with the context marker
+        // or has been created from monthly context (monthlyContext will add the marker)
+        const isTrackingComment = body.content.trim().startsWith('💬') || 
+                                 body.content.includes('📋 **Comentario sobre seguimiento mensual');
+        
+        console.log('🔧 Mock POST - Is tracking comment:', isTrackingComment);
+        console.log('🔧 Mock POST - Has tracking document info:', !!body.tracking_document_info);
+        
         const newComment: Comment = {
           id: nextCommentId++,
           content: body.content,
@@ -88,9 +213,53 @@ class CommentsService {
           user_name: body.user_name || "Usuario Actual",
           user_email: body.user_email || "usuario@austral.edu.ar"
         };
+        
+        // Add metadata only for tracking comments
+        if (isTrackingComment) {
+          // Use tracking document info if provided, otherwise use generic data
+          if (body.tracking_document_info) {
+            const trackingInfo = body.tracking_document_info;
+            const documentTitle = trackingInfo.title || `Seguimiento ${trackingInfo.month.charAt(0).toUpperCase() + trackingInfo.month.slice(1)} 2025 ${trackingInfo.version}`;
+            const fileKey = trackingInfo.file_key || `seguimiento_${trackingInfo.month}_2025_${trackingInfo.version.toLowerCase()}.xlsx`;
+            const notes = trackingInfo.notes || `Seguimiento mensual de ${trackingInfo.month} - ${trackingInfo.version}`;
+            
+            newComment.document_metadata = {
+              document_type: "SEGUIMIENTO",
+              document_title: documentTitle,
+              document_file_key: fileKey,
+              document_notes: notes,
+              document_area_year_id: trackingInfo.area_year_id,
+              document_created_at: trackingInfo.created_at,
+              document_updated_at: new Date().toISOString()
+            };
+            
+            console.log('🔧 Mock POST - Using real tracking document info:', {
+              title: documentTitle,
+              fileKey,
+              notes,
+              areaYearId: trackingInfo.area_year_id
+            });
+          } else {
+            // Fallback to generic metadata
+            newComment.document_metadata = {
+              document_type: "SEGUIMIENTO",
+              document_title: "Documento de Seguimiento",
+              document_file_key: `documento_${body.document_id}.pdf`,
+              document_notes: "Documento generado automáticamente",
+              document_area_year_id: body.document_id,
+              document_created_at: new Date().toISOString(),
+              document_updated_at: new Date().toISOString()
+            };
+          }
+        }
         console.log('🔧 Mock POST - Created comment:', newComment);
         console.log('🔧 Mock POST - nextCommentId after:', nextCommentId);
         mockComments.unshift(newComment);
+        
+        // Save to localStorage
+        saveCommentsToStorage(mockComments);
+        saveNextIdToStorage(nextCommentId);
+        
         return newComment as T;
       }
       
@@ -124,6 +293,10 @@ class CommentsService {
             comment.user_email = body.user_email;
           }
           console.log('🔧 Updated comment:', comment);
+          
+          // Save to localStorage
+          saveCommentsToStorage(mockComments);
+          
           return comment as T;
         }
         console.log('❌ Comment not found for ID:', commentId);
@@ -137,6 +310,10 @@ class CommentsService {
         const index = mockComments.findIndex(c => c.id === commentId);
         if (index !== -1) {
           mockComments.splice(index, 1);
+          
+          // Save to localStorage
+          saveCommentsToStorage(mockComments);
+          
           return undefined as T;
         }
         throw new Error("Comentario no encontrado");
@@ -246,6 +423,63 @@ class CommentsService {
       body: JSON.stringify({ user_id: userId }),
     });
   }
+
+  async downloadDocument(documentId: number): Promise<DownloadResponse> {
+    try {
+      const response = await fetch(`http://localhost:8000/api/document/${documentId}/download/`, {
+        method: "GET",
+        headers: {
+          "Accept": "application/octet-stream",
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Download failed: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = `document_${documentId}.pdf`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="([^"]+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      return { blob, filename };
+    } catch (error) {
+      console.error("Download error:", error);
+      throw error;
+    }
+  }
+
+  // Utility method for debugging: clear all stored comments
+  clearStoredComments(): void {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(COMMENTS_STORAGE_KEY);
+      localStorage.removeItem(NEXT_ID_STORAGE_KEY);
+      mockComments.length = 0;
+      mockComments.push(...initialMockComments);
+      nextCommentId = 3;
+      saveCommentsToStorage(mockComments);
+      saveNextIdToStorage(nextCommentId);
+      console.log('🗑️ Comentarios limpiados y resetdeados a valores iniciales');
+    }
+  }
+
+  // Utility method for debugging: get current stored comments count
+  getStoredCommentsCount(): number {
+    return mockComments.length;
+  }
 }
 
 export const commentsService = new CommentsService();
+
+// Make utility functions available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).clearStoredComments = () => commentsService.clearStoredComments();
+  (window as any).getStoredCommentsCount = () => commentsService.getStoredCommentsCount();
+}

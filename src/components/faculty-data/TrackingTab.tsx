@@ -15,6 +15,9 @@ interface TrackingTabProps {
     version: string;
     createdAt: string;
     documentId: number;
+    title?: string;
+    fileKey?: string;
+    notes?: string;
   }) => void;
 }
 
@@ -235,7 +238,10 @@ export default function TrackingTab({ areaYearId, onNavigateToComments }: Tracki
                                   month: m,
                                   version: latestVersion || 'V1',
                                   createdAt: latest.created_at,
-                                  documentId: latest.id
+                                  documentId: latest.id,
+                                  title: latest.title,
+                                  fileKey: latest.file_key,
+                                  notes: latest.notes || undefined
                                 });
                               }
                             }}

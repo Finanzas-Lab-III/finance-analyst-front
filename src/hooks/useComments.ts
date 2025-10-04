@@ -7,6 +7,15 @@ interface UseCommentsOptions {
   currentUserId: number;
   currentUserName: string;
   currentUserEmail?: string;
+  monthlyContext?: {
+    month: string;
+    version: string;
+    createdAt: string;
+    documentId: number;
+    title?: string;
+    fileKey?: string;
+    notes?: string;
+  } | null;
 }
 
 interface UseCommentsReturn {
@@ -19,7 +28,7 @@ interface UseCommentsReturn {
   refresh: () => Promise<void>;
 }
 
-export function useComments({ documentId, documentStatus, currentUserId, currentUserName, currentUserEmail }: UseCommentsOptions): UseCommentsReturn {
+export function useComments({ documentId, documentStatus, currentUserId, currentUserName, currentUserEmail, monthlyContext }: UseCommentsOptions): UseCommentsReturn {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +79,26 @@ export function useComments({ documentId, documentStatus, currentUserId, current
         user_email: currentUserEmail,
       };
 
+      // Add tracking document info if this is a tracking comment with monthly context
+      const isTrackingComment = content.trim().startsWith('💬') || 
+                               content.includes('📋 **Comentario sobre seguimiento mensual');
+      
+      if (isTrackingComment && monthlyContext) {
+        // Generate appropriate description based on the month and version
+        const monthName = monthlyContext.month.charAt(0).toUpperCase() + monthlyContext.month.slice(1);
+        const documentDescription = `Seguimiento mensual de ${monthName} 2025 (${monthlyContext.version})`;
+        
+        newCommentData.tracking_document_info = {
+          title: monthlyContext.title || `Seguimiento ${monthName} 2025`,
+          month: monthlyContext.month,
+          version: monthlyContext.version,
+          file_key: monthlyContext.fileKey || undefined,
+          notes: documentDescription, // Use generated description instead of raw document notes
+          area_year_id: documentId, // Using document ID as area_year_id for now
+          created_at: monthlyContext.createdAt
+        };
+      }
+
       console.log('📦 Datos del comentario a enviar:', newCommentData);
 
       const newComment = await commentsService.createComment(newCommentData);
@@ -83,7 +112,7 @@ export function useComments({ documentId, documentStatus, currentUserId, current
       setError(errorMessage);
       throw err;
     }
-  }, [documentId, documentStatus, currentUserId, currentUserName, currentUserEmail]);
+  }, [documentId, documentStatus, currentUserId, currentUserName, currentUserEmail, monthlyContext]);
 
   const updateComment = useCallback(async (commentId: number, content: string) => {
     if (!content.trim()) {

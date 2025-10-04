@@ -81,3 +81,51 @@ export function getDocumentStatusLabel(status: string): string {
   
   return statusMap[status] || status;
 }
+
+/**
+ * Gets the document type label in Spanish
+ */
+export function getDocumentTypeLabel(type: string): string {
+  const typeMap: Record<string, string> = {
+    'ARMADO': 'Armado',
+    'SEGUIMIENTO': 'Seguimiento',
+  };
+  
+  return typeMap[type] || type;
+}
+
+/**
+ * Formats a month name in Spanish
+ */
+export function formatMonthLabel(monthStr: string): string {
+  const monthMap: Record<string, string> = {
+    'January': 'Enero',
+    'February': 'Febrero', 
+    'March': 'Marzo',
+    'April': 'Abril',
+    'May': 'Mayo',
+    'June': 'Junio',
+    'July': 'Julio',
+    'August': 'Agosto',
+    'September': 'Septiembre',
+    'October': 'Octubre',
+    'November': 'Noviembre',
+    'December': 'Diciembre'
+  };
+  
+  return monthMap[monthStr] || monthStr;
+}
+
+/**
+ * Downloads a file from a blob
+ */
+export function downloadFile(blob: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
