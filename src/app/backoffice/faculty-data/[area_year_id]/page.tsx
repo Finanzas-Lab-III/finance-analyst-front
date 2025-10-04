@@ -267,14 +267,12 @@ export default function BudgetDetailPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDocumentSnapshot, setShowDocumentSnapshot] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<BudgetVariation | null>(null);
-  const [commentContext, setCommentContext] = useState<{
-    monthlyDocument?: {
-      documentId: number;
-      month: string;
-      version: string;
-      createdAt: string;
-    };
-  }>({});
+  const [monthlyContext, setMonthlyContext] = useState<{
+    month: string;
+    version: string;
+    createdAt: string;
+    documentId: number;
+  } | null>(null);
   
   // Use the latest armado document if available
   const latest = armadoDocuments.length > 0 ? armadoDocuments[0] : null;
@@ -292,22 +290,30 @@ export default function BudgetDetailPage() {
     setShowDocumentSnapshot(true);
   };
 
-  // Handler para navegar a comentarios con contexto de documento mensual
-  const handleNavigateToComments = (documentId: number, month: string, version: string, createdAt: string) => {
-    setCommentContext({
-      monthlyDocument: {
-        documentId,
-        month,
-        version,
-        createdAt
-      }
-    });
+  // Handler para navegar a comentarios con contexto específico del mes
+  const handleNavigateToComments = (monthContext?: {
+    month: string;
+    version: string;
+    createdAt: string;
+    documentId: number;
+  }) => {
+    setActiveTab('comments');
+    // Si hay contexto del mes, establecer el estado para pre-llenar el comentario
+    if (monthContext) {
+      setMonthlyContext(monthContext);
+    } else {
+      setMonthlyContext(null);
+    }
+  };
+
+  // Handler para navegación directa a comentarios (limpiar contexto)
+  const handleDirectCommentNavigation = () => {
+    setMonthlyContext(null);
     setActiveTab('comments');
   };
 
-  // Handler para limpiar el contexto
   const handleClearCommentContext = () => {
-    setCommentContext({});
+    setMonthlyContext(null);
   };
 
   const getCommentTypeColor = (type: BudgetComment['type']) => {
@@ -340,6 +346,16 @@ export default function BudgetDetailPage() {
     { id: 'comments', label: 'Comentarios' },
   ] as const;
 
+  // Handler personalizado para el cambio de tabs
+  const handleTabChange = (tabId: typeof activeTab) => {
+    if (tabId === 'comments') {
+      // Si navegamos directamente a comentarios, limpiar contexto mensual
+      handleDirectCommentNavigation();
+    } else {
+      setActiveTab(tabId);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with navigation */}
@@ -368,7 +384,7 @@ export default function BudgetDetailPage() {
 
       {/* Navigation Tabs */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <TabManager tabs={tabs as any} activeTab={activeTab as any} onChange={setActiveTab as any} />
+        <TabManager tabs={tabs as any} activeTab={activeTab as any} onChange={handleTabChange as any} />
 
         <div className="p-6">
           {activeTab === 'overview' && (
@@ -399,16 +415,16 @@ export default function BudgetDetailPage() {
               </div>
 
               <IntegratedComments
-                documentId={commentContext.monthlyDocument?.documentId || getDocumentIdFromAreaYearId(areaYearId)}
+                documentId={getDocumentIdFromAreaYearId(areaYearId)}
                 documentStatus={mapAreaYearStatusToDocumentStatus((status || 'NOT_STARTED') as AreaYearStatus)}
                 currentUserId={effectiveUser.id}
                 currentUserName={effectiveUser.name}
                 canEdit={true}
                 canDelete={true}
-                monthlyDocumentContext={commentContext.monthlyDocument}
                 onCommentSubmitted={() => {
                   console.log('Comment submitted');
                 }}
+                monthlyContext={monthlyContext}
                 onClearContext={handleClearCommentContext}
               />
             </div>

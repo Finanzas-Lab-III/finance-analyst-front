@@ -10,7 +10,12 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface TrackingTabProps {
   areaYearId: string | number;
-  onNavigateToComments?: (documentId: number, month: string, version: string, createdAt: string) => void;
+  onNavigateToComments?: (monthContext?: {
+    month: string;
+    version: string;
+    createdAt: string;
+    documentId: number;
+  }) => void;
 }
 
 export default function TrackingTab({ areaYearId, onNavigateToComments }: TrackingTabProps) {
@@ -226,16 +231,16 @@ export default function TrackingTab({ areaYearId, onNavigateToComments }: Tracki
                             onClick={(e) => {
                               e.stopPropagation();
                               if (onNavigateToComments && latest) {
-                                onNavigateToComments(
-                                  latest.id,
-                                  m,
-                                  latestVersion || 'V1',
-                                  latest.created_at
-                                );
+                                onNavigateToComments({
+                                  month: m,
+                                  version: latestVersion || 'V1',
+                                  createdAt: latest.created_at,
+                                  documentId: latest.id
+                                });
                               }
                             }}
                             className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
-                            title="Agregar comentario sobre este documento mensual"
+                            title={`Comentar sobre seguimiento de ${m}`}
                           >
                             <MessageSquare className="w-4 h-4" />
                           </button>

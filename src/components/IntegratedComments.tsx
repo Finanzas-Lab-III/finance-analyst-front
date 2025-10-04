@@ -12,13 +12,13 @@ interface IntegratedCommentsProps {
   currentUserName: string;
   canEdit?: boolean;
   canDelete?: boolean;
-  monthlyDocumentContext?: {
-    documentId: number;
+  onCommentSubmitted?: () => void;
+  monthlyContext?: {
     month: string;
     version: string;
     createdAt: string;
-  };
-  onCommentSubmitted?: () => void;
+    documentId: number;
+  } | null;
   onClearContext?: () => void;
 }
 
@@ -29,8 +29,8 @@ export default function IntegratedComments({
   currentUserName,
   canEdit = true,
   canDelete = true,
-  monthlyDocumentContext,
   onCommentSubmitted,
+  monthlyContext,
   onClearContext,
 }: IntegratedCommentsProps) {
   const { comments, loading, error, createComment, updateComment, deleteComment } = useComments({
@@ -65,23 +65,26 @@ export default function IntegratedComments({
     checkConnection();
   }, []);
 
-  // Pre-rellenar comentario con contexto de documento mensual
+  // Pre-llenar comentario con contexto de seguimiento mensual
   useEffect(() => {
-    if (monthlyDocumentContext && !newComment) {
+    if (monthlyContext && !newComment) {
       const monthNames: Record<string, string> = {
         enero: 'Enero', febrero: 'Febrero', marzo: 'Marzo', abril: 'Abril',
         mayo: 'Mayo', junio: 'Junio', julio: 'Julio', agosto: 'Agosto',
         septiembre: 'Septiembre', octubre: 'Octubre', noviembre: 'Noviembre', diciembre: 'Diciembre'
       };
       
-      const monthDisplay = monthNames[monthlyDocumentContext.month] || monthlyDocumentContext.month;
-      const dateDisplay = new Date(monthlyDocumentContext.createdAt).toLocaleDateString('es-AR');
+      const monthDisplay = monthNames[monthlyContext.month] || monthlyContext.month.charAt(0).toUpperCase() + monthlyContext.month.slice(1);
+      const dateDisplay = new Date(monthlyContext.createdAt).toLocaleDateString('es-AR');
       
-      const contextComment = `📋 **Comentario sobre seguimiento mensual de ${monthDisplay}**\n🗓️ Documento: ${monthlyDocumentContext.version} (${dateDisplay})\n\n💬 `;
+      const contextComment = `📋 **Comentario sobre seguimiento mensual de ${monthDisplay}**\n🗓️ Documento: ${monthlyContext.version} (${dateDisplay})\n\n💬 `;
       
       setNewComment(contextComment);
+    } else if (!monthlyContext && newComment.includes('📋 **Comentario sobre seguimiento mensual')) {
+      // Limpiar comentario pre-llenado si se quita el contexto mensual
+      setNewComment("");
     }
-  }, [monthlyDocumentContext?.documentId]);
+  }, [monthlyContext, newComment]);
 
   const handleSubmitComment = async () => {
     if (!newComment.trim()) return;
@@ -213,8 +216,8 @@ export default function IntegratedComments({
         </div>
       )}
 
-      {/* Monthly Document Context Banner */}
-      {monthlyDocumentContext && (
+      {/* Monthly Context Banner */}
+      {monthlyContext && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
@@ -223,25 +226,25 @@ export default function IntegratedComments({
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2 mb-1">
                 <h4 className="font-medium text-blue-900">
-                  Comentarios sobre documento mensual
+                  Comentarios sobre seguimiento mensual
                 </h4>
                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {monthlyDocumentContext.month.charAt(0).toUpperCase() + monthlyDocumentContext.month.slice(1)} 2025
+                  {monthlyContext.month.charAt(0).toUpperCase() + monthlyContext.month.slice(1)} 2025
                 </span>
               </div>
               <div className="flex items-center space-x-4 text-sm text-blue-700">
                 <div className="flex items-center space-x-1">
                   <span className="font-medium">Versión:</span>
-                  <span>{monthlyDocumentContext.version}</span>
+                  <span>{monthlyContext.version}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Calendar className="w-4 h-4" />
-                  <span>{new Date(monthlyDocumentContext.createdAt).toLocaleDateString('es-AR')}</span>
+                  <span>{new Date(monthlyContext.createdAt).toLocaleDateString('es-AR')}</span>
                 </div>
               </div>
               <p className="text-sm text-blue-600 mt-2">
                 Puedes agregar comentarios específicos sobre el documento del mes de{' '}
-                <strong>{monthlyDocumentContext.month}</strong>.
+                <strong>{monthlyContext.month}</strong>.
               </p>
             </div>
             <div className="flex-shrink-0">
