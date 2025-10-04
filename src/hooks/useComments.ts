@@ -33,9 +33,11 @@ export function useComments({ documentId, documentStatus, currentUserId, current
       const response = await commentsService.getCommentsByDocument(documentId);
       console.log(`✅ Comentarios cargados: ${response.comments.length} comentarios`);
       
-      setComments(response.comments.sort((a, b) => 
+      const sortedComments = response.comments.sort((a, b) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      ));
+      );
+      
+      setComments(sortedComments);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error loading comments';
       console.error('❌ Error fetching comments:', err);
@@ -93,7 +95,7 @@ export function useComments({ documentId, documentStatus, currentUserId, current
     }
 
     try {
-      const updatedComment = await commentsService.updateComment(commentId, content.trim());
+      const updatedComment = await commentsService.updateComment(commentId, content.trim(), currentUserId, currentUserName);
       
       setComments(prev => 
         prev.map(comment => 
@@ -105,11 +107,11 @@ export function useComments({ documentId, documentStatus, currentUserId, current
       setError(errorMessage);
       throw err;
     }
-  }, []);
+  }, [currentUserId, currentUserName]);
 
   const deleteComment = useCallback(async (commentId: number) => {
     try {
-      await commentsService.deleteComment(commentId);
+      await commentsService.deleteComment(commentId, currentUserId);
       
       setComments(prev => prev.filter(comment => comment.id !== commentId));
     } catch (err) {
@@ -117,7 +119,7 @@ export function useComments({ documentId, documentStatus, currentUserId, current
       setError(errorMessage);
       throw err;
     }
-  }, []);
+  }, [currentUserId]);
 
   const refresh = useCallback(async () => {
     await fetchComments();

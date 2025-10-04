@@ -67,11 +67,15 @@ class CommentsService {
       }
       
       if (url.includes("/document/") && options?.method !== "POST") {
+        console.log('🔧 Mock GET - Returning comments');
+        console.log('🔧 Mock GET - mockComments:', mockComments);
         const commentsResponse: CommentsResponse = { comments: [...mockComments] };
         return commentsResponse as T;
       }
       
       if (options?.method === "POST") {
+        console.log('🔧 Mock POST - Creating new comment');
+        console.log('🔧 Mock POST - nextCommentId before:', nextCommentId);
         const body = JSON.parse(options.body as string) as CreateCommentRequest;
         const newComment: Comment = {
           id: nextCommentId++,
@@ -81,27 +85,55 @@ class CommentsService {
           user_id: body.user_id,
           document_id: body.document_id,
           document_status: body.document_status,
-          user_name: "Usuario Actual",
-          user_email: "usuario@austral.edu.ar"
+          user_name: body.user_name || "Usuario Actual",
+          user_email: body.user_email || "usuario@austral.edu.ar"
         };
+        console.log('🔧 Mock POST - Created comment:', newComment);
+        console.log('🔧 Mock POST - nextCommentId after:', nextCommentId);
         mockComments.unshift(newComment);
         return newComment as T;
       }
       
       if (options?.method === "PUT") {
-        const commentId = parseInt(url.split("/")[1]);
+        // URL será algo como "/1/" entonces necesitamos extraer el número
+        console.log('🔧 PUT request URL:', url);
+        const urlParts = url.split("/").filter(part => part !== "");
+        console.log('🔧 URL parts:', urlParts);
+        const commentId = parseInt(urlParts[0]);
+        console.log('🔧 Parsed commentId:', commentId);
+        
+        // Validate that commentId is a valid number
+        if (isNaN(commentId)) {
+          console.log('❌ Invalid commentId:', urlParts[0]);
+          throw new Error("ID de comentario inválido");
+        }
+        
+        console.log('🔧 Available comments:', mockComments.map(c => ({ id: c.id, content: c.content.substring(0, 20) + '...' })));
         const body = JSON.parse(options.body as string);
+        console.log('🔧 Request body:', body);
         const comment = mockComments.find(c => c.id === commentId);
         if (comment) {
+          console.log('🔧 Found comment to update:', comment);
           comment.content = body.content;
           comment.updated_at = new Date().toISOString();
+          // Preserve the original user info, but update if new user info is provided
+          if (body.user_name) {
+            comment.user_name = body.user_name;
+          }
+          if (body.user_email) {
+            comment.user_email = body.user_email;
+          }
+          console.log('🔧 Updated comment:', comment);
           return comment as T;
         }
+        console.log('❌ Comment not found for ID:', commentId);
         throw new Error("Comentario no encontrado");
       }
       
       if (options?.method === "DELETE") {
-        const commentId = parseInt(url.split("/")[1]);
+        // URL será algo como "/1/" entonces necesitamos extraer el número
+        const urlParts = url.split("/").filter(part => part !== "");
+        const commentId = parseInt(urlParts[0]);
         const index = mockComments.findIndex(c => c.id === commentId);
         if (index !== -1) {
           mockComments.splice(index, 1);
@@ -191,16 +223,27 @@ class CommentsService {
     return this.request<CommentsResponse>(`/document/${documentId}/`);
   }
 
-  async updateComment(commentId: number, content: string): Promise<Comment> {
+  async updateComment(commentId: number, content: string, userId: number, userName?: string): Promise<Comment> {
+    const updateData: any = { 
+      content,
+      user_id: userId 
+    };
+    
+    // Include user_name if provided to ensure it's preserved
+    if (userName) {
+      updateData.user_name = userName;
+    }
+    
     return this.request<Comment>(`/${commentId}/`, {
       method: "PUT", 
-      body: JSON.stringify({ content }),
+      body: JSON.stringify(updateData),
     });
   }
 
-  async deleteComment(commentId: number): Promise<void> {
+  async deleteComment(commentId: number, userId: number): Promise<void> {
     await this.request<void>(`/${commentId}/`, {
       method: "DELETE",
+      body: JSON.stringify({ user_id: userId }),
     });
   }
 }

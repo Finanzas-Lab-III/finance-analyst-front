@@ -28,11 +28,10 @@ import TrackingTab from "@/components/faculty-data/TrackingTab";
 import IntegratedComments from "@/components/IntegratedComments";
 import DocumentSnapshotModal from "@/components/faculty-data/DocumentSnapshotModal";
 import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
-import { useAreaYearStatus } from "@/hooks/useAreaYearStatus";
-import { statusColor as areaYearStatusColor, statusLabelEs as areaYearStatusLabel } from "@/lib/areaYearStatus";
+import { useAreaYearDocuments, useAreaYearStatus } from "@/hooks/useAreaYearDocuments";
+import { statusColor as areaYearStatusColor, statusLabelEs as areaYearStatusLabel, AreaYearStatus } from "@/lib/areaYearStatus";
 import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "@/lib/commentsHelpers";
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
-import { useArmadoDocuments } from "@/hooks/useArmadoDocuments";
 import { useAuth } from "@/components/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
@@ -226,11 +225,35 @@ export default function BudgetDetailPage() {
   const { user: mockUser } = useAuth(); // Keep for backward compatibility if needed
   const { user: realUser, loading: userLoading, error: userError } = useCurrentUser();
   
+  // Debug logging for user data
+  console.log('🔍 User Debug Info:', {
+    realUser,
+    userLoading,
+    userError,
+    realUserId: realUser?.id,
+    realUserName: realUser?.name,
+    mockUser: mockUser?.id
+  });
+
+  // Determine which user to use
+  const effectiveUser = realUser?.id ? realUser : (mockUser?.id ? {
+    id: Number(mockUser.id),
+    name: mockUser.name || 'Usuario',
+    email: mockUser.email || 'usuario@austral.edu.ar'
+  } : null);
+
+  console.log('👤 Effective User:', effectiveUser);
+  
   const [budget] = useState<BudgetDetail>(mockBudgetDetail);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState<BudgetDetail['status']>(budget.status);
-  const { status, area, year, faculty } = useAreaYearStatus(areaYearId);
+  const { status, areaName, year, parentArea } = useAreaYearStatus({ areaYearId });
+  const { armadoDocuments, loading: documentsLoading } = useAreaYearDocuments({ areaYearId });
   const headerStatus = (status as any) ?? budget.status;
+  
+  // Determine faculty and area names
+  const faculty = parentArea?.name || '';
+  const area = areaName || '';
   
   // Title format: "Presupuesto {facultyOrArea} {year}"
   const headerName = `Presupuesto ${faculty || area || budget.area} ${year || new Date().getFullYear()}`;
@@ -252,7 +275,10 @@ export default function BudgetDetailPage() {
       createdAt: string;
     };
   }>({});
-  const { latest, history } = useArmadoDocuments(areaYearId);
+  
+  // Use the latest armado document if available
+  const latest = armadoDocuments.length > 0 ? armadoDocuments[0] : null;
+  const history = armadoDocuments.length > 1 ? armadoDocuments.slice(1) : [];
 
   const handleStatusChange = () => {
     // Aquí implementarías la lógica para cambiar el estado
@@ -365,7 +391,7 @@ export default function BudgetDetailPage() {
             />
           )}
 
-          {activeTab === 'comments' && realUser && !userLoading && (
+          {activeTab === 'comments' && effectiveUser && !userLoading && (
             <div className="space-y-6">
               <div className="flex items-center space-x-2">
                 <MessageSquare className="w-5 h-5 text-gray-600" />
@@ -374,9 +400,9 @@ export default function BudgetDetailPage() {
 
               <IntegratedComments
                 documentId={commentContext.monthlyDocument?.documentId || getDocumentIdFromAreaYearId(areaYearId)}
-                documentStatus={mapAreaYearStatusToDocumentStatus(status || 'NOT_STARTED')}
-                currentUserId={realUser.id}
-                currentUserName={realUser.name}
+                documentStatus={mapAreaYearStatusToDocumentStatus((status || 'NOT_STARTED') as AreaYearStatus)}
+                currentUserId={effectiveUser.id}
+                currentUserName={effectiveUser.name}
                 canEdit={true}
                 canDelete={true}
                 monthlyDocumentContext={commentContext.monthlyDocument}
@@ -385,6 +411,23 @@ export default function BudgetDetailPage() {
                 }}
                 onClearContext={handleClearCommentContext}
               />
+            </div>
+          )}
+
+          {activeTab === 'comments' && !effectiveUser && !userLoading && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800">ID de usuario requerido</h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    No se pudo obtener información válida del usuario. Los comentarios están deshabilitados.
+                  </p>
+                  <div className="text-xs text-yellow-600 mt-2">
+                    Debug: realUser = {JSON.stringify(realUser)}, mockUser = {JSON.stringify(mockUser)}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

@@ -112,6 +112,21 @@ export default function IntegratedComments({
       setEditContent("");
     } catch (err) {
       console.error('Error updating comment:', err);
+      
+      // Show user-friendly error messages
+      let errorMessage = 'Error al actualizar el comentario';
+      if (err instanceof Error) {
+        if (err.message.includes('403') || err.message.includes('Forbidden')) {
+          errorMessage = 'No tienes permisos para editar este comentario';
+        } else if (err.message.includes('404') || err.message.includes('Not Found')) {
+          errorMessage = 'El comentario ya no existe';
+        } else if (err.message.includes('400') || err.message.includes('Bad Request')) {
+          errorMessage = 'Error en los datos del comentario';
+        }
+      }
+      
+      // You can use your toast system here if available
+      alert(errorMessage);
     }
   };
 
@@ -124,10 +139,27 @@ export default function IntegratedComments({
       await deleteComment(commentId);
     } catch (err) {
       console.error('Error deleting comment:', err);
+      
+      // Show user-friendly error messages
+      let errorMessage = 'Error al eliminar el comentario';
+      if (err instanceof Error) {
+        if (err.message.includes('403') || err.message.includes('Forbidden')) {
+          errorMessage = 'No tienes permisos para eliminar este comentario';
+        } else if (err.message.includes('404') || err.message.includes('Not Found')) {
+          errorMessage = 'El comentario ya no existe';
+        } else if (err.message.includes('400') || err.message.includes('Bad Request')) {
+          errorMessage = 'Error en la solicitud de eliminación';
+        }
+      }
+      
+      // You can use your toast system here if available
+      alert(errorMessage);
     }
   };
 
   const startEditing = (comment: Comment) => {
+    console.log('🔧 startEditing called with comment:', comment);
+    console.log('🔧 startEditing - comment.id:', comment.id, 'type:', typeof comment.id);
     setEditingCommentId(comment.id);
     setEditContent(comment.content);
   };
@@ -293,13 +325,14 @@ export default function IntegratedComments({
             <p className="text-sm">¡Sé el primero en comentar!</p>
           </div>
         ) : (
-          comments.map((comment) => (
+          <>
+            {comments.map((comment) => (
             <div key={comment.id} className="bg-white border border-gray-200 rounded-lg p-4">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
-                      {getUserInitials(comment.user_name || 'Usuario')}
+                      {getUserInitials(comment.user_name || (comment.user_id === currentUserId ? currentUserName : `Usuario ${comment.user_id}`))}
                     </span>
                   </div>
                 </div>
@@ -307,7 +340,7 @@ export default function IntegratedComments({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-1">
                     <h5 className="font-medium text-gray-900">
-                      {comment.user_name || 'Usuario'}
+                      {comment.user_name || (comment.user_id === currentUserId ? currentUserName : `Usuario ${comment.user_id}`)}
                     </h5>
                     <span className="text-sm text-gray-500">
                       {formatRelativeTime(comment.created_at)}
@@ -367,7 +400,8 @@ export default function IntegratedComments({
                 )}
               </div>
             </div>
-          ))
+          ))}
+          </>
         )}
       </div>
     </div>
