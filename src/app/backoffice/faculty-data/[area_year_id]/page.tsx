@@ -21,6 +21,7 @@ import {
   Eye
 } from "lucide-react";
 import Link from "next/link";
+import DashboardTab from '@/components/faculty-data/DashboardTab';
 import TabManager from "@/components/TabManager";
 import OverviewTab from "@/components/faculty-data/OverviewTab";
 import BudgetTab from "@/components/faculty-data/BudgetTab";
@@ -238,7 +239,7 @@ export default function BudgetDetailPage() {
     if (area) return `Presupuesto del ${displayYear} para ${area}`;
     return "";
   })();
-  const [activeTab, setActiveTab] = useState<'overview' | 'budget' | 'tracking' | 'comments'>('budget');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'overview' | 'budget' | 'tracking' | 'comments'>('dashboard');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDocumentSnapshot, setShowDocumentSnapshot] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<BudgetVariation | null>(null);
@@ -303,9 +304,12 @@ export default function BudgetDetailPage() {
     }).format(amount);
   };
 
+// ...DashboardSection moved to src/components/faculty-data/DashboardSection.tsx
+
   
 
   const tabs = [
+    { id: 'dashboard', label: 'Dashboard' },
     // { id: 'overview', label: 'Resumen' },
     { id: 'budget', label: 'Presupuesto' },
     { id: 'tracking', label: 'Seguimientos' },
@@ -345,6 +349,10 @@ export default function BudgetDetailPage() {
         <div className="p-6">
           {activeTab === 'overview' && (
             <OverviewTab budget={budget as any} formatCurrency={formatCurrency} />
+          )}
+
+          {activeTab === 'dashboard' && (
+            <DashboardTab isAdmin={user?.role === 'finance'} />
           )}
 
           {activeTab === 'budget' && (
