@@ -1,17 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
+import ProjectionChart from './ProjectionChart';
 import ChatMessage from './ChatMessage';
 
-interface MonthlyData {
-  categories: string[];
-  original_values: number[];
-  modified_values: number[];
-  chart_type: string;
-}
-
-interface InflationScenarioData {
-  is_inflation_scenario: boolean;
-  monthly: MonthlyData;
+interface ChartData {
+  labels: string[];
+  series: { name: string; data: number[] }[];
 }
 
 interface Message {
@@ -19,7 +13,7 @@ interface Message {
   message: string;
   sender: 'ai' | 'user';
   timestamp?: string;
-  scenarioData?: InflationScenarioData;
+  chartData?: ChartData;
 }
 
 interface QuickAction {
@@ -88,7 +82,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 message={msg.message}
                 sender={msg.sender}
                 timestamp={msg.timestamp}
-                scenarioData={msg.scenarioData}
+                chartData={msg.chartData}
               />
             ))
           )}

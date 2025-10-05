@@ -19,12 +19,17 @@ interface InflationScenarioData {
   monthly: MonthlyData;
 }
 
+interface ChartData {
+  labels: string[];
+  series: { name: string; data: number[] }[];
+}
+
 interface Message {
   id: string;
   message: string;
   sender: 'ai' | 'user';
   timestamp?: string;
-  scenarioData?: InflationScenarioData;
+  chartData?: ChartData;
 }
 
 interface AIAgentSidebarProps {
@@ -47,13 +52,20 @@ const AIAgentSidebar: React.FC<AIAgentSidebarProps> = ({ excelFilePath }) => {
 
     try {
       const baseUrl = process.env.NEXT_PUBLIC_SERVICE_URL;
-      // Determine endpoint and agent type based on file path
+      
+      // Determine if this is a projection/chart request
       const isProjectionFile = excelFilePath.toLowerCase().includes('plus');
-      const endpoint = `${baseUrl}/api/analyze/${isProjectionFile ? 'projection' : 'budget_variation'}`;
+      const isChartRequest = message.toLowerCase().includes('serie') || 
+                           message.toLowerCase().includes('graficar') ||
+                           message.toLowerCase().includes('inflación');
+      
+      // Use projection endpoint for both projection files and chart requests
+      const useProjectionEndpoint = isProjectionFile || isChartRequest;
+      const endpoint = `${baseUrl}/api/analyze/${useProjectionEndpoint ? 'projection' : 'budget_variation'}`;
       
       const requestBody = {
         question: message,
-        agent_type: isProjectionFile ? 'projection' : 'budget_variation',
+        agent_type: useProjectionEndpoint ? 'projection' : 'budget_variation',
         excel_file: excelFilePath
       };
 
@@ -71,24 +83,24 @@ const AIAgentSidebar: React.FC<AIAgentSidebarProps> = ({ excelFilePath }) => {
 
       const data = await response.json();
       console.log('API Response:', data);
-      console.log('Scenario data from API:', data.is_inflation_scenario, data.monthly);
 
-      // Check for monthly inflation scenario data
-      const scenarioData = data.is_inflation_scenario && data.monthly ? {
-        is_inflation_scenario: data.is_inflation_scenario,
-        monthly: data.monthly
-      } : undefined;
       // Validate the response format
       if (data.errors) {
         throw new Error(data.errors.excel_file?.[0] || 'Invalid request data');
       }
 
+      // Check if response contains chart data
+      const chartData = 'chart' in data ? data.chart : undefined;
+      
+      // For text responses, use data.answer
+      const messageText = 'answer' in data ? data.answer : '';
+
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
-        message: data.answer,
+        message: messageText,
         sender: 'ai',
         timestamp: new Date().toLocaleTimeString(),
-        scenarioData: scenarioData,
+        chartData: chartData,
       };
       console.log('AI Message created:', aiMessage);
       setMessages(prev => [...prev, aiMessage]);
