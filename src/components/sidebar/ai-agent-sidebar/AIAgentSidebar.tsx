@@ -47,11 +47,13 @@ const AIAgentSidebar: React.FC<AIAgentSidebarProps> = ({ excelFilePath }) => {
 
     try {
       const baseUrl = process.env.NEXT_PUBLIC_SERVICE_URL;
-      const endpoint = `${baseUrl}/api/analyze/budget_variation`;
-
+      // Determine endpoint and agent type based on file path
+      const isProjectionFile = excelFilePath.toLowerCase().includes('plus');
+      const endpoint = `${baseUrl}/api/analyze/${isProjectionFile ? 'projection' : 'budget_variation'}`;
+      
       const requestBody = {
         question: message,
-        agent_type: 'budget_variation',
+        agent_type: isProjectionFile ? 'projection' : 'budget_variation',
         excel_file: excelFilePath
       };
 
