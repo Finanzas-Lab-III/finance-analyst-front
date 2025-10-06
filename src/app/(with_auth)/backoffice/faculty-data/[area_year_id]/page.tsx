@@ -3,17 +3,11 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { 
   ArrowLeft, 
-  Download, 
   Edit, 
-  Save, 
-  X, 
   CheckCircle, 
   XCircle, 
   Clock, 
   AlertCircle,
-  FileText,
-  History,
-  User,
   Calendar,
   Upload,
   MessageSquare,
@@ -21,6 +15,7 @@ import {
   Eye
 } from "lucide-react";
 import Link from "next/link";
+import DashboardTab from '@/components/faculty-data/DashboardTab';
 import TabManager from "@/components/TabManager";
 import OverviewTab from "@/components/faculty-data/OverviewTab";
 import BudgetTab from "@/components/faculty-data/BudgetTab";
@@ -214,7 +209,7 @@ export default function BudgetDetailPage() {
     if (area) return `Presupuesto del ${displayYear} para ${area}`;
     return "";
   })();
-  const [activeTab, setActiveTab] = useState<'overview' | 'budget' | 'tracking' | 'comments'>('budget');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'overview' | 'budget' | 'tracking' | 'comments'>('dashboard');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDocumentSnapshot, setShowDocumentSnapshot] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<BudgetVariation | null>(null);
@@ -227,18 +222,6 @@ export default function BudgetDetailPage() {
     };
   }>({});
   const { latest, history } = useArmadoDocuments(areaYearId);
-
-  const handleStatusChange = () => {
-    // Aquí implementarías la lógica para cambiar el estado
-    console.log(`Cambiando estado a: ${newStatus}`);
-    setIsEditingStatus(false);
-    // Actualizar el estado del presupuesto
-  };
-
-  const handleViewSnapshot = (variation: BudgetVariation) => {
-    setSelectedVariation(variation);
-    setShowDocumentSnapshot(true);
-  };
 
   // Handler para navegar a comentarios con contexto de documento mensual
   const handleNavigateToComments = (documentId: number, month: string, version: string, createdAt: string) => {
@@ -279,9 +262,12 @@ export default function BudgetDetailPage() {
     }).format(amount);
   };
 
+// ...DashboardSection moved to src/components/faculty-data/DashboardSection.tsx
+
   
 
   const tabs = [
+    { id: 'dashboard', label: 'Dashboard' },
     // { id: 'overview', label: 'Resumen' },
     { id: 'budget', label: 'Presupuesto' },
     { id: 'tracking', label: 'Seguimientos' },
@@ -321,6 +307,10 @@ export default function BudgetDetailPage() {
         <div className="p-6">
           {activeTab === 'overview' && (
             <OverviewTab budget={budget as any} formatCurrency={formatCurrency} />
+          )}
+
+          {activeTab === 'dashboard' && (
+            <DashboardTab isAdmin={user?.role === 'finance'} />
           )}
 
           {activeTab === 'budget' && (

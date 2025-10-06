@@ -90,7 +90,7 @@ Template for environment variables needed in production.
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_API_BASE_URL` | Main AI analysis API endpoint | `https://api.example.com` |
+| `NEXT_PUBLIC_SERVICE_URL` | Main AI analysis API endpoint | `https://api.example.com` |
 | `NEXT_PUBLIC_FILE_SERVICE_URL` | File service API endpoint | `https://files.example.com` |
 | `NEXT_PUBLIC_BUDGET_ANALYSIS_URL` | Budget analysis API endpoint | `https://budget.example.com` |
 

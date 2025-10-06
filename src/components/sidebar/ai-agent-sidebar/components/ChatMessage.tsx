@@ -1,36 +1,23 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import MonthlyInflationChart from './MonthlyInflationChart';
+import ProjectionChart from './ProjectionChart';
 
-interface MonthlyData {
-  categories: string[];
-  original_values: number[];
-  modified_values: number[];
-  chart_type: string;
-}
-
-interface InflationScenarioData {
-  is_inflation_scenario: boolean;
-  monthly: MonthlyData;
+interface ChartData {
+  labels: string[];
+  series: { name: string; data: number[]; }[];
 }
 
 interface ChatMessageProps {
   message: string;
   sender: 'ai' | 'user';
   timestamp?: string;
-  scenarioData?: InflationScenarioData;
+  chartData?: ChartData;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, timestamp, scenarioData }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, timestamp, chartData }) => {
   const isUser = sender === 'user';
   const isAI = sender === 'ai';
   
-  console.log('ChatMessage props:', { 
-    message: message.substring(0, 50) + '...', 
-    sender, 
-    scenarioData 
-  });
-
   const userMessageClasses = 'bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-gray-900';
   const aiMessageClasses = 'py-2 text-sm text-gray-900';
 
@@ -47,8 +34,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, timestamp, s
           >
             {message}
           </ReactMarkdown>
-          {scenarioData && scenarioData.is_inflation_scenario && (
-            <MonthlyInflationChart scenarioData={scenarioData} />
+          {chartData && (
+            <ProjectionChart chartData={chartData} />
           )}
         </>
       ) : (
@@ -63,4 +50,4 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, timestamp, s
   );
 };
 
-export default ChatMessage; 
+export default ChatMessage;

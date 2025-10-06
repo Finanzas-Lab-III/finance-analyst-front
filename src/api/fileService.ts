@@ -1,10 +1,10 @@
 import { ApiResponse, FileSystemNode } from './fileSystemData';
 
-const API_BASE_URL = "/api/proxy";
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVICE_URL || "";
 
 export const fetchFileTree = async (): Promise<FileSystemNode[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/excel/files`, {
+    const response = await fetch(`${API_BASE_URL}/api/excel/files`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export const fetchFile = async (filePath: string): Promise<Blob> => {
     }
     
     // Handle backend files (original behavior)
-    const response = await fetch(`${API_BASE_URL}/excel/file/${encodeURIComponent(filePath)}`, {
+    const response = await fetch(`${API_BASE_URL}/api/excel/file/${encodeURIComponent(filePath)}`, {
       method: 'GET',
       headers: {
         'ngrok-skip-browser-warning': 'true',
