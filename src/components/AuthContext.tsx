@@ -47,7 +47,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // API endpoint for authentication
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
 const AUTH_API_URL = '/api/auth/login/';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

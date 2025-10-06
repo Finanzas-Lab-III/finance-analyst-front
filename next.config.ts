@@ -19,13 +19,13 @@ const nextConfig: NextConfig = {
     },
   },
   async rewrites() {
-    if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
+    if (!process.env.NEXT_PUBLIC_SERVICE_URL) {
       throw new Error('NEXT_PUBLIC_API_URL is not defined');
     }
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_SERVICE_URL}/api/:path*`,
       },
     ];
   },

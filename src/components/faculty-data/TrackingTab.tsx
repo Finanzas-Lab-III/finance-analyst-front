@@ -50,7 +50,7 @@ export default function TrackingTab({ areaYearId, onNavigateToComments }: Tracki
       setLoadError(null);
       
       try {        
-        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
         const response = await fetch(`${API_BASE}/api/monthly_budget_variation_summaries/${areaYearId}/`);
         const data = await response.json();
         

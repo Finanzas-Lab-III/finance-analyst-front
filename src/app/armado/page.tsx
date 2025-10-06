@@ -136,7 +136,7 @@ const ArmadoContent = () => {
     try {
       // Determine the file path for the Excel file download endpoint
       let filePath: string;
-      let API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      let API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL || '';
       
       if (fileParam) {
         // If file parameter is provided, use it directly with the correct path format
