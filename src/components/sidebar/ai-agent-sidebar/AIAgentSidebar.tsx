@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useFileContext } from '@/components/FileContext';
+import React, { useState } from 'react';
 import {
   ChatInterface,
   ResizableSidebar
@@ -20,28 +19,26 @@ interface InflationScenarioData {
   monthly: MonthlyData;
 }
 
+interface ChartData {
+  labels: string[];
+  series: { name: string; data: number[] }[];
+}
+
 interface Message {
   id: string;
   message: string;
   sender: 'ai' | 'user';
   timestamp?: string;
-  scenarioData?: InflationScenarioData;
+  chartData?: ChartData;
 }
 
-const AIAgentSidebar: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const { selectedFile } = useFileContext();
-  const [attendedFiles, setAttendedFiles] = useState<string[]>([]);
-  const [isManuallyModified, setIsManuallyModified] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+interface AIAgentSidebarProps {
+  excelFilePath: string;
+}
 
-  useEffect(() => {
-    if (selectedFile && !isManuallyModified) {
-      setAttendedFiles([selectedFile]);
-    } else if (!selectedFile && !isManuallyModified) {
-      setAttendedFiles([]);
-    }
-  }, [selectedFile, isManuallyModified]);
+const AIAgentSidebar: React.FC<AIAgentSidebarProps> = ({ excelFilePath }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSendMessage = async (message: string) => {
     const userMessage: Message = {
@@ -54,19 +51,30 @@ const AIAgentSidebar: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Determine endpoint based on whether selected file contains "+"
-      const baseUrl = "/api/proxy";
-      const endpoint = selectedFile && selectedFile.includes('+') 
-        ? `${baseUrl}/analyze/projection`
-        : `${baseUrl}/analyze/budget_variation`;
+      const baseUrl = process.env.NEXT_PUBLIC_SERVICE_URL;
+      
+      // Determine if this is a projection/chart request
+      const isProjectionFile = excelFilePath.toLowerCase().includes('plus');
+      const isChartRequest = message.toLowerCase().includes('serie') || 
+                           message.toLowerCase().includes('graficar') ||
+                           message.toLowerCase().includes('inflación');
+      
+      // Use projection endpoint for both projection files and chart requests
+      const useProjectionEndpoint = isProjectionFile || isChartRequest;
+      const endpoint = `${baseUrl}/api/analyze/${useProjectionEndpoint ? 'projection' : 'budget_variation'}`;
+      
+      const requestBody = {
+        question: message,
+        agent_type: useProjectionEndpoint ? 'projection' : 'budget_variation',
+        excel_file: excelFilePath
+      };
 
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
         },
-        body: JSON.stringify({ question: message }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -75,20 +83,24 @@ const AIAgentSidebar: React.FC = () => {
 
       const data = await response.json();
       console.log('API Response:', data);
-      console.log('Scenario data from API:', data.is_inflation_scenario, data.monthly);
 
-      // Check for monthly inflation scenario data
-      const scenarioData = data.is_inflation_scenario && data.monthly ? {
-        is_inflation_scenario: data.is_inflation_scenario,
-        monthly: data.monthly
-      } : undefined;
+      // Validate the response format
+      if (data.errors) {
+        throw new Error(data.errors.excel_file?.[0] || 'Invalid request data');
+      }
+
+      // Check if response contains chart data
+      const chartData = 'chart' in data ? data.chart : undefined;
+      
+      // For text responses, use data.answer
+      const messageText = 'answer' in data ? data.answer : '';
 
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
-        message: data.answer,
+        message: messageText,
         sender: 'ai',
         timestamp: new Date().toLocaleTimeString(),
-        scenarioData: scenarioData,
+        chartData: chartData,
       };
       console.log('AI Message created:', aiMessage);
       setMessages(prev => [...prev, aiMessage]);
@@ -107,22 +119,6 @@ const AIAgentSidebar: React.FC = () => {
     }
   };
 
-  const handleQuickAction = (action: string) => {
-    // TODO: Implement quick action handling
-    console.log('Quick action:', action);
-  };
-
-  const handleAddFile = () => {
-    // TODO: Implement file selection modal
-    console.log('Add file clicked');
-    setIsManuallyModified(true);
-  };
-
-  const handleRemoveFile = (fileToRemove: string) => {
-    setAttendedFiles(prev => prev.filter(file => file !== fileToRemove));
-    setIsManuallyModified(true);
-  };
-
   return (
     <ResizableSidebar
       defaultWidth={400}
@@ -132,32 +128,10 @@ const AIAgentSidebar: React.FC = () => {
       className="bg-white text-gray-900 border-l border-gray-200"
     >
       <div className="h-full flex flex-col p-4">
-        <div className="mb-4 border-b border-gray-200 pb-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={handleAddFile} className="p-1.5 hover:bg-gray-100 rounded-md text-gray-600 hover:text-gray-900">
-              <Plus size={16} />
-            </button>
-            {attendedFiles.length > 0 ? (
-              attendedFiles.map(file => (
-                <div key={file} className="flex items-center bg-gray-100 py-1 pl-1 pr-2 rounded-full">
-                  <button onClick={() => handleRemoveFile(file)} className="p-0.5 hover:bg-gray-200 rounded-full text-gray-600 hover:text-gray-900 mr-1">
-                    <X size={14} />
-                  </button>
-                  <span className="text-sm truncate text-gray-700">{file.split('/').pop()}</span>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-xs text-gray-500 px-2">
-                No file in context.
-              </div>
-            )}
-          </div>
-        </div>
         <div className="flex-1 min-h-0">
           <ChatInterface
             messages={messages}
             onSendMessage={handleSendMessage}
-            onQuickAction={handleQuickAction}
             disabled={isLoading}
           />
         </div>
