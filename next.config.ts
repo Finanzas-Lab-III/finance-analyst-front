@@ -18,9 +18,17 @@ const nextConfig: NextConfig = {
       allowedOrigins: ['localhost:3000', '*.vercel.app'],
     },
   },
-  // Important: do not rewrite all /api/* to the backend, we use an explicit
-  // same-origin proxy at /api/proxy/[...path] and internal routes like /api/session
-  // must remain handled by Next.js.
+  async rewrites() {
+    if (!process.env.NEXT_PUBLIC_SERVICE_URL) {
+      throw new Error('NEXT_PUBLIC_API_URL is not defined');
+    }
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_SERVICE_URL}/api/:path*`,
+      },
+    ];
+  },
   eslint: {
     // Allow production builds to successfully complete even if there are ESLint errors
     ignoreDuringBuilds: true,

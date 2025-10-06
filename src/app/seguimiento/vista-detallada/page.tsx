@@ -40,7 +40,7 @@ const SeguimientoDetailedViewContent = () => {
         const decodedFileName = decodeURIComponent(fileName);
         
         // Build the file path
-        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL;
         let filePath = `/api/excel/file/${decodedFileName}`;
 
         // Fetch the Excel file
@@ -281,7 +281,7 @@ const SeguimientoDetailedViewContent = () => {
         </div>
 
         {/* AI Agent Sidebar */}
-        <AIAgentSidebar />
+        <AIAgentSidebar excelFilePath={decodeURIComponent(fileName || '')} />
       </div>
     </main>
   );

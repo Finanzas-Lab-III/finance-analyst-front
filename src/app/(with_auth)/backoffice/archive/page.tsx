@@ -1,14 +1,12 @@
-"use client"
-import React, { useEffect, useMemo, useState } from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Archive } from "lucide-react";
-import { useAuth } from "@/components/AuthContext";
-import { fetchUserFacultiesAreas, AreaInChargeDto, FacultyInChargeDto } from "@/api/userService";
+import { AreaInChargeDto, FacultyInChargeDto } from "@/api/userService";
+import { getFacultiesAndAreas } from "@/lib/user-api";
 
 export default function ArchivePage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const userId = useMemo(() => user?.id ?? null, [user]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [areas, setAreas] = useState<AreaInChargeDto[]>([]);
@@ -17,24 +15,42 @@ export default function ArchivePage() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      if (!userId) return;
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchUserFacultiesAreas(userId);
-        if (cancelled) return;
-        setAreas(data.areas_in_charge || []);
-        setFacultades(data.faculties_in_charge || []);
+        const res = await getFacultiesAndAreas();
+        // Expected shape:
+        // { areas_in_charge: AreaInChargeDto[], faculties_in_charge: FacultyInChargeDto[] }
+        if (!cancelled) {
+          const faculties = Array.isArray(res?.faculties_in_charge) ? res.faculties_in_charge : [];
+          const areasInCharge = Array.isArray(res?.areas_in_charge) ? res.areas_in_charge : [];
+
+          // Optional: sort alphabetically and dedupe by id
+          const uniqueById = <T extends { id: number }>(xs: T[]) =>
+            Array.from(new Map(xs.map(x => [x.id, x])).values());
+
+          setFacultades(
+            uniqueById(faculties).sort((a, b) => a.name.localeCompare(b.name))
+          );
+
+          // If your API returns `parent_area_id` only, you can keep it as-is;
+          // the UI already handles absence of `parent?.name`.
+          // (If later you fetch parents, map them here to { ...a, parent: { id, name } }.)
+          setAreas(
+            uniqueById(areasInCharge).sort((a, b) => a.name.localeCompare(b.name))
+          );
+        }
       } catch (e: any) {
-        if (cancelled) return;
-        setError(e?.message ? String(e.message) : "Error cargando datos");
+        if (!cancelled) setError(e?.message ? String(e.message) : "Error cargando datos");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
     load();
-    return () => { cancelled = true; };
-  }, [userId]);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const showFacultades = facultades.length > 0;
   const showAreas = areas.length > 0;
@@ -54,11 +70,15 @@ export default function ArchivePage() {
       </div>
 
       {loading && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-gray-600">Cargando…</div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-gray-600">
+          Cargando…
+        </div>
       )}
 
       {error && (
-        <div className="bg-white rounded-lg shadow-sm border border-red-200 p-6 text-red-700">{error}</div>
+        <div className="bg-white rounded-lg shadow-sm border border-red-200 p-6 text-red-700">
+          {error}
+        </div>
       )}
 
       {showFacultades && (
@@ -69,16 +89,23 @@ export default function ArchivePage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área/Facultad</th>
-                </tr>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Área/Facultad
+                </th>
+              </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {facultades.map((f) => (
-                  <tr key={f.id} className="hover:bg-gray-50 cursor-pointer">
-                    <td onClick={() => goToYears(f.id)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{f.name}</td>
-                  </tr>
-                ))}
+              {facultades.map((f) => (
+                <tr key={f.id} className="hover:bg-gray-50 cursor-pointer">
+                  <td
+                    onClick={() => goToYears(f.id)}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                  >
+                    {f.name}
+                  </td>
+                </tr>
+              ))}
               </tbody>
             </table>
           </div>
@@ -93,18 +120,23 @@ export default function ArchivePage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área/Facultad</th>
-                </tr>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Área/Facultad
+                </th>
+              </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {areas.map((a) => (
-                  <tr key={a.id} className="hover:bg-gray-50 cursor-pointer">
-                    <td onClick={() => goToYears(a.id)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {a.name}{a.parent?.name ? ` — ${a.parent.name}` : ""}
-                    </td>
-                  </tr>
-                ))}
+              {areas.map((a) => (
+                <tr key={a.id} className="hover:bg-gray-50 cursor-pointer">
+                  <td
+                    onClick={() => goToYears(a.id)}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                  >
+                    {a.name}{a?.parent?.name ? ` — ${a.parent.name}` : ""}
+                  </td>
+                </tr>
+              ))}
               </tbody>
             </table>
           </div>

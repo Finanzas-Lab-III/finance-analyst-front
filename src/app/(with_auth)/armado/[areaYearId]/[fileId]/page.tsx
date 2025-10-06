@@ -43,7 +43,7 @@ export default function ArmadoDocumentPage_Example() {
 
   return (
     <FileProvider>
-      <div className="flex w-full h-screen overflow-hidden bg-gray-50">
+      <div className="flex w-full h-screen overflow-hidden bg-gray-50 m-0 p-0">
         <div className="flex-1 min-w-0 h-full flex flex-col">
           {/* Header */}
           <ArmadoHeader

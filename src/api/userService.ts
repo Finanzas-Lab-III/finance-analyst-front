@@ -15,10 +15,10 @@ export interface UserFilters {
   mail?: string;
 }
 
-const USERS_API_BASE = "/api/proxy";
+const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL || "";
 
 export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> {
-  const base = `${USERS_API_BASE}/api/admin/users/`;
+  const base = `${USERS_API_BASE}/api/admin/users`;
   const params = new URLSearchParams();
   if (filters.nombre_apellido) params.set("nombre_apellido", filters.nombre_apellido);
   if (filters.facultad) params.set("facultad", filters.facultad);
@@ -77,7 +77,7 @@ export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> 
 }
 
 export async function deleteUser(id: string | number): Promise<void> {
-  const url = `${USERS_API_BASE}/api/admin/users/`;
+  const url = `${USERS_API_BASE}/api/admin/users`;
   const res = await fetch(url, {
     method: "DELETE",
     headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
@@ -101,7 +101,7 @@ export type CreateUserPayload = {
 };
 
 export async function createUser(payload: CreateUserPayload): Promise<any> {
-  const url = `${USERS_API_BASE}/api/admin/users/`;
+  const url = `${USERS_API_BASE}/api/admin/users`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
@@ -158,7 +158,7 @@ export interface CreateDirectorPayload {
 }
 
 export async function createDirector(payload: CreateDirectorPayload): Promise<any> {
-  const url = `${USERS_API_BASE}/api/admin/users/`;
+  const url = `${USERS_API_BASE}/api/admin/users`;
   const body = { rol: "DIRECTOR", ...payload };
   const res = await fetch(url, {
     method: "POST",
@@ -192,7 +192,7 @@ export interface UserDetailDto {
 }
 
 export async function fetchUserDetail(id: number | string): Promise<UserDetailDto> {
-  const url = `${USERS_API_BASE}/api/admin/users/${id}/`;
+  const url = `${USERS_API_BASE}/api/admin/users/${id}`;
   const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
   if (!res.ok) {
     throw new Error(`Error obteniendo usuario ${id}: ${res.status} ${res.statusText}`);
@@ -248,7 +248,7 @@ export interface UpdateUserPayload {
 }
 
 export async function updateUser(payload: UpdateUserPayload): Promise<any> {
-  const url = `${USERS_API_BASE}/api/admin/users/`;
+  const url = `${USERS_API_BASE}/api/admin/users`;
   const res = await fetch(url, {
     method: "PUT",
     headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
@@ -331,69 +331,6 @@ export type AreaYearStatus =
   | "BUDGET_APPROVED"
   | "FOLLOW_UP_AVAILABLE";
 
-export interface YearsOfAreaItemDto {
-  area_year_id: number;
-  year: number;
-  isCurrent: boolean;
-  isFuture: boolean;
-  status: AreaYearStatus;
-}
-
-export interface YearsOfAreaResponse {
-  area_id: number;
-  area_name?: string;
-  yearsOfArea: YearsOfAreaItemDto[];
-}
-
-export async function fetchYearsOfArea(areaId: number | string): Promise<YearsOfAreaResponse> {
-  try {
-    const url = `${USERS_API_BASE}/api/yearsOfArea/${areaId}`;
-    const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
-    
-    if (!res.ok) {
-      console.warn(`Backend API failed for years of area ${areaId} (${res.status}), using mock data`);
-      const mockData = MOCK_YEARS_DATA[String(areaId)];
-      if (mockData) {
-        return mockData;
-      }
-      // Default mock data if area not found
-      return {
-        area_id: Number(areaId),
-        yearsOfArea: [
-          { area_year_id: Number(areaId) * 100 + 1, year: 2023, isCurrent: false, isFuture: false, status: "BUDGET_APPROVED" },
-          { area_year_id: Number(areaId) * 100 + 2, year: 2024, isCurrent: false, isFuture: false, status: "FOLLOW_UP_AVAILABLE" },
-          { area_year_id: Number(areaId) * 100 + 3, year: 2025, isCurrent: true, isFuture: false, status: "BUDGET_APPROVED" },
-          { area_year_id: Number(areaId) * 100 + 4, year: 2026, isCurrent: false, isFuture: true, status: "BUDGET_STARTED" },
-          { area_year_id: Number(areaId) * 100 + 5, year: 2027, isCurrent: false, isFuture: true, status: "NOT_STARTED" }
-        ]
-      };
-    }
-    
-    const data = (await res.json()) as YearsOfAreaResponse;
-    return {
-      area_id: Number(data?.area_id) || Number(areaId),
-      area_name: data?.area_name,
-      yearsOfArea: Array.isArray(data?.yearsOfArea) ? data.yearsOfArea : [],
-    };
-  } catch (error) {
-    console.warn(`Backend connection failed for years of area ${areaId}, using mock data:`, error);
-    const mockData = MOCK_YEARS_DATA[String(areaId)];
-    if (mockData) {
-      return mockData;
-    }
-    // Default mock data if area not found
-    return {
-      area_id: Number(areaId),
-      yearsOfArea: [
-        { area_year_id: Number(areaId) * 100 + 1, year: 2023, isCurrent: false, isFuture: false, status: "BUDGET_APPROVED" },
-        { area_year_id: Number(areaId) * 100 + 2, year: 2024, isCurrent: false, isFuture: false, status: "FOLLOW_UP_AVAILABLE" },
-        { area_year_id: Number(areaId) * 100 + 3, year: 2025, isCurrent: true, isFuture: false, status: "BUDGET_APPROVED" },
-        { area_year_id: Number(areaId) * 100 + 4, year: 2026, isCurrent: false, isFuture: true, status: "BUDGET_STARTED" },
-        { area_year_id: Number(areaId) * 100 + 5, year: 2027, isCurrent: false, isFuture: true, status: "NOT_STARTED" }
-      ]
-    };
-  }
-}
 
 export interface AreaSummaryDto {
   id: number;
