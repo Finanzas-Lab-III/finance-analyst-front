@@ -74,11 +74,8 @@ const DEFAULT_CONVERSION_RATES = {
 export default function MonthlyBudgetByCurrencyChart({ 
   filePath = '/app/storage/files/4/armado/Modelo presupuestario 2024 Bioterio - Gallo (Versión Final).xlsx' 
 }: MonthlyBudgetByCurrencyChartProps) {
-  console.log('[MonthlyBudgetByCurrencyChart] Component rendering...');
-  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [chartData, setChartData] = useState<any[]>([]);
   const [currencies, setCurrencies] = useState<string[]>([]);
   const [currencyData, setCurrencyData] = useState<{ [key: string]: any[] }>({});
   const [conversionRates, setConversionRates] = useState(DEFAULT_CONVERSION_RATES);
@@ -89,10 +86,7 @@ export default function MonthlyBudgetByCurrencyChart({
 
     async function fetchBudgetData() {
       try {
-        console.log('[MonthlyBudgetByCurrencyChart] Starting to fetch budget data...');
         const API_BASE_URL = process.env.NEXT_PUBLIC_SERVICE_URL ?? '';
-        console.log('[MonthlyBudgetByCurrencyChart] API_BASE_URL:', API_BASE_URL);
-        console.log('[MonthlyBudgetByCurrencyChart] File path:', filePath);
         
         const response = await fetch(`${API_BASE_URL}/api/budget-processor/process/`, {
           method: 'POST',
@@ -100,16 +94,12 @@ export default function MonthlyBudgetByCurrencyChart({
           body: JSON.stringify({ file_path: filePath })
         });
 
-        console.log('[MonthlyBudgetByCurrencyChart] Response status:', response.status);
-
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('[MonthlyBudgetByCurrencyChart] API error response:', errorText);
           throw new Error(`API error: ${response.status} - ${errorText}`);
         }
 
         const result: BudgetProcessorResponse = await response.json();
-        console.log('[MonthlyBudgetByCurrencyChart] API result:', result);
 
         if (!mounted) return;
 
@@ -119,13 +109,12 @@ export default function MonthlyBudgetByCurrencyChart({
 
         // Process data to group by month and currency
         const processedData = prepareChartData(result.data);
-        console.log('[MonthlyBudgetByCurrencyChart] Processed chart data:', processedData);
         setCurrencies(processedData.currencies);
         setCurrencyData(processedData.currencyData);
         
       } catch (err: any) {
         if (!mounted) return;
-        console.error('[MonthlyBudgetByCurrencyChart] Error fetching budget data:', err);
+        console.error('Error fetching budget data:', err);
         setError(err.message || 'Failed to load budget data');
       } finally {
         if (!mounted) return;
@@ -276,23 +265,23 @@ export default function MonthlyBudgetByCurrencyChart({
         </button>
         
         {showSettings && (
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {currencies.filter(c => c !== 'Pesos' && c !== 'ARS').map((currency) => (
-              <div key={currency} className="flex flex-col">
-                <label className="text-sm font-medium text-gray-700 mb-1">
-                  {currency} a ARS
-                </label>
-                <input
-                  type="number"
-                  value={conversionRates[currency as keyof typeof conversionRates] || 0}
-                  onChange={(e) => handleConversionRateChange(currency, e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  step="0.01"
-                  min="0"
-                />
-              </div>
-            ))}
-          </div>
+           <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+             {currencies.filter(c => c !== 'Pesos' && c !== 'ARS').map((currency) => (
+               <div key={currency} className="flex flex-col">
+                 <label className="text-sm font-medium text-gray-700 mb-1">
+                   {currency} a ARS
+                 </label>
+                 <input
+                   type="number"
+                   value={conversionRates[currency as keyof typeof conversionRates] || 0}
+                   onChange={(e) => handleConversionRateChange(currency, e.target.value)}
+                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium"
+                   step="0.01"
+                   min="0"
+                 />
+               </div>
+             ))}
+           </div>
         )}
       </div>
 
