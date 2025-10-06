@@ -1,15 +1,16 @@
-"use client"
+"use client";
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchYearsOfArea, YearsOfAreaItemDto } from "@/api/userService";
-import { statusColor, statusLabelEs } from "@/lib/areaYearStatus";
+import { getYearsOfArea } from "@/lib/user-api";
+import {YearsOfAreaItemDto} from "@/types/types";
 
 export default function AreaYearsPage() {
   const params = useParams();
   const router = useRouter();
   const rawId = params?.id as string;
   const areaId = useMemo(() => (rawId ? decodeURIComponent(rawId) : null), [rawId]);
-  const [loading, setLoading] = useState<boolean>(false);
+
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<YearsOfAreaItemDto[]>([]);
   const [areaName, setAreaName] = useState<string>("");
@@ -21,10 +22,10 @@ export default function AreaYearsPage() {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchYearsOfArea(areaId);
+        const { areaName, items } = await getYearsOfArea(areaId); // <- ahora devuelve ambos
         if (cancelled) return;
-        setItems(Array.isArray(data.yearsOfArea) ? data.yearsOfArea : []);
-        setAreaName(data?.area_name || "");
+        setItems(items);
+        setAreaName(areaName); // <- nombre real del backend
       } catch (e: any) {
         if (cancelled) return;
         setError(e?.message ? String(e.message) : "Error cargando años del área");
@@ -36,9 +37,11 @@ export default function AreaYearsPage() {
     return () => { cancelled = true; };
   }, [areaId]);
 
-  const current = items.filter(i => i.isCurrent);
-  const future = items.filter(i => i.isFuture && !i.isCurrent);
-  const others = items.filter(i => !i.isCurrent && !i.isFuture).sort((a, b) => b.year - a.year);
+
+  const now = new Date().getFullYear();
+  const current = items.filter(i => i.year === now);
+  const future = items.filter(i => i.year > now);
+  const others = items.filter(i => i.year < now).sort((a, b) => b.year - a.year);
 
   const resolvedAreaName = areaName || (areaId ? `Área ${areaId}` : "Área");
 
@@ -50,35 +53,36 @@ export default function AreaYearsPage() {
       <div className="overflow-x-auto">
         <table className="w-full table-fixed">
           <colgroup>
-            <col className="w-1/2" />
-            <col className="w-1/2" />
+            <col className="w-2/3" />
+            <col className="w-1/3" />
           </colgroup>
           <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presupuesto</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-            </tr>
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Presupuesto
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Año
+            </th>
+          </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {rows.map((r) => (
-              <tr 
-                key={r.area_year_id} 
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => {
-                  const url = `/backoffice/faculty-data/${r.area_year_id}`;
-                  router.push(url);
-                }}
-              >
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                  Presupuesto {resolvedAreaName} {r.year}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor(r.status)}`}>
-                    {statusLabelEs(r.status)}
-                  </span>
-                </td>
-              </tr>
-            ))}
+          {rows.map((r) => (
+            <tr
+              key={r.area_year_id}
+              className="hover:bg-gray-50 cursor-pointer"
+              onClick={() => {
+                router.push(`/backoffice/faculty-data/${r.area_year_id}`);
+              }}
+            >
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                Presupuesto {resolvedAreaName} {r.year}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                {r.year}
+              </td>
+            </tr>
+          ))}
           </tbody>
         </table>
       </div>
@@ -89,20 +93,13 @@ export default function AreaYearsPage() {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{resolvedAreaName}</h1>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900">{resolvedAreaName}</h1>
           <button onClick={() => router.back()} className="text-blue-600 hover:text-blue-800 text-sm">Volver</button>
         </div>
       </div>
 
-      {loading && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-gray-600">Cargando…</div>
-      )}
-
-      {error && (
-        <div className="bg-white rounded-lg shadow-sm border border-red-200 p-6 text-red-700">{error}</div>
-      )}
+      {loading && <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-gray-600">Cargando…</div>}
+      {error && <div className="bg-white rounded-lg shadow-sm border border-red-200 p-6 text-red-700">{error}</div>}
 
       {!loading && !error && (
         <>
@@ -119,5 +116,3 @@ export default function AreaYearsPage() {
     </div>
   );
 }
-
-

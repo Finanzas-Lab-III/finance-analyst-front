@@ -3,17 +3,11 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { 
   ArrowLeft, 
-  Download, 
   Edit, 
-  Save, 
-  X, 
   CheckCircle, 
   XCircle, 
   Clock, 
   AlertCircle,
-  FileText,
-  History,
-  User,
   Calendar,
   Upload,
   MessageSquare,

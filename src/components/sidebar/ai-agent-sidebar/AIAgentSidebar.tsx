@@ -5,7 +5,6 @@ import {
   ChatInterface,
   ResizableSidebar
 } from './components';
-import { Plus, X } from 'lucide-react';
 
 interface MonthlyData {
   categories: string[];

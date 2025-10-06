@@ -1,47 +1,38 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+import {analyzeArmado} from "@/lib/user-api";
 
 type ArmadoApiItem = {
-  row?: number
-  rule?: string
-  error?: string
-  [k: string]: any
-}
+  row?: number;
+  rule?: string;
+  error?: string;
+  [k: string]: any;
+};
 
 type UseArmadoAIResult = {
-  analysisResults: ArmadoApiItem[]
-  analysisLoading: boolean
-  analysisError: string | null
-}
+  analysisResults: ArmadoApiItem[];
+  analysisLoading: boolean;
+  analysisError: string | null;
+};
 
 export function useArmadoAI(areaYearId?: string): UseArmadoAIResult {
-  const [analysisResults, setAnalysisResults] = useState<ArmadoApiItem[]>([])
-  const [analysisLoading, setAnalysisLoading] = useState(false)
-  const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [analysisResults, setAnalysisResults] = useState<ArmadoApiItem[]>([]);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!areaYearId) return
-    const controller = new AbortController()
+    if (!areaYearId) return;
+
+    const controller = new AbortController();
 
     async function run() {
-      setAnalysisLoading(true)
-      setAnalysisError(null)
+      setAnalysisLoading(true);
+      setAnalysisError(null);
       try {
-        const res = await fetch(`http://localhost:8000/api/armado/${encodeURIComponent(areaYearId as string)}` , {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true',
-          },
-          body: JSON.stringify({}),
-          cache: 'no-store',
-          signal: controller.signal,
-        })
-        if (!res.ok) {
-          throw new Error(`Error ${res.status}`)
-        }
-        const data: any = await res.json()
+        if(!areaYearId) throw new Error('ID de año de área no proporcionado');
+        const data: any = await analyzeArmado(areaYearId, { signal: controller.signal });
+
         if (Array.isArray(data)) {
           const mapped: ArmadoApiItem[] = data.map((item: ArmadoApiItem) => ({
             // For the sidebar UI
@@ -49,25 +40,24 @@ export function useArmadoAI(areaYearId?: string): UseArmadoAIResult {
             description: `Fila ${item.row ?? '-'} • Regla: ${item.rule ?? '-'}`,
             // Keep original fields
             ...item,
-          }))
-          setAnalysisResults(mapped)
+          }));
+          setAnalysisResults(mapped);
         } else {
           // Pass through unexpected shapes so the UI can show them
-          setAnalysisResults(data)
+          setAnalysisResults(data);
         }
       } catch (e: any) {
-        if (e?.name === 'AbortError') return
-        setAnalysisError(e?.message ? String(e.message) : 'No se pudo analizar el presupuesto')
+        // Handle abort/cancel from axios v1 (ERR_CANCELED) and generic AbortError
+        if (e?.code === 'ERR_CANCELED' || e?.name === 'AbortError' || e?.name === 'CanceledError') return;
+        setAnalysisError(e?.message ? String(e.message) : 'No se pudo analizar el presupuesto');
       } finally {
-        setAnalysisLoading(false)
+        setAnalysisLoading(false);
       }
     }
 
-    run()
-    return () => controller.abort()
-  }, [areaYearId])
+    run();
+    return () => controller.abort();
+  }, [areaYearId]);
 
-  return { analysisResults, analysisLoading, analysisError }
+  return { analysisResults, analysisLoading, analysisError };
 }
-
-
