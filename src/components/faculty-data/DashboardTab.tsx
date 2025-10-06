@@ -16,6 +16,12 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
     progress_percentage: string | number;
   } | null>(null);
 
+  const formatNumber = (value: string | number): string => {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(num)) return String(value);
+    return num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  };
+
   React.useEffect(() => {
     let mounted = true;
     async function fetchLatestTotals() {
@@ -84,21 +90,21 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <div className="text-sm text-gray-500 uppercase">Presupuesto Total</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                {String(data.total_budget)}
+                $ {formatNumber(data.total_budget)}
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <div className="text-sm text-gray-500 uppercase">Total Gastado</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                {String(data.total_spent)}
+                $ {formatNumber(data.total_spent)}
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <div className="text-sm text-gray-500 uppercase">Porcentaje de Progreso</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                {String(data.progress_percentage)}
+                {formatNumber(data.progress_percentage)}%
               </div>
             </div>
           </div>
