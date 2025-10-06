@@ -223,18 +223,6 @@ export default function BudgetDetailPage() {
   }>({});
   const { latest, history } = useArmadoDocuments(areaYearId);
 
-  const handleStatusChange = () => {
-    // Aquí implementarías la lógica para cambiar el estado
-    console.log(`Cambiando estado a: ${newStatus}`);
-    setIsEditingStatus(false);
-    // Actualizar el estado del presupuesto
-  };
-
-  const handleViewSnapshot = (variation: BudgetVariation) => {
-    setSelectedVariation(variation);
-    setShowDocumentSnapshot(true);
-  };
-
   // Handler para navegar a comentarios con contexto de documento mensual
   const handleNavigateToComments = (documentId: number, month: string, version: string, createdAt: string) => {
     setCommentContext({
