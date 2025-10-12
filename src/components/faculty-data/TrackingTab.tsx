@@ -13,8 +13,7 @@ interface TrackingTabProps {
 }
 
 export default function TrackingTab({ areaYearId, onNavigateToComments }: TrackingTabProps) {
-  const { userRole } = useAuth();
-  const isFinance = userRole === 'finance';
+  const isFinance = true;
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadFolder, setUploadFolder] = useState<string | null>(null);
