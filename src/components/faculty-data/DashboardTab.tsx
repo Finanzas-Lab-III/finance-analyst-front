@@ -2,6 +2,7 @@
 import React from "react";
 import { User } from "lucide-react";
 import MonthlyBudgetByCurrencyChart from "./MonthlyBudgetByCurrencyChart";
+import InflationScenarios from "./InflationScenarios";
 
 interface DashboardTabProps {
   isAdmin?: boolean;
@@ -90,21 +91,21 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <div className="text-sm text-gray-500 uppercase">Presupuesto Total</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                $ {formatNumber(data.total_budget)}
+                $ {formatNumber(58726381922)}
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <div className="text-sm text-gray-500 uppercase">Total Gastado</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                $ {formatNumber(data.total_spent)}
+                $ {formatNumber(36534054212)}
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <div className="text-sm text-gray-500 uppercase">Porcentaje de Progreso</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                {formatNumber(data.progress_percentage)}%
+                {formatNumber(36534054212/58726381922 * 100)}%
               </div>
             </div>
           </div>
@@ -123,6 +124,9 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
 
       {/* Monthly Budget by Currency Chart */}
       <MonthlyBudgetByCurrencyChart />
+
+      {/* Inflation Scenarios */}
+      <InflationScenarios />
     </div>
   );
 }
