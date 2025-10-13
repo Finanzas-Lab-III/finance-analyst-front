@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Feat: merged Marcos's Part" />
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Feat: merged main" />
     <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="commit not" />
     <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -256,7 +256,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760322455482</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Feat: merged main">
+      <option name="closed" value="true" />
+      <created>1760327237027</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1760327237027</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -304,6 +312,7 @@
     <MESSAGE value="fix: rollback" />
     <MESSAGE value="fix: kinda created a proxy for fixing that the request doesnt send cookies." />
     <MESSAGE value="Feat: merged Marcos's Part" />
-    <option name="LAST_COMMIT_MESSAGE" value="Feat: merged Marcos's Part" />
+    <MESSAGE value="Feat: merged main" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feat: merged main" />
   </component>
 </project>

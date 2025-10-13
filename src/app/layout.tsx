@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthContext";
 import MsalProviderWrapper from "@/components/MsalProviderWrapper";
 import ToastProvider from "@/components/ToastProvider";
+import { FileProvider } from "@/components/FileContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,8 +34,10 @@ export default function RootLayout({
       >
         <MsalProviderWrapper>
           <AuthProvider>
-            {children}
-            <ToastProvider />
+            <FileProvider>
+              {children}
+              <ToastProvider />
+            </FileProvider>
           </AuthProvider>
         </MsalProviderWrapper>
       </body>
