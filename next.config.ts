@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
         // Vercel proxies to Django; change the path part depending on your Django URLs:
         // If your Django endpoints are like http://20.57.160.54:8000/api/..., keep the /api here.
         // If your endpoints are at root (e.g. /auth/login), remove the /api below.
-        destination: `${SERVICE_URL}/:path*`, // or `${SERVICE_URL}/api/:path*`
+        destination: `${SERVICE_URL}/api/:path*`, // or `${SERVICE_URL}/api/:path*`
       },
     ];
   },
