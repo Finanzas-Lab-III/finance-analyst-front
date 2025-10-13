@@ -11,6 +11,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { TrendingUp, DollarSign, Euro, Banknote, Settings } from 'lucide-react';
+import { processBudgetFile, BudgetProcessorResponse } from "@/lib/budget-api";
 
 interface BudgetDataItem {
   'Grupo Cuenta': string;
@@ -34,12 +35,7 @@ interface BudgetDataItem {
   'Tot': number;
 }
 
-interface BudgetProcessorResponse {
-  success: boolean;
-  data: BudgetDataItem[];
-  columns: string[];
-  row_count: number;
-}
+// Response type is imported from budget-api
 
 interface MonthlyBudgetByCurrencyChartProps {
   filePath?: string;
@@ -86,20 +82,7 @@ export default function MonthlyBudgetByCurrencyChart({
 
     async function fetchBudgetData() {
       try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_SERVICE_URL ?? '';
-        
-        const response = await fetch(`${API_BASE_URL}/api/budget-processor/process/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ file_path: filePath })
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`API error: ${response.status} - ${errorText}`);
-        }
-
-        const result: BudgetProcessorResponse = await response.json();
+        const result: BudgetProcessorResponse = await processBudgetFile(filePath);
 
         if (!mounted) return;
 
