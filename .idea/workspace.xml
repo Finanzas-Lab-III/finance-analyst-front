@@ -4,24 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="fix: proxied the /api/admin/user endpoint">
-      <change afterPath="$PROJECT_DIR$/src/types/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/commentsService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/commentsService.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/fileService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/fileService.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/userService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/userService.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/armado/[areaYearId]/[fileId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/armado/[areaYearId]/[fileId]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/archive/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/archive/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-data/[area_year_id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-data/[area_year_id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/proxy/[...path]/route.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/armado/hooks/useArmadoAI.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/armado/hooks/useArmadoAI.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/BudgetTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/BudgetTab.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/UploadBudgetModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/UploadBudgetModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sidebar/ai-agent-sidebar/AIAgentSidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sidebar/ai-agent-sidebar/AIAgentSidebar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/login-api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/login-api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/user-api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/user-api.ts" afterDir="false" />
-    </list>
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Feat: merged Marcos's Part" />
     <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="commit not" />
     <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,7 +15,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="cors-fix" />
+        <entry key="$PROJECT_DIR$" value="6-octubre-fer" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -61,7 +44,7 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;22-sep-fer&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/rvassolo/WebstormProjects/lab3/src/lib&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/rvassolo/WebstormProjects/lab3/src/app/(with_auth)/armado&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -73,16 +56,18 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/app/(with_auth)/armado" />
+      <recent name="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-data" />
       <recent name="$PROJECT_DIR$/src/lib" />
       <recent name="$PROJECT_DIR$/src/app/(auth)" />
       <recent name="$PROJECT_DIR$/src/app/backoffice/faculty/[id]/[year]" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/app/(with_auth)/backoffice" />
       <recent name="$PROJECT_DIR$/src/app/(auth)" />
       <recent name="$PROJECT_DIR$/src/app/(with_auth)" />
       <recent name="$PROJECT_DIR$/src/app/armado/[areaYearId]/[fileId]" />
       <recent name="$PROJECT_DIR$/src/components/armado/components" />
-      <recent name="$PROJECT_DIR$/src/app/backoffice/faculty-years" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -263,7 +248,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759156348545</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Feat: merged Marcos's Part">
+      <option name="closed" value="true" />
+      <created>1760322455482</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1760322455482</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -310,6 +303,7 @@
     <MESSAGE value="fix: I just don't know anymore what I am doing" />
     <MESSAGE value="fix: rollback" />
     <MESSAGE value="fix: kinda created a proxy for fixing that the request doesnt send cookies." />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: kinda created a proxy for fixing that the request doesnt send cookies." />
+    <MESSAGE value="Feat: merged Marcos's Part" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feat: merged Marcos's Part" />
   </component>
 </project>
