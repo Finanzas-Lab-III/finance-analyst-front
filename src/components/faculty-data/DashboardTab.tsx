@@ -2,6 +2,7 @@
 import React from "react";
 import { User } from "lucide-react";
 import MonthlyBudgetByCurrencyChart from "./MonthlyBudgetByCurrencyChart";
+import InflationAdjustmentChart from "./InflationAdjustmentChart";
 
 interface DashboardTabProps {
   isAdmin?: boolean;
@@ -123,6 +124,9 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
 
       {/* Monthly Budget by Currency Chart */}
       <MonthlyBudgetByCurrencyChart />
+
+      {/* Inflation Adjustment Chart */}
+      <InflationAdjustmentChart />
     </div>
   );
 }
