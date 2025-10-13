@@ -203,13 +203,21 @@ export default function InflationAdjustmentChart({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-gray-600" />
-          <h4 className="font-semibold text-gray-900">Ajuste por Inflación</h4>
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+          <div className="flex items-center space-x-3">
+            <div className="bg-white/20 rounded-lg p-2">
+              <Percent className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">Proyección con Ajuste por Inflación</h3>
+              <p className="text-sm text-blue-100">Cálculo basado en valores en Pesos Argentinos (ARS)</p>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-600">Cargando datos...</div>
+        <div className="flex flex-col items-center justify-center h-64 p-6">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <div className="text-gray-600 font-medium">Cargando datos...</div>
         </div>
       </div>
     );
@@ -217,13 +225,32 @@ export default function InflationAdjustmentChart({
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-gray-600" />
-          <h4 className="font-semibold text-gray-900">Ajuste por Inflación</h4>
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+          <div className="flex items-center space-x-3">
+            <div className="bg-white/20 rounded-lg p-2">
+              <Percent className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">Proyección con Ajuste por Inflación</h3>
+              <p className="text-sm text-blue-100">Cálculo basado en valores en Pesos Argentinos (ARS)</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800 text-sm">Error al cargar datos: {error}</p>
+        <div className="p-6">
+          <div className="bg-red-50 border-2 border-red-200 rounded-lg p-5">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-red-800 font-semibold mb-1">Error al cargar datos</h4>
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -237,191 +264,235 @@ export default function InflationAdjustmentChart({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-300 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Percent className="w-6 h-6 text-purple-600" />
-            <h3 className="text-lg font-bold text-gray-900">Proyección con Ajuste por Inflación (Solo ARS)</h3>
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-gray-100 rounded-t-lg px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="bg-white/20 rounded-lg p-2">
+                <Percent className="w-6 h-6 text-black" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Proyección con Ajuste por Inflación</h3>
+                <p className="text-sm text-blue-400">Cálculo basado en valores en Pesos Argentinos (ARS)</p>
+              </div>
+            </div>
+            <button
+              onClick={handleReset}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg transition-colors text-white"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span className="text-sm font-medium">Resetear</span>
+            </button>
           </div>
-          <button
-            onClick={handleReset}
-            className="flex items-center space-x-2 px-4 py-2 bg-white border border-purple-300 rounded-lg hover:bg-purple-50 transition-colors"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span className="text-sm font-medium">Resetear</span>
-          </button>
         </div>
 
         {/* Inflation Controls */}
-        <div className="bg-white rounded-lg p-4 space-y-4">
-          <div className="flex items-center space-x-4">
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                checked={useGlobalInflation}
-                onChange={() => setUseGlobalInflation(true)}
-                className="w-4 h-4 text-purple-600"
-              />
-              <span className="font-medium">Inflación Global</span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                checked={!useGlobalInflation}
-                onChange={() => setUseGlobalInflation(false)}
-                className="w-4 h-4 text-purple-600"
-              />
-              <span className="font-medium">Inflación por Mes</span>
-            </label>
+        <div className="p-6 space-y-6">
+          {/* Tab-style toggle */}
+          <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setUseGlobalInflation(true)}
+              className={`flex-1 px-4 py-2.5 rounded-md font-medium transition-all duration-200 ${
+                useGlobalInflation
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Inflación Global
+            </button>
+            <button
+              onClick={() => setUseGlobalInflation(false)}
+              className={`flex-1 px-4 py-2.5 rounded-md font-medium transition-all duration-200 ${
+                !useGlobalInflation
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Inflación por Mes
+            </button>
           </div>
 
           {useGlobalInflation ? (
-            <div className="flex items-center space-x-4">
-              <div className="flex-1">
-                <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Tasa de Inflación Mensual (%)
-                </label>
-                <input
-                  type="number"
-                  value={globalInflation}
-                  onChange={(e) => handleGlobalInflationChange(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 font-medium"
-                  step="0.1"
-                  placeholder="Ej: 5.5"
-                />
-              </div>
-              <button
-                onClick={handleApplyGlobalToAll}
-                className="mt-6 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-              >
-                Aplicar a Todos los Meses
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {MONTH_LABELS.map((month, index) => (
-                <div key={month}>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">{month}</label>
+            <div className="bg-blue-50 rounded-lg p-5 border border-blue-100">
+              <div className="flex items-end space-x-4">
+                <div className="flex-1">
+                  <label className="text-sm font-semibold text-gray-700 mb-2 block">
+                    Tasa de Inflación Mensual (%)
+                  </label>
                   <div className="relative">
                     <input
                       type="number"
-                      value={monthlyInflation[index]}
-                      onChange={(e) => handleMonthlyInflationChange(index, e.target.value)}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500 text-gray-900"
+                      value={globalInflation}
+                      onChange={(e) => handleGlobalInflationChange(e.target.value)}
+                      className="w-full pl-4 pr-10 py-3 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-semibold text-lg"
                       step="0.1"
+                      placeholder="Ej: 5.5"
                     />
-                    <span className="absolute right-2 top-1 text-xs text-gray-500">%</span>
+                    <span className="absolute right-4 top-3.5 text-blue-600 font-semibold">%</span>
                   </div>
                 </div>
-              ))}
+                <button
+                  onClick={handleApplyGlobalToAll}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+                >
+                  Aplicar a Todos los Meses
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {MONTH_LABELS.map((month, index) => (
+                  <div key={month} className="bg-white rounded-lg p-3 border border-gray-200">
+                    <label className="text-xs font-semibold text-gray-600 mb-2 block uppercase tracking-wide">{month}</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={monthlyInflation[index]}
+                        onChange={(e) => handleMonthlyInflationChange(index, e.target.value)}
+                        className="w-full pl-3 pr-8 py-2 text-sm border-2 border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
+                        step="0.1"
+                      />
+                      <span className="absolute right-2 top-2 text-xs text-gray-500 font-medium">%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h4 className="font-semibold text-gray-900 mb-4">Comparación: Original vs Ajustado por Inflación</h4>
-        
-        <div className="h-[400px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={adjustedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#6b7280" />
-              <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12 }} stroke="#6b7280" />
-              <Tooltip 
-                formatter={(value: number) => `$ ${formatNumber(value)}`}
-                contentStyle={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  fontSize: '12px'
-                }}
-              />
-              <Legend wrapperStyle={{ fontSize: '12px' }} />
-              <Line
-                type="monotone"
-                dataKey="original"
-                name="Presupuesto Original (ARS)"
-                stroke="#3b82f6"
-                strokeWidth={2}
-                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="adjusted"
-                name="Ajustado por Inflación (ARS)"
-                stroke="#ef4444"
-                strokeWidth={2}
-                dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <h4 className="font-semibold text-gray-900">Comparación: Original vs Ajustado por Inflación</h4>
         </div>
+        
+        <div className="p-6">
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={adjustedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#6b7280" />
+                <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 12 }} stroke="#6b7280" />
+                <Tooltip 
+                  formatter={(value: number) => `$ ${formatNumber(value)}`}
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Line
+                  type="monotone"
+                  dataKey="original"
+                  name="Presupuesto Original (ARS)"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                  dot={{ fill: '#3b82f6', strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 7 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="adjusted"
+                  name="Ajustado por Inflación (ARS)"
+                  stroke="#ef4444"
+                  strokeWidth={3}
+                  dot={{ fill: '#ef4444', strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 7 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-        {/* Summary */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-            <div className="text-sm text-blue-600 font-medium mb-1">Total Original</div>
-            <div className="text-2xl font-bold text-blue-700">$ {formatNumber(totalOriginal)}</div>
-          </div>
-          <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-            <div className="text-sm text-red-600 font-medium mb-1">Total Ajustado</div>
-            <div className="text-2xl font-bold text-red-700">$ {formatNumber(totalAdjusted)}</div>
-          </div>
-          <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-            <div className="text-sm text-purple-600 font-medium mb-1">Diferencia Total</div>
-            <div className="text-2xl font-bold text-purple-700">
-              {totalDifference >= 0 ? '+' : ''} $ {formatNumber(totalDifference)}
+          {/* Summary */}
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
+              <div className="relative z-10">
+                <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">Total Original</div>
+                <div className="text-2xl font-bold text-blue-700">$ {formatNumber(totalOriginal)}</div>
+              </div>
+              <div className="absolute -right-4 -bottom-4 text-blue-200 opacity-20">
+                <TrendingUp className="w-24 h-24" />
+              </div>
+            </div>
+            <div className="relative overflow-hidden bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-5 border border-red-200">
+              <div className="relative z-10">
+                <div className="text-xs font-semibold text-red-600 uppercase tracking-wider mb-2">Total Ajustado</div>
+                <div className="text-2xl font-bold text-red-700">$ {formatNumber(totalAdjusted)}</div>
+              </div>
+              <div className="absolute -right-4 -bottom-4 text-red-200 opacity-20">
+                <TrendingUp className="w-24 h-24" />
+              </div>
+            </div>
+            <div className="relative overflow-hidden bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-5 border border-indigo-200">
+              <div className="relative z-10">
+                <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-2">Diferencia Total</div>
+                <div className="text-2xl font-bold text-indigo-700">
+                  {totalDifference >= 0 ? '+' : ''} $ {formatNumber(totalDifference)}
+                </div>
+              </div>
+              <div className="absolute -right-4 -bottom-4 text-indigo-200 opacity-20">
+                <Percent className="w-24 h-24" />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Detailed Table */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <button
           onClick={() => setShowTable(!showTable)}
-          className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 mb-4"
+          className="w-full flex items-center justify-between px-6 py-4 bg-gray-50 hover:bg-gray-100 transition-colors border-b border-gray-200"
         >
-          {showTable ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-          <h4 className="font-semibold text-gray-900">Tabla Detallada de Ajustes</h4>
+          <h4 className="font-semibold text-gray-900 flex items-center space-x-2">
+            <span>Tabla Detallada de Ajustes</span>
+          </h4>
+          {showTable ? 
+            <ChevronUp className="w-5 h-5 text-gray-600" /> : 
+            <ChevronDown className="w-5 h-5 text-gray-600" />
+          }
         </button>
 
         {showTable && (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Mes</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Inflación Mensual</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Inflación Acum.</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Original (ARS)</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Ajustado (ARS)</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Diferencia</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">% Cambio</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Mes</th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Inflación Mensual</th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Inflación Acum.</th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Original (ARS)</th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Ajustado (ARS)</th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Diferencia</th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">% Cambio</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 bg-white">
                 {adjustedData.map((item, index) => (
-                  <tr key={item.month} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.month}</td>
-                    <td className="px-4 py-3 text-sm text-right text-gray-700">
+                  <tr key={item.month} className="hover:bg-blue-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">{item.month}</td>
+                    <td className="px-6 py-4 text-sm text-right text-gray-700 font-medium">
                       {item.inflationRate.toFixed(1)}%
                     </td>
-                    <td className="px-4 py-3 text-sm text-right font-medium text-purple-600">
+                    <td className="px-6 py-4 text-sm text-right font-semibold text-indigo-600">
                       {item.cumulativeInflation.toFixed(2)}%
                     </td>
-                    <td className="px-4 py-3 text-sm text-right font-medium text-blue-600">
+                    <td className="px-6 py-4 text-sm text-right font-semibold text-blue-600">
                       $ {formatNumber(item.original)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-right font-medium text-red-600">
+                    <td className="px-6 py-4 text-sm text-right font-semibold text-red-600">
                       $ {formatNumber(item.adjusted)}
                     </td>
-                    <td className={`px-4 py-3 text-sm text-right font-medium ${item.difference >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <td className={`px-6 py-4 text-sm text-right font-semibold ${item.difference >= 0 ? 'text-red-600' : 'text-green-600'}`}>
                       {item.difference >= 0 ? '+' : ''} $ {formatNumber(item.difference)}
                     </td>
-                    <td className={`px-4 py-3 text-sm text-right font-semibold ${item.percentChange >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <td className={`px-6 py-4 text-sm text-right font-bold ${item.percentChange >= 0 ? 'text-red-600' : 'text-green-600'}`}>
                       {item.percentChange >= 0 ? '+' : ''}{item.percentChange.toFixed(2)}%
                     </td>
                   </tr>
