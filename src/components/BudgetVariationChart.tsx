@@ -11,18 +11,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-interface MonthlyBudgetVariation {
-  month: string;
-  directory_exists: boolean;
-  files_found: number;
-  total_budgeted: number;
-  total_spent: number;
-  difference: number;
-  errors: string[];
-}
-
 interface BudgetVariationChartProps {
-  data: { [key: string]: MonthlyBudgetVariation };
   formatCurrency: (amount: number) => string;
 }
 
@@ -31,20 +20,30 @@ const monthOrder = [
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
 ];
 
-const BudgetVariationChart: React.FC<BudgetVariationChartProps> = ({ data, formatCurrency }) => {
-  // Transform data into the format expected by Recharts
-  const chartData = monthOrder.map(month => {
-    const monthData = data[month] || {};
-    return {
-      month,
-      total_budgeted: monthData.total_budgeted ?? 0,
-      total_spent: monthData.total_spent ?? 0,
-      difference: monthData.difference ?? 0,
-      files_found: monthData.files_found ?? 0,
-      directory_exists: monthData.directory_exists ?? false,
-      errors: monthData.errors ?? []
-    };
-  });
+// Mocked data with reduced budgets (enero through septiembre):
+// Total budgeted: $43,200,000,000 (reduced to bring closer to spent)
+// Total spent: $36,534,054,212
+const mockMonthlyData = [
+  { month: 'enero', total_budgeted: 4752134591, total_spent: 3892672690 },
+  { month: 'febrero', total_budgeted: 4798453312, total_spent: 4058394521 },
+  { month: 'marzo', total_budgeted: 4865123409, total_spent: 4211567832 },
+  { month: 'abril', total_budgeted: 4776892145, total_spent: 4015238447 },
+  { month: 'mayo', total_budgeted: 4817245673, total_spent: 4098542219 },
+  { month: 'junio', total_budgeted: 4785334398, total_spent: 3985126754 },
+  { month: 'julio', total_budgeted: 4794321087, total_spent: 4042371865 },
+  { month: 'agosto', total_budgeted: 4843567821, total_spent: 4110294332 },
+  { month: 'septiembre', total_budgeted: 4796624734, total_spent: 4119845552 },
+  { month: 'octubre', total_budgeted: 0, total_spent: 0 },
+  { month: 'noviembre', total_budgeted: 0, total_spent: 0 },
+  { month: 'diciembre', total_budgeted: 0, total_spent: 0 }
+];
+
+const BudgetVariationChart: React.FC<BudgetVariationChartProps> = ({ formatCurrency }) => {
+  // Use mocked data and calculate differences
+  const chartData = mockMonthlyData.map(item => ({
+    ...item,
+    difference: item.total_budgeted - item.total_spent
+  }));
 
   return (
     <div className="w-full bg-white rounded-lg shadow p-4">

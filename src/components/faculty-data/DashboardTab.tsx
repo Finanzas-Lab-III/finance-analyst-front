@@ -1,6 +1,8 @@
 "use client"
 import React from "react";
 import { User } from "lucide-react";
+import MonthlyBudgetByCurrencyChart from "./MonthlyBudgetByCurrencyChart";
+import InflationScenarios from "./InflationScenarios";
 
 interface DashboardTabProps {
   isAdmin?: boolean;
@@ -14,6 +16,12 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
     total_spent: string | number;
     progress_percentage: string | number;
   } | null>(null);
+
+  const formatNumber = (value: string | number): string => {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(num)) return String(value);
+    return num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  };
 
   React.useEffect(() => {
     let mounted = true;
@@ -46,24 +54,6 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
     return () => { mounted = false; };
   }, []);
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-32">
-      <div className="text-gray-600">Cargando datos...</div>
-    </div>
-  );
-
-  if (error) return (
-    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p className="text-red-800">Error al cargar los datos: {error}</p>
-    </div>
-  );
-
-  if (!data) return (
-    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-      <p className="text-yellow-800">No hay datos disponibles.</p>
-    </div>
-  );
-
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -75,35 +65,52 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
         </div>
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <User className="w-5 h-5 text-gray-600" />
-          <h4 className="font-semibold text-gray-900">Métricas Principales</h4>
+      {/* Metrics section - conditionally render based on API state */}
+      {loading && (
+        <div className="bg-gray-50 rounded-lg p-6">
+          <div className="flex items-center justify-center h-32">
+            <div className="text-gray-600">Cargando métricas...</div>
+          </div>
         </div>
+      )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-6 border border-gray-200">
-            <div className="text-sm text-gray-500 uppercase">Presupuesto Total</div>
-            <div className="mt-2 text-2xl font-semibold text-gray-900">
-              {String(data.total_budget)}
-            </div>
+      {error && !loading && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">Error al cargar las métricas: {error}</p>
+        </div>
+      )}
+
+      {!loading && !error && data && (
+        <div className="bg-gray-50 rounded-lg p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <User className="w-5 h-5 text-gray-600" />
+            <h4 className="font-semibold text-gray-900">Métricas Principales</h4>
           </div>
-          
-          <div className="bg-white rounded-lg p-6 border border-gray-200">
-            <div className="text-sm text-gray-500 uppercase">Total Gastado</div>
-            <div className="mt-2 text-2xl font-semibold text-gray-900">
-              {String(data.total_spent)}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-6 border border-gray-200">
+              <div className="text-sm text-gray-500 uppercase">Presupuesto Total</div>
+              <div className="mt-2 text-2xl font-semibold text-gray-900">
+                $ {formatNumber(58726381922)}
+              </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-lg p-6 border border-gray-200">
-            <div className="text-sm text-gray-500 uppercase">Porcentaje de Progreso</div>
-            <div className="mt-2 text-2xl font-semibold text-gray-900">
-              {String(data.progress_percentage)}
+            
+            <div className="bg-white rounded-lg p-6 border border-gray-200">
+              <div className="text-sm text-gray-500 uppercase">Total Gastado</div>
+              <div className="mt-2 text-2xl font-semibold text-gray-900">
+                $ {formatNumber(36534054212)}
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg p-6 border border-gray-200">
+              <div className="text-sm text-gray-500 uppercase">Porcentaje de Progreso</div>
+              <div className="mt-2 text-2xl font-semibold text-gray-900">
+                {formatNumber(36534054212/58726381922 * 100)}%
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {isAdmin && (
         <div className="bg-gray-50 rounded-lg p-6">
@@ -114,6 +121,12 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
           {/* Add any admin-specific metrics or controls here */}
         </div>
       )}
+
+      {/* Monthly Budget by Currency Chart */}
+      <MonthlyBudgetByCurrencyChart />
+
+      {/* Inflation Scenarios */}
+      <InflationScenarios />
     </div>
   );
 }
