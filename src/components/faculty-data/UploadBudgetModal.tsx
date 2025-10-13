@@ -2,7 +2,6 @@
 import React, { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
 import { AreaYearStatus, fetchAreaYearStatus, updateAreaYearStatus, createAreaYearStatus } from "@/api/userService";
-import { analyzeArmado } from "@/lib/user-api";
 
 interface UploadBudgetModalProps {
   open: boolean;
@@ -78,17 +77,6 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
         } catch (e) {
           // Non-blocking: ignore status update error here, but log for debugging
           console.error("Error updating status after upload", e);
-        }
-
-        // Kick off long-running Armado analysis without blocking the UI
-        try {
-          // Fire-and-forget; backend may take minutes to respond
-          // Do not await to avoid blocking modal close or page refresh
-          void analyzeArmado(String(areaYearId)).catch((e) => {
-            console.error("Error triggering Armado analysis", e);
-          });
-        } catch (e) {
-          console.error("Error scheduling Armado analysis", e);
         }
       }
 
