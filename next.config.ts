@@ -1,42 +1,38 @@
+// next.config.ts
 import type { NextConfig } from "next";
+
+const SERVICE_URL = process.env.NEXT_PUBLIC_SERVICE_URL;
+if (!SERVICE_URL) {
+  throw new Error("NEXT_PUBLIC_SERVICE_URL is not defined");
+}
 
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      },
+      { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "localhost" },
     ],
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', '*.vercel.app'],
+      // Prefer explicit domains. Wildcards may not behave as you think.
+      allowedOrigins: ["localhost:3000", "finance-analyst-front-dep.vercel.app"],
     },
   },
   async rewrites() {
-    if (!process.env.NEXT_PUBLIC_SERVICE_URL) {
-      throw new Error('NEXT_PUBLIC_API_URL is not defined');
-    }
     return [
       {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_SERVICE_URL}/api/:path*`,
+        // Browser calls /api/... on your Vercel origin
+        source: "/api/:path*",
+        // Vercel proxies to Django; change the path part depending on your Django URLs:
+        // If your Django endpoints are like http://20.57.160.54:8000/api/..., keep the /api here.
+        // If your endpoints are at root (e.g. /auth/login), remove the /api below.
+        destination: `${SERVICE_URL}/:path*`, // or `${SERVICE_URL}/api/:path*`
       },
     ];
   },
-  eslint: {
-    // Allow production builds to successfully complete even if there are ESLint errors
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    // Allow production builds to successfully complete even if there are type errors
-    ignoreBuildErrors: true,
-  },
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
 };
 
 export default nextConfig;
