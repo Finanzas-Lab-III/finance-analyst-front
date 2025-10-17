@@ -6,9 +6,10 @@ import InflationAdjustmentChart from "./InflationAdjustmentChart";
 
 interface DashboardTabProps {
   isAdmin?: boolean;
+  areaYearId: string;
 }
 
-export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
+export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardTabProps) {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [data, setData] = React.useState<{
@@ -123,10 +124,10 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
       )}
 
       {/* Monthly Budget by Currency Chart */}
-      <MonthlyBudgetByCurrencyChart />
+      <MonthlyBudgetByCurrencyChart areaYearId={parseInt(areaYearId)} />
 
       {/* Inflation Adjustment Chart */}
-      <InflationAdjustmentChart />
+      <InflationAdjustmentChart areaYearId={parseInt(areaYearId)} />
     </div>
   );
 }

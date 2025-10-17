@@ -38,7 +38,7 @@ interface BudgetDataItem {
 // Response type is imported from budget-api
 
 interface MonthlyBudgetByCurrencyChartProps {
-  filePath?: string;
+  areaYearId: number;
 }
 
 const MONTH_COLUMNS = [
@@ -68,7 +68,7 @@ const DEFAULT_CONVERSION_RATES = {
 };
 
 export default function MonthlyBudgetByCurrencyChart({ 
-  filePath = '/app/storage/files/4/armado/Modelo presupuestario 2024 Bioterio - Gallo (Versión Final).xlsx' 
+  areaYearId
 }: MonthlyBudgetByCurrencyChartProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +82,7 @@ export default function MonthlyBudgetByCurrencyChart({
 
     async function fetchBudgetData() {
       try {
-        const result: BudgetProcessorResponse = await processBudgetFile(filePath);
+        const result: BudgetProcessorResponse = await processBudgetFile(areaYearId);
 
         if (!mounted) return;
 
@@ -107,7 +107,7 @@ export default function MonthlyBudgetByCurrencyChart({
 
     fetchBudgetData();
     return () => { mounted = false; };
-  }, [filePath]);
+  }, [areaYearId]);
 
   const prepareChartData = (data: BudgetDataItem[]) => {
     // Get unique currencies
