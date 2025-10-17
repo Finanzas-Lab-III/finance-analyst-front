@@ -35,12 +35,12 @@ export interface BudgetProcessorResponse {
 }
 
 export async function processBudgetFile(
-  filePath: string,
+  areaYearId: number,
   opts?: { signal?: AbortSignal }
 ): Promise<BudgetProcessorResponse> {
   const res = await instance.post<BudgetProcessorResponse>(
     "/api/budget-processor/process/",
-    { file_path: filePath },
+    { area_year_id: areaYearId },
     { signal: opts?.signal }
   );
   return res.data;

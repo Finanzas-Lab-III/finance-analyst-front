@@ -13,38 +13,10 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { TrendingUp, Percent, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
-
-interface BudgetDataItem {
-  'Grupo Cuenta': string;
-  'Denominacion': string;
-  'Cuenta': number;
-  'Moneda': string;
-  'Descripción/detalle': string;
-  'Nuevo/Corriente': string;
-  'Jan-24': number | string;
-  'Feb-24': number | string;
-  'Mar-24': number | string;
-  'Apr-24': number | string;
-  'May-24': number | string;
-  'Jun-24': number | string;
-  'Jul-24': number | string;
-  'Aug-24': number | string;
-  'Sep-24': number | string;
-  'Oct-24': number | string;
-  'Nov-24': number | string;
-  'Dec-24': number | string;
-  'Tot': number;
-}
-
-interface BudgetProcessorResponse {
-  success: boolean;
-  data: BudgetDataItem[];
-  columns: string[];
-  row_count: number;
-}
+import { processBudgetFile, BudgetProcessorResponse, BudgetDataItem } from "@/lib/budget-api";
 
 interface InflationAdjustmentChartProps {
-  filePath?: string;
+  areaYearId: number;
   conversionRates?: { [key: string]: number };
 }
 
@@ -66,7 +38,7 @@ const DEFAULT_CONVERSION_RATES = {
 };
 
 export default function InflationAdjustmentChart({ 
-  filePath = '/app/storage/files/4/armado/Modelo presupuestario 2024 Bioterio - Gallo (Versión Final).xlsx',
+  areaYearId,
   conversionRates = DEFAULT_CONVERSION_RATES
 }: InflationAdjustmentChartProps) {
   const [loading, setLoading] = useState(true);
@@ -82,20 +54,7 @@ export default function InflationAdjustmentChart({
 
     async function fetchBudgetData() {
       try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_SERVICE_URL ?? '';
-        
-        const response = await fetch(`${API_BASE_URL}/api/budget-processor/process/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ file_path: filePath })
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`API error: ${response.status} - ${errorText}`);
-        }
-
-        const result: BudgetProcessorResponse = await response.json();
+        const result: BudgetProcessorResponse = await processBudgetFile(areaYearId);
 
         if (!mounted) return;
 
@@ -119,7 +78,7 @@ export default function InflationAdjustmentChart({
 
     fetchBudgetData();
     return () => { mounted = false; };
-  }, [filePath]);
+  }, [areaYearId]);
 
   const prepareARSData = (data: BudgetDataItem[]) => {
     return MONTH_COLUMNS.map((monthCol, index) => {
