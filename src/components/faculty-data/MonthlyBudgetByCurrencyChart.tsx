@@ -39,6 +39,8 @@ interface BudgetDataItem {
 
 interface MonthlyBudgetByCurrencyChartProps {
   areaYearId: number;
+  conversionRates?: { [key: string]: number };
+  onConversionRatesChange?: (rates: { [key: string]: number }) => void;
 }
 
 const MONTH_COLUMNS = [
@@ -68,14 +70,18 @@ const DEFAULT_CONVERSION_RATES = {
 };
 
 export default function MonthlyBudgetByCurrencyChart({ 
-  areaYearId
+  areaYearId,
+  conversionRates: controlledRates,
+  onConversionRatesChange
 }: MonthlyBudgetByCurrencyChartProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currencies, setCurrencies] = useState<string[]>([]);
   const [currencyData, setCurrencyData] = useState<{ [key: string]: any[] }>({});
-  const [conversionRates, setConversionRates] = useState(DEFAULT_CONVERSION_RATES);
+  const [uncontrolledRates, setUncontrolledRates] = useState(DEFAULT_CONVERSION_RATES);
   const [showSettings, setShowSettings] = useState(false);
+
+  const effectiveRates = controlledRates ?? uncontrolledRates;
 
   useEffect(() => {
     let mounted = true;
@@ -159,7 +165,7 @@ export default function MonthlyBudgetByCurrencyChart({
       currencies.forEach(currency => {
         const monthData = currencyData[currency]?.[index];
         if (monthData) {
-          const rate = conversionRates[currency as keyof typeof conversionRates] || 1;
+          const rate = effectiveRates[currency as keyof typeof effectiveRates] || 1;
           totalARS += monthData.amount * rate;
         }
       });
@@ -175,10 +181,16 @@ export default function MonthlyBudgetByCurrencyChart({
 
   const handleConversionRateChange = (currency: string, value: string) => {
     const numValue = parseFloat(value) || 0;
-    setConversionRates(prev => ({
-      ...prev,
+    const next = {
+      ...effectiveRates,
       [currency]: numValue
-    }));
+    } as { [key: string]: number };
+
+    if (onConversionRatesChange) {
+      onConversionRatesChange(next);
+    } else {
+      setUncontrolledRates(next as any);
+    }
   };
 
   if (loading) {
@@ -256,7 +268,7 @@ export default function MonthlyBudgetByCurrencyChart({
                  </label>
                  <input
                    type="number"
-                   value={conversionRates[currency as keyof typeof conversionRates] || 0}
+                   value={effectiveRates[currency as keyof typeof effectiveRates] || 0}
                    onChange={(e) => handleConversionRateChange(currency, e.target.value)}
                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium"
                    step="0.01"
