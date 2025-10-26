@@ -4,6 +4,7 @@ import { User } from "lucide-react";
 import MonthlyBudgetByCurrencyChart from "./MonthlyBudgetByCurrencyChart";
 import InflationAdjustmentChart from "./InflationAdjustmentChart";
 import { processBudgetFile, BudgetDataItem } from "@/lib/budget-api";
+import { toFriendlyError, formatFriendlyErrorInline } from "@/lib/http-errors";
 
 interface DashboardTabProps {
   isAdmin?: boolean;
@@ -83,7 +84,15 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
         setData(responseData);
       } catch (err: any) {
         if (!mounted) return;
-        setError(err.message || String(err));
+        const friendly = toFriendlyError(err, 'No se pudieron cargar las métricas del panel.');
+        // If there are simply no budgets uploaded yet, show a neutral no-data state
+        if (friendly.code === 400 || friendly.code === 404) {
+          setMonthlyRows([] as any);
+          setData(null);
+          setError(null);
+        } else {
+          setError(formatFriendlyErrorInline(friendly));
+        }
       } finally {
         if (!mounted) return;
         setLoading(false);
@@ -140,8 +149,8 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
       )}
 
       {error && !loading && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Error al cargar las métricas: {error}</p>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p className="text-gray-700">{error}</p>
         </div>
       )}
 
@@ -174,6 +183,12 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {!loading && !error && !data && (
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="text-gray-700">No hay gráficos para mostrar todavía.</div>
         </div>
       )}
 

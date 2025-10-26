@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { TrendingUp, DollarSign, Euro, Banknote, Settings } from 'lucide-react';
 import { processBudgetFile, BudgetProcessorResponse } from "@/lib/budget-api";
+import { toFriendlyError, formatFriendlyErrorInline } from "@/lib/http-errors";
 
 interface BudgetDataItem {
   'Grupo Cuenta': string;
@@ -104,7 +105,15 @@ export default function MonthlyBudgetByCurrencyChart({
       } catch (err: any) {
         if (!mounted) return;
         console.error('Error fetching budget data:', err);
-        setError(err.message || 'Failed to load budget data');
+        const friendly = toFriendlyError(err, 'No se pudo cargar el presupuesto.');
+        // If there is simply no data yet, render a neutral no-data state (no red error)
+        if (friendly.code === 400 || friendly.code === 404) {
+          setCurrencies([]);
+          setCurrencyData({});
+          setError(null);
+        } else {
+          setError(formatFriendlyErrorInline(friendly));
+        }
       } finally {
         if (!mounted) return;
         setLoading(false);
@@ -228,8 +237,8 @@ export default function MonthlyBudgetByCurrencyChart({
           <TrendingUp className="w-5 h-5 text-gray-600" />
           <h4 className="font-semibold text-gray-900">Presupuesto Mensual por Moneda</h4>
         </div>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-yellow-800 text-sm">No hay datos disponibles para mostrar.</p>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p className="text-gray-700 text-sm">No hay gráficos para mostrar todavía.</p>
         </div>
       </div>
     );
