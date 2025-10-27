@@ -69,3 +69,16 @@ export async function analyzeArmado(
   );
   return res.data;
 }
+
+export async function completeArmadoRules(
+  ids: number[],
+  opts?: { signal?: AbortSignal; token?: string }
+): Promise<{ success?: boolean } | any> {
+  const headers = opts?.token ? { Authorization: `Bearer ${opts.token}` } : undefined;
+  const res = await instance.post(
+    "/api/armado/rules/complete",
+    { ids },
+    { signal: opts?.signal, headers }
+  );
+  return res.data;
+}
