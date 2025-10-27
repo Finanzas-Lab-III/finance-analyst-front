@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { TrendingUp, Percent, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { processBudgetFile, BudgetProcessorResponse, BudgetDataItem } from "@/lib/budget-api";
+import { toFriendlyError, formatFriendlyErrorInline } from "@/lib/http-errors";
 
 interface InflationAdjustmentChartProps {
   areaYearId: number;
@@ -69,7 +70,14 @@ export default function InflationAdjustmentChart({
       } catch (err: any) {
         if (!mounted) return;
         console.error('Error fetching budget data:', err);
-        setError(err.message || 'Failed to load budget data');
+        const friendly = toFriendlyError(err, 'No se pudo cargar el presupuesto.');
+        if (friendly.code === 400 || friendly.code === 404) {
+          // Treat as no data yet
+          setOriginalData([]);
+          setError(null);
+        } else {
+          setError(formatFriendlyErrorInline(friendly));
+        }
       } finally {
         if (!mounted) return;
         setLoading(false);
@@ -209,6 +217,21 @@ export default function InflationAdjustmentChart({
                 <p className="text-red-700 text-sm">{error}</p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (originalData.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <h4 className="font-semibold text-gray-900">Proyección con Ajuste por Inflación</h4>
+        </div>
+        <div className="p-6">
+          <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 text-gray-700">
+            No hay gráficos para mostrar todavía.
           </div>
         </div>
       </div>
