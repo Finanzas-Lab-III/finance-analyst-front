@@ -24,6 +24,7 @@ import IntegratedComments from "@/components/IntegratedComments";
 import DocumentSnapshotModal from "@/components/faculty-data/DocumentSnapshotModal";
 import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
 import { useAreaYearStatus } from "@/hooks/useAreaYearStatus";
+import { useBudgetStatusCalculation } from "@/hooks/useBudgetStatusCalculation";
 import { statusColor as areaYearStatusColor, statusLabelEs as areaYearStatusLabel } from "@/lib/areaYearStatus";
 import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "@/lib/commentsHelpers";
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
@@ -198,7 +199,13 @@ export default function BudgetDetailPage() {
   const [budget] = useState<BudgetDetail>(mockBudgetDetail);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState<BudgetDetail['status']>(budget.status);
-  const { status, area, year, faculty } = useAreaYearStatus(areaYearId);
+  const { status: originalStatus, area, year, faculty } = useAreaYearStatus(areaYearId);
+  
+  // Usar el nuevo hook para calcular el estado basado en variaciones mensuales
+  const { calculatedStatus, isYearComplete, loadedMonths, missingMonths } = useBudgetStatusCalculation(areaYearId);
+  
+  // Usar el estado calculado en lugar del original
+  const status = calculatedStatus || originalStatus;
   const headerStatus = (status as any) ?? budget.status;
   
   // Title format: "Presupuesto {facultyOrArea} {year}"
@@ -299,6 +306,53 @@ export default function BudgetDetailPage() {
         getStatusText={(s) => areaYearStatusLabel(s as any)}
         getStatusColor={(s) => areaYearStatusColor(s as any)}
       />
+
+      {/* Estado calculado - Solo para administradores */}
+      {user?.role === 'ADMINISTRADOR' && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-blue-900">
+                Estado calculado automáticamente
+              </h3>
+              <div className="mt-2 text-sm text-blue-800">
+                <p>
+                  <strong>Estado actual:</strong> {areaYearStatusLabel(calculatedStatus)}
+                  {isYearComplete ? " (Todas las variaciones mensuales cargadas)" : ` (${loadedMonths.length}/12 meses cargados)`}
+                </p>
+                
+                {/* Barra de progreso */}
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs text-blue-700 mb-1">
+                    <span>Progreso anual</span>
+                    <span>{loadedMonths.length}/12 meses</span>
+                  </div>
+                  <div className="w-full bg-blue-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${(loadedMonths.length / 12) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                {!isYearComplete && missingMonths.length > 0 && (
+                  <p className="mt-3">
+                    <strong>Meses faltantes:</strong> {missingMonths.join(", ")}
+                  </p>
+                )}
+                {loadedMonths.length > 0 && (
+                  <p className="mt-2">
+                    <strong>Meses cargados:</strong> {loadedMonths.join(", ")}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation Tabs */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">

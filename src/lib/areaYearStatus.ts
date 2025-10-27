@@ -27,13 +27,13 @@ export const statusLabelEs = (status: AreaYearStatus): string => {
     case "NOT_STARTED":
       return "No iniciado";
     case "BUDGET_STARTED":
-      return "Presupuesto iniciado";
+      return "En curso";
     case "NEEDS_CHANGES":
       return "Requiere cambios";
     case "PENDING_APPROVAL":
       return "Pendiente de aprobación";
     case "BUDGET_APPROVED":
-      return "Presupuesto aprobado";
+      return "Finalizado";
     case "FOLLOW_UP_AVAILABLE":
       return "Seguimiento disponible";
     default:
