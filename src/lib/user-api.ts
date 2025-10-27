@@ -11,8 +11,13 @@ export const getProfile = async (): Promise<NavBarData | null> => {
   try {
     const res = await instance.get<NavBarData>("/api/user/me"); // mismo path que usabas
     return res.data;
-  } catch {
-    return null;
+  } catch (error: any) {
+    // If 404, 403, or 500, user doesn't exist or backend has issues
+    if (error?.response?.status === 404 || error?.response?.status === 403 || error?.response?.status === 500) {
+      throw new Error("USER_NOT_FOUND");
+    }
+    // Other errors
+    throw error;
   }
 };
 
