@@ -29,6 +29,7 @@ import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
 import { useArmadoDocuments } from "@/hooks/useArmadoDocuments";
 import { useAuth } from "@/components/AuthContext";
+import CalendarTab from "@/components/faculty-data/CalendarTab";
 
 interface BudgetDetail {
   id: string;
@@ -209,7 +210,7 @@ export default function BudgetDetailPage() {
     if (area) return `Presupuesto del ${displayYear} para ${area}`;
     return "";
   })();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'overview' | 'budget' | 'tracking' | 'comments'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'overview' | 'budget' | 'tracking' | 'calendar' | 'comments'>('dashboard');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDocumentSnapshot, setShowDocumentSnapshot] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<BudgetVariation | null>(null);
@@ -271,6 +272,7 @@ export default function BudgetDetailPage() {
     // { id: 'overview', label: 'Resumen' },
     { id: 'budget', label: 'Presupuesto' },
     { id: 'tracking', label: 'Seguimientos' },
+    { id: 'calendar', label: 'Calendario' },
     { id: 'comments', label: 'Comentarios' },
   ] as const;
 
@@ -327,6 +329,10 @@ export default function BudgetDetailPage() {
               areaYearId={areaYearId} 
               onNavigateToComments={handleNavigateToComments}
             />
+          )}
+
+          {activeTab === 'calendar' && (
+            <CalendarTab areaYearId={areaYearId} year={Number(year) || undefined} />
           )}
 
           {activeTab === 'comments' && user && (

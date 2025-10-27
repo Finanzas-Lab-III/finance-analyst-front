@@ -65,7 +65,9 @@ export async function analyzeArmado(
   opts?: { signal?: AbortSignal }
 ): Promise<any> {
   const res = await instance.post(
-    `/api/armado/${encodeURIComponent(areaYearId)}`
+    `/api/armado/${encodeURIComponent(areaYearId)}`,
+    undefined,
+    { signal: opts?.signal }
   );
   return res.data;
 }

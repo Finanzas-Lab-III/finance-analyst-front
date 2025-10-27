@@ -49,7 +49,13 @@ export function useArmadoAI(areaYearId?: string): UseArmadoAIResult {
       } catch (e: any) {
         // Handle abort/cancel from axios v1 (ERR_CANCELED) and generic AbortError
         if (e?.code === 'ERR_CANCELED' || e?.name === 'AbortError' || e?.name === 'CanceledError') return;
-        setAnalysisError(e?.message ? String(e.message) : 'No se pudo analizar el presupuesto');
+        // If backend returns 400 for no previous year to compare
+        const status = e?.response?.status;
+        if (status === 400) {
+          setAnalysisError('No hay año anterior con qué comparar');
+        } else {
+          setAnalysisError(e?.message ? String(e.message) : 'No se pudo analizar el presupuesto');
+        }
       } finally {
         setAnalysisLoading(false);
       }
