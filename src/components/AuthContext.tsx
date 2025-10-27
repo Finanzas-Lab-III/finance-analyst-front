@@ -26,7 +26,7 @@ function deleteCookie(name: string) {
   } catch {}
 }
 
-export type UserRole = 'director' | 'finance' | null;
+export type UserRole = 'DIRECTOR' | 'ADMINISTRADOR' | null;
 
 interface User {
   id: string;
@@ -67,7 +67,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
     }
 
     if (savedRole) {
@@ -133,8 +134,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     
-    // In a real implementation, this should be removed or replaced with proper role management
-    console.warn('setTestRole is deprecated and should not be used in production');
+    // Create a mock user for testing
+    const mockUser = {
+      id: "test-" + role.toLowerCase(),
+      name: role === 'DIRECTOR' ? 'Roberto Fernández (Test)' : 'Admin Usuario (Test)',
+      email: role === 'DIRECTOR' ? 'rcastromartinez@mail.austral.edu.ar' : 'admin@mail.austral.edu.ar',
+      role: role
+    };
+    
+    setUser(mockUser);
+    setUserRole(role);
+    localStorage.setItem('currentUser', JSON.stringify(mockUser));
+    localStorage.setItem('testRole', role);
+    setCookie('userRole', role);
+    setCookie('userId', mockUser.id);
   };
 
   return (

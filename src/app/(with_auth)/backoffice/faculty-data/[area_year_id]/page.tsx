@@ -310,7 +310,7 @@ export default function BudgetDetailPage() {
           )}
 
           {activeTab === 'dashboard' && (
-            <DashboardTab isAdmin={user?.role === 'finance'} areaYearId={areaYearId} />
+            <DashboardTab isAdmin={user?.role === 'ADMINISTRADOR'} areaYearId={areaYearId} />
           )}
 
           {activeTab === 'budget' && (
@@ -326,6 +326,7 @@ export default function BudgetDetailPage() {
             <TrackingTab 
               areaYearId={areaYearId} 
               onNavigateToComments={handleNavigateToComments}
+              canAddVariations={user?.role !== 'DIRECTOR'}
             />
           )}
 

@@ -4,6 +4,7 @@ import { Download, Upload, FileText, ChevronDown, ChevronRight, Loader2 } from "
 import { ArmadoDocument } from "@/api/userService";
 import { useRouter } from "next/navigation";
 import { useArmadoAI } from "@/components/armado/hooks/useArmadoAI";
+import { useAuth } from "@/components/AuthContext";
 
 interface BudgetTabProps {
   latest: ArmadoDocument | null | undefined;
@@ -15,8 +16,14 @@ interface BudgetTabProps {
 export default function BudgetTab({ latest, history = [], onOpenUpload, areaYearId }: BudgetTabProps) {
   const USERS_API_BASE = "";
   const router = useRouter();
+  const { userRole } = useAuth();
   const { analysisResults, analysisLoading, analysisError } = useArmadoAI(String(areaYearId));
   const [showDetails, setShowDetails] = useState(false);
+
+  // Función para determinar si el usuario puede agregar nuevas variaciones
+  const canAddVariation = () => {
+    return userRole === 'ADMINISTRADOR';
+  };
 
   const { totalErrors, groupedByRule } = useMemo(() => {
     const byRule = new Map<string, { count: number; items: any[] }>();
@@ -130,13 +137,15 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
               <Download className="w-4 h-4" />
               <span>Descargar</span>
             </button>
-            <button 
-              onClick={onOpenUpload}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-            >
-              <Upload className="w-4 h-4" />
-              <span>Nueva Versión</span>
-            </button>
+            {canAddVariation() && (
+              <button 
+                onClick={onOpenUpload}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                <Upload className="w-4 h-4" />
+                <span>Nueva Versión</span>
+              </button>
+            )}
           </div>
         </div>
         {latest ? (

@@ -10,10 +10,12 @@ import BudgetVariationChart from "@/components/BudgetVariationChart";
 interface TrackingTabProps {
   areaYearId: string | number;
   onNavigateToComments?: (documentId: number, month: string, version: string, createdAt: string) => void;
+  canAddVariations?: boolean;
 }
 
-export default function TrackingTab({ areaYearId, onNavigateToComments }: TrackingTabProps) {
-  const isFinance = true;
+export default function TrackingTab({ areaYearId, onNavigateToComments, canAddVariations = true }: TrackingTabProps) {
+  // Usar la prop canAddVariations para controlar si se muestran los botones
+  const isFinance = canAddVariations;
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadFolder, setUploadFolder] = useState<string | null>(null);
