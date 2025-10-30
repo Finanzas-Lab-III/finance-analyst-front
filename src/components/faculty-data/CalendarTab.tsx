@@ -1,7 +1,5 @@
 "use client"
 import React, { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
-import AddCostModal from "./AddCostModal";
 
 type PaymentRecord = {
   fila: number;
@@ -19,7 +17,6 @@ type PaymentsResponse = Record<string, PaymentRecord[]>;
 interface CalendarTabProps {
   areaYearId: string | number;
   year?: number | string;
-  userId?: number;
 }
 
 const MONTHS: string[] = [
@@ -59,12 +56,10 @@ function normalizeCurrency(currency: string | null): string {
   return currency;
 }
 
-export default function CalendarTab({ areaYearId, year, userId }: CalendarTabProps) {
+export default function CalendarTab({ areaYearId, year }: CalendarTabProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [payments, setPayments] = useState<PaymentsResponse | null>(null);
-  const [showAddCostModal, setShowAddCostModal] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState<{ month: string; monthIndex: number; cuenta?: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -159,30 +154,11 @@ export default function CalendarTab({ areaYearId, year, userId }: CalendarTabPro
     return result;
   }, [payments]);
 
-  const handleOpenAddCost = (month: string, monthIndex: number, cuenta?: string) => {
-    setSelectedMonth({ month, monthIndex, cuenta });
-    setShowAddCostModal(true);
-  };
-
-  const handleCloseAddCost = () => {
-    setShowAddCostModal(false);
-    setSelectedMonth(null);
-  };
-
-  const handleCostAdded = () => {
-    // Optionally refresh payments data here
-    // For now, just close the modal
-    handleCloseAddCost();
-  };
-
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-xl font-semibold text-gray-900">Calendario de Pagos</h3>
-        <p className="text-gray-600 text-sm mt-1">
-          Pagos agrupados por mes
-          {!userId && <span className="ml-2 text-xs text-amber-600">(Inicia sesión para agregar gastos)</span>}
-        </p>
+        <p className="text-gray-600 text-sm mt-1">Pagos agrupados por mes</p>
       </div>
 
       {loading && (
@@ -197,7 +173,7 @@ export default function CalendarTab({ areaYearId, year, userId }: CalendarTabPro
 
       {!loading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {monthlySummaries.map(({ month, items, totalsByCurrency, highlight }, idx) => (
+          {monthlySummaries.map(({ month, items, totalsByCurrency, highlight }) => (
             <div
               key={month}
               className={[
@@ -210,14 +186,13 @@ export default function CalendarTab({ areaYearId, year, userId }: CalendarTabPro
             >
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-semibold text-gray-900">{titleCase(month)}</h4>
-              </div>
-
-              <div className="flex items-center space-x-2 text-xs text-gray-600 mb-3 flex-wrap">
-                {Object.entries(totalsByCurrency).map(([curr, amt]) => (
-                  <span key={curr} className="px-2 py-0.5 bg-gray-50 border border-gray-200 rounded-full">
-                    {curr}: {amt.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-                  </span>
-                ))}
+                <div className="flex items-center space-x-2 text-xs text-gray-600">
+                  {Object.entries(totalsByCurrency).map(([curr, amt]) => (
+                    <span key={curr} className="px-2 py-0.5 bg-gray-50 border border-gray-200 rounded-full">
+                      {curr}: {amt.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <div className="flex-1 overflow-auto">
@@ -226,27 +201,16 @@ export default function CalendarTab({ areaYearId, year, userId }: CalendarTabPro
                 ) : (
                   <ul className="space-y-2">
                     {items.slice(0, 8).map((it) => (
-                      <li key={`${it.fila}-${it.denominacion}`} className="flex items-start justify-between gap-2 group hover:bg-gray-50 px-2 py-1 -mx-2 rounded transition-colors">
-                        <div className="pr-2 flex-1 min-w-0">
-                          <div className="text-sm font-medium text-gray-900 truncate">{it.denominacion}</div>
+                      <li key={`${it.fila}-${it.denominacion}`} className="flex items-start justify-between">
+                        <div className="pr-3">
+                          <div className="text-sm font-medium text-gray-900 truncate max-w-[220px]">{it.denominacion}</div>
                           {it.observaciones && (
-                            <div className="text-xs text-gray-500 truncate">{it.observaciones}</div>
+                            <div className="text-xs text-gray-500 truncate max-w-[240px]">{it.observaciones}</div>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <div className="text-sm text-gray-700 whitespace-nowrap">
-                            <span className="font-semibold">{normalizeCurrency(it.moneda) || ""}</span>{" "}
-                            {parseNumber(it.total).toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-                          </div>
-                          {userId && (
-                            <button
-                              onClick={() => handleOpenAddCost(month, idx + 1, it.denominacion || undefined)}
-                              className="p-1.5 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors shadow-sm"
-                              title="Agregar gasto para esta cuenta"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                            </button>
-                          )}
+                        <div className="text-sm text-gray-700 whitespace-nowrap">
+                          <span className="font-semibold">{normalizeCurrency(it.moneda) || ""}</span>{" "}
+                          {parseNumber(it.total).toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                         </div>
                       </li>
                     ))}
@@ -256,20 +220,6 @@ export default function CalendarTab({ areaYearId, year, userId }: CalendarTabPro
             </div>
           ))}
         </div>
-      )}
-
-      {/* Add Cost Modal */}
-      {showAddCostModal && selectedMonth && userId && (
-        <AddCostModal
-          open={showAddCostModal}
-          onClose={handleCloseAddCost}
-          areaYearId={Number(areaYearId)}
-          month={selectedMonth.monthIndex}
-          monthName={titleCase(selectedMonth.month)}
-          onCostAdded={handleCostAdded}
-          userId={userId}
-          preselectedCuenta={selectedMonth.cuenta}
-        />
       )}
     </div>
   );
