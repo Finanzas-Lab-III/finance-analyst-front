@@ -2,13 +2,16 @@
 import React from "react";
 import { User } from "lucide-react";
 import MonthlyBudgetByCurrencyChart from "./MonthlyBudgetByCurrencyChart";
-import InflationScenarios from "./InflationScenarios";
+import InflationAdjustmentChart from "./InflationAdjustmentChart";
+import { processBudgetFile, BudgetDataItem } from "@/lib/budget-api";
+import { toFriendlyError, formatFriendlyErrorInline } from "@/lib/http-errors";
 
 interface DashboardTabProps {
   isAdmin?: boolean;
+  areaYearId: string;
 }
 
-export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
+export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardTabProps) {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [data, setData] = React.useState<{
@@ -16,6 +19,18 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
     total_spent: string | number;
     progress_percentage: string | number;
   } | null>(null);
+  const [monthlyRows, setMonthlyRows] = React.useState<BudgetDataItem[] | null>(null);
+  const [conversionRates, setConversionRates] = React.useState<Record<string, number>>({
+    USD: 1050,
+    EUR: 1150,
+    Pesos: 1,
+    ARS: 1,
+  });
+  const MONTH_COLUMNS = React.useMemo(() => (
+    ['Jan-24','Feb-24','Mar-24','Apr-24','May-24','Jun-24','Jul-24','Aug-24','Sep-24','Oct-24','Nov-24','Dec-24']
+  ), []);
+
+  const DEFAULT_CONVERSION_RATES: Record<string, number> = conversionRates;
 
   const formatNumber = (value: string | number): string => {
     const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -28,22 +43,56 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
     async function fetchLatestTotals() {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_SERVICE_URL ?? '';
-        const res = await fetch(`${API_BASE_URL}/api/analyze/latest_totals/`);
-        if (!res.ok) throw new Error('Failed to load totals');
-        const json = await res.json();
-        console.log('API Response:', json);
+        // Fetch monthly budget data for computing total budget from the same source as the monthly chart
+        const [latestTotalsRes, monthlyData] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/analyze/latest_totals/`),
+          processBudgetFile(parseInt(areaYearId))
+        ]);
+
+        if (!latestTotalsRes.ok) throw new Error('Failed to load totals');
+        const json = await latestTotalsRes.json();
+
+        // Compute total budget in ARS by summing month columns (same method as chart)
+        const computeTotalBudgetARS = (rows: BudgetDataItem[]): number => {
+          return rows
+            .filter(r => Boolean(r['Moneda']))
+            .reduce((sum, row) => {
+              const currencyRaw = String(row['Moneda']);
+              const rate =
+                DEFAULT_CONVERSION_RATES[currencyRaw as keyof typeof DEFAULT_CONVERSION_RATES] ??
+                DEFAULT_CONVERSION_RATES[currencyRaw.toUpperCase() as keyof typeof DEFAULT_CONVERSION_RATES] ??
+                1;
+              const rowMonthlyTotal = MONTH_COLUMNS.reduce((acc, col) => {
+                const v = (row as any)[col];
+                const num = typeof v === 'number' ? v : parseFloat(String(v)) || 0;
+                return acc + num;
+              }, 0);
+              return sum + rowMonthlyTotal * rate;
+            }, 0);
+        };
+
+        const monthly = (monthlyData?.data || []).filter(r => Boolean(r['Moneda']));
+        const totalBudgetARS = computeTotalBudgetARS(monthly);
 
         if (!mounted) return;
         const responseData = {
-          total_budget: json.total_budget,
+          total_budget: totalBudgetARS,
           total_spent: json.total_spent,
           progress_percentage: json.progress_percentage
         };
-        console.log('Processed Data:', responseData);
+        setMonthlyRows(monthly);
         setData(responseData);
       } catch (err: any) {
         if (!mounted) return;
-        setError(err.message || String(err));
+        const friendly = toFriendlyError(err, 'No se pudieron cargar las métricas del panel.');
+        // If there are simply no budgets uploaded yet, show a neutral no-data state
+        if (friendly.code === 400 || friendly.code === 404) {
+          setMonthlyRows([] as any);
+          setData(null);
+          setError(null);
+        } else {
+          setError(formatFriendlyErrorInline(friendly));
+        }
       } finally {
         if (!mounted) return;
         setLoading(false);
@@ -53,6 +102,31 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
     fetchLatestTotals();
     return () => { mounted = false; };
   }, []);
+
+  // Recompute total budget when conversion rates change
+  React.useEffect(() => {
+    if (!monthlyRows || !data) return;
+    const computeTotalBudgetARS = (rows: BudgetDataItem[]): number => {
+      return rows
+        .filter(r => Boolean(r['Moneda']))
+        .reduce((sum, row) => {
+          const currencyRaw = String(row['Moneda']);
+          const rate =
+            conversionRates[currencyRaw as keyof typeof conversionRates] ??
+            conversionRates[currencyRaw.toUpperCase() as keyof typeof conversionRates] ??
+            1;
+          const rowMonthlyTotal = MONTH_COLUMNS.reduce((acc, col) => {
+            const v = (row as any)[col];
+            const num = typeof v === 'number' ? v : parseFloat(String(v)) || 0;
+            return acc + num;
+          }, 0);
+          return sum + rowMonthlyTotal * rate;
+        }, 0);
+    };
+
+    const totalBudgetARS = computeTotalBudgetARS(monthlyRows);
+    setData({ ...data, total_budget: totalBudgetARS });
+  }, [conversionRates]);
 
   return (
     <div className="space-y-8">
@@ -75,8 +149,8 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
       )}
 
       {error && !loading && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Error al cargar las métricas: {error}</p>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p className="text-gray-700">{error}</p>
         </div>
       )}
 
@@ -91,24 +165,30 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <div className="text-sm text-gray-500 uppercase">Presupuesto Total</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                $ {formatNumber(58726381922)}
+                $ {formatNumber(data.total_budget)}
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <div className="text-sm text-gray-500 uppercase">Total Gastado</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                $ {formatNumber(36534054212)}
+                $ {formatNumber(data.total_spent)}
               </div>
             </div>
             
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <div className="text-sm text-gray-500 uppercase">Porcentaje de Progreso</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                {formatNumber(36534054212/58726381922 * 100)}%
+                {formatNumber(data.progress_percentage)}%
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {!loading && !error && !data && (
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="text-gray-700">No hay gráficos para mostrar todavía.</div>
         </div>
       )}
 
@@ -123,10 +203,14 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
       )}
 
       {/* Monthly Budget by Currency Chart */}
-      <MonthlyBudgetByCurrencyChart />
+      <MonthlyBudgetByCurrencyChart 
+        areaYearId={parseInt(areaYearId)}
+        conversionRates={conversionRates}
+        onConversionRatesChange={setConversionRates}
+      />
 
-      {/* Inflation Scenarios */}
-      <InflationScenarios />
+      {/* Inflation Adjustment Chart */}
+      <InflationAdjustmentChart areaYearId={parseInt(areaYearId)} />
     </div>
   );
 }

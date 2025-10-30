@@ -143,6 +143,7 @@ export default function TrackingTab({ areaYearId, onNavigateToComments }: Tracki
         ) : monthlyData ? (
           <div className="relative">
             <BudgetVariationChart
+              data={monthlyData}
               formatCurrency={value => new Intl.NumberFormat('es-AR', {
                 style: 'currency',
                 currency: 'ARS',

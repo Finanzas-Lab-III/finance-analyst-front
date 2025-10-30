@@ -15,7 +15,7 @@ interface BudgetTabProps {
 export default function BudgetTab({ latest, history = [], onOpenUpload, areaYearId }: BudgetTabProps) {
   const USERS_API_BASE = "";
   const router = useRouter();
-  const { analysisResults, analysisLoading, analysisError } = useArmadoAI(String(areaYearId));
+  const { analysisResults, analysisLoading, analysisError, noData } = useArmadoAI(String(areaYearId));
   const [showDetails, setShowDetails] = useState(false);
 
   const { totalErrors, groupedByRule } = useMemo(() => {
@@ -51,7 +51,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
           <button
             className="flex items-center text-sm text-blue-600 hover:text-blue-800"
             onClick={() => setShowDetails((v) => !v)}
-            disabled={analysisLoading || (!!analysisError)}
+            disabled={analysisLoading || (!!analysisError) || noData}
           >
             {showDetails ? <ChevronDown className="w-4 h-4 mr-1"/> : <ChevronRight className="w-4 h-4 mr-1"/>}
             Ver detalle
@@ -64,8 +64,13 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
             <Loader2 className="w-4 h-4 mr-2 animate-spin"/> Analizando presupuesto...
           </div>
         )}
+        {noData && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-700">
+            No hay gráficos para mostrar todavía.
+          </div>
+        )}
         {analysisError && (
-          <div className="text-sm text-red-600">{analysisError}</div>
+          <div className="text-sm text-gray-700">{analysisError}</div>
         )}
 
         {!analysisLoading && !analysisError && (

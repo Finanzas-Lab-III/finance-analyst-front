@@ -312,7 +312,7 @@ export default function BudgetDetailPage() {
           )}
 
           {activeTab === 'dashboard' && (
-            <DashboardTab isAdmin={user?.role === 'finance'} />
+            <DashboardTab isAdmin={user?.role === 'finance'} areaYearId={areaYearId} />
           )}
 
           {activeTab === 'budget' && (
