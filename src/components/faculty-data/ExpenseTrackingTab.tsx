@@ -31,7 +31,7 @@ interface ExpenseTrackingTabProps {
 }
 
 export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabProps) {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [costs, setCosts] = useState<Cost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +42,8 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
   const [editingCost, setEditingCost] = useState<Cost | null>(null);
   const [selectedBudgetItem, setSelectedBudgetItem] = useState<BudgetItem | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
+  const [isImporting, setIsImporting] = useState(false);
+  const [hasImported, setHasImported] = useState(false);
 
   // Reload data function - reusable
   const reloadData = useCallback(async () => {
@@ -80,19 +82,11 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
     loadData();
   }, [reloadData]);
 
-  // Calculate totals and statistics (respect selectedCurrency on client too)
+  // Calculate totals and statistics
   const statistics = useMemo(() => {
-    // Base arrays
-    const itemsBase = budgetItems || [];
-    const expensesBase = costs || [];
-
-    // Apply client-side currency filter to be safe even if backend ignores it
-    const items = selectedCurrency
-      ? itemsBase.filter((it) => it.currency === selectedCurrency)
-      : itemsBase;
-    const expenses = selectedCurrency
-      ? expensesBase.filter((c) => c.currency === selectedCurrency)
-      : expensesBase;
+    // Safety check: ensure arrays are defined
+    const items = budgetItems || [];
+    const expenses = costs || [];
     
     // Group budgeted amounts by currency
     const budgetedByCurrency: Record<string, number> = {};
@@ -153,7 +147,7 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
       spentByCurrency,
       remainingByCurrency,
     };
-  }, [budgetItems, costs, selectedCurrency]);
+  }, [budgetItems, costs]);
 
   const handleDeleteCost = async (costId: number) => {
     if (!window.confirm("¿Está seguro de eliminar este gasto?")) return;
@@ -193,11 +187,45 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
     setShowCreateModal(true);
   };
 
+  const handleImportBudgetItems = async () => {
+    if (hasImported || isImporting) return;
+    const confirmed = window.confirm(
+      "¿Importar líneas presupuestarias desde el presupuesto? Esta acción puede sobrescribir existentes."
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsImporting(true);
+      const baseUrl = process.env.NEXT_PUBLIC_SERVICE_URL || "http://localhost:8000";
+      const response = await fetch(
+        `${baseUrl}/api/budget-processor/import-budget-items/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+          body: JSON.stringify({ area_year_id: Number(areaYearId), overwrite: true }),
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.message || "Error al importar líneas de presupuesto");
+      }
+
+      setHasImported(true);
+      await reloadData();
+      alert("Importación completada correctamente");
+    } catch (e: any) {
+      alert(e?.message || "Error al importar líneas de presupuesto");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const exportToCSV = () => {
-    const itemsRaw = budgetItems || [];
-    const items = selectedCurrency
-      ? itemsRaw.filter((it) => it.currency === selectedCurrency)
-      : itemsRaw;
+    const items = budgetItems || [];
     const headers = ["Cuenta", "Nombre", "Mes", "Presupuestado", "Gastado", "Restante", "% Uso", "Moneda"];
     const rows = items.map((item) => {
       const itemCosts = statistics.costsByBudgetItem.get(item.id) || [];
@@ -256,6 +284,30 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
           <p className="text-gray-600 mt-1">Control de presupuesto vs gastos ejecutados</p>
         </div>
         <div className="flex space-x-2">
+          {userRole === 'finance' && (
+            <button
+              onClick={handleImportBudgetItems}
+              disabled={isImporting || hasImported}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors text-white ${
+                hasImported
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : isImporting
+                  ? 'bg-gray-500'
+                  : 'bg-purple-600 hover:bg-purple-700'
+              }`}
+              title={hasImported ? 'Ya importado' : 'Importar líneas desde presupuesto'}
+              type="button"
+            >
+              <Download className="w-4 h-4" />
+              <span>
+                {hasImported
+                  ? 'Imported'
+                  : isImporting
+                  ? 'Importing…'
+                  : 'import budget items from budget'}
+              </span>
+            </button>
+          )}
           <button
             onClick={exportToCSV}
             className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
@@ -411,15 +463,12 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
         </div>
 
         <div className="divide-y divide-gray-100">
-          {!(budgetItems && budgetItems.length > 0) ? (
+          {!budgetItems || budgetItems.length === 0 ? (
             <div className="px-6 py-8 text-center text-gray-500">
               No hay líneas presupuestarias disponibles
             </div>
           ) : (
-            (selectedCurrency
-              ? budgetItems.filter((it) => it.currency === selectedCurrency)
-              : budgetItems
-            ).map((item) => {
+            budgetItems.map((item) => {
               const itemCosts = statistics.costsByBudgetItem.get(item.id) || [];
               const spent = itemCosts.reduce((sum, c) => sum + c.amount, 0);
               const remaining = item.budgetedAmount - spent;
