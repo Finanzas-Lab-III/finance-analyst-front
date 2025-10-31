@@ -20,6 +20,7 @@ import TabManager from "@/components/TabManager";
 import OverviewTab from "@/components/faculty-data/OverviewTab";
 import BudgetTab from "@/components/faculty-data/BudgetTab";
 import TrackingTab from "@/components/faculty-data/TrackingTab";
+import ExpenseTrackingTab from "@/components/faculty-data/ExpenseTrackingTab";
 import IntegratedComments from "@/components/IntegratedComments";
 import DocumentSnapshotModal from "@/components/faculty-data/DocumentSnapshotModal";
 import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
@@ -29,6 +30,7 @@ import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
 import { useArmadoDocuments } from "@/hooks/useArmadoDocuments";
 import { useAuth } from "@/components/AuthContext";
+import CalendarTab from "@/components/faculty-data/CalendarTab";
 
 interface BudgetDetail {
   id: string;
@@ -209,7 +211,7 @@ export default function BudgetDetailPage() {
     if (area) return `Presupuesto del ${displayYear} para ${area}`;
     return "";
   })();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'overview' | 'budget' | 'tracking' | 'comments'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'overview' | 'budget' | 'tracking' | 'expense_tracking' | 'calendar' | 'comments'>('dashboard');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDocumentSnapshot, setShowDocumentSnapshot] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<BudgetVariation | null>(null);
@@ -271,6 +273,8 @@ export default function BudgetDetailPage() {
     // { id: 'overview', label: 'Resumen' },
     { id: 'budget', label: 'Presupuesto' },
     { id: 'tracking', label: 'Seguimientos' },
+    { id: 'expense_tracking', label: 'Tracking de Gastos' },
+    { id: 'calendar', label: 'Calendario' },
     { id: 'comments', label: 'Comentarios' },
   ] as const;
 
@@ -327,6 +331,16 @@ export default function BudgetDetailPage() {
               areaYearId={areaYearId} 
               onNavigateToComments={handleNavigateToComments}
             />
+          )}
+
+          {activeTab === 'expense_tracking' && (
+            <ExpenseTrackingTab 
+              areaYearId={areaYearId}
+            />
+          )}
+
+          {activeTab === 'calendar' && (
+            <CalendarTab areaYearId={areaYearId} year={Number(year) || undefined} />
           )}
 
           {activeTab === 'comments' && user && (

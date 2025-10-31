@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { completeArmadoRules } from "@/lib/user-api";
+import { toast } from "react-toastify";
 
 type AnalysisItem = {
   message?: string;
@@ -27,12 +29,17 @@ export default function ArmadoSidebar({
   allChecked: boolean;
   onSubmit?: () => void;
 }) {
+  const [items, setItems] = useState<AnalysisItem[]>([])
   const [checked, setChecked] = useState<boolean[]>([])
+  const [submitting, setSubmitting] = useState<boolean>(false)
+  const [removingKeys, setRemovingKeys] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (Array.isArray(analysisResults)) {
+      setItems(analysisResults)
       setChecked(new Array(analysisResults.length).fill(false))
     } else {
+      setItems([])
       setChecked([])
     }
   }, [analysisResults])
@@ -45,12 +52,63 @@ export default function ArmadoSidebar({
     })
   }
 
-  const localAllChecked = Array.isArray(analysisResults)
-    && analysisResults.length > 0
-    && checked.length === analysisResults.length
-    && checked.every(Boolean)
+  const anyChecked = Array.isArray(items)
+    && items.length > 0
+    && checked.some(Boolean)
 
-  const enableSubmit = localAllChecked || allChecked
+  const enableSubmit = anyChecked || allChecked
+
+  const handleSubmit = async () => {
+    if (!Array.isArray(items)) return
+    const selected = items
+      .map((it: any, idx: number) => ({ it, idx }))
+      .filter(({ idx }) => checked[idx])
+      .map(({ it }) => {
+        const candidates = [it?.id, it?.rule_id, it?.ruleId]
+        const numeric = candidates.find((v) => Number.isFinite(Number(v)))
+        return numeric !== undefined ? Number(numeric) : undefined
+      })
+      .filter((v: any) => Number.isFinite(v)) as number[]
+
+    if (selected.length === 0) {
+      toast.error("Seleccioná al menos una regla con ID válido")
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      await completeArmadoRules(selected)
+      toast.success("Reglas enviadas correctamente")
+      // animate out selected cards, then remove
+      const selectedKeys = new Set<string>()
+      items.forEach((it: any, idx: number) => {
+        if (checked[idx]) {
+          const key = String(it?.id ?? `idx-${idx}`)
+          selectedKeys.add(key)
+        }
+      })
+      setRemovingKeys(selectedKeys)
+      setTimeout(() => {
+        const nextItems: AnalysisItem[] = []
+        const nextChecked: boolean[] = []
+        items.forEach((it: any, idx: number) => {
+          const key = String(it?.id ?? `idx-${idx}`)
+          if (!selectedKeys.has(key)) {
+            nextItems.push(it)
+            nextChecked.push(checked[idx])
+          }
+        })
+        setItems(nextItems)
+        setChecked(nextChecked)
+        setRemovingKeys(new Set())
+        if (onSubmit) onSubmit()
+      }, 300)
+    } catch (e: any) {
+      toast.error(e?.message ? String(e.message) : "No se pudieron enviar las reglas")
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <aside className="w-[320px] bg-white text-gray-900 h-full flex flex-col border-l border-gray-200">
@@ -65,11 +123,17 @@ export default function ArmadoSidebar({
         {analysisError && <div className="mt-4 text-red-600">{analysisError}</div>}
 
         {!analysisLoading && !analysisError && (
-          Array.isArray(analysisResults) ? (
-            analysisResults.length > 0 ? (
+          Array.isArray(items) ? (
+            items.length > 0 ? (
               <div className="mt-4 flex flex-col gap-3">
-                {analysisResults.map((result: AnalysisItem, idx: number) => (
-                  <div key={idx} className="bg-gray-50 border-l-4 border-blue-500 rounded shadow p-3">
+                {items.map((result: AnalysisItem, idx: number) => {
+                  const key = String((result as any)?.id ?? `idx-${idx}`)
+                  const isRemoving = removingKeys.has(key)
+                  return (
+                  <div
+                    key={key}
+                    className={`bg-gray-50 border-l-4 border-blue-500 rounded shadow p-3 transition-all duration-300 ease-out ${isRemoving ? 'translate-x-4 opacity-0' : ''}`}
+                  >
                     <div className="flex items-start gap-2">
                       <input
                         type="checkbox"
@@ -90,7 +154,7 @@ export default function ArmadoSidebar({
                       </div>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             ) : (
               <div className="mt-4 text-gray-500">No se encontraron observaciones en el análisis.</div>
@@ -107,33 +171,31 @@ export default function ArmadoSidebar({
         )}
       </div>
 
-      <div className="p-4">
-        <div className="border-t border-gray-200 pt-4">
-          {showDisclaimer && (
-            <div className="relative bg-yellow-100 text-yellow-800 text-xs rounded px-3 py-2 mb-3 flex items-start shadow-sm">
-              <span className="flex-1 pr-4">
-                Esta es una verificación automatizada y puede contener errores. Por favor, revisa manualmente si es necesario.
-              </span>
-              <button
-                className="ml-2 text-yellow-700 hover:text-yellow-900 text-lg font-bold leading-none focus:outline-none"
-                onClick={onCloseDisclaimer}
-                aria-label="Cerrar aviso"
-              >
-                ×
-              </button>
-            </div>
-          )}
+      <div className="mt-auto sticky bottom-0 bg-white p-4 border-t border-gray-200">
+        {showDisclaimer && (
+          <div className="relative bg-yellow-100 text-yellow-800 text-xs rounded px-3 py-2 mb-3 flex items-start shadow-sm">
+            <span className="flex-1 pr-4">
+              Esta es una verificación automatizada y puede contener errores. Por favor, revisa manualmente si es necesario.
+            </span>
+            <button
+              className="ml-2 text-yellow-700 hover:text-yellow-900 text-lg font-bold leading-none focus:outline-none"
+              onClick={onCloseDisclaimer}
+              aria-label="Cerrar aviso"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
-          <button
-            className={`w-full py-2 mt-2 rounded text-white font-semibold transition-colors ${
-              enableSubmit ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
-            }`}
-            disabled={!enableSubmit}
-            onClick={onSubmit}
-          >
-            Enviar
-          </button>
-        </div>
+        <button
+          className={`w-full py-2 mt-2 rounded text-white font-semibold transition-colors ${
+            enableSubmit && !submitting ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
+          }`}
+          disabled={!enableSubmit || submitting}
+          onClick={handleSubmit}
+        >
+          {submitting ? "Enviando..." : "Enviar"}
+        </button>
       </div>
     </aside>
   );

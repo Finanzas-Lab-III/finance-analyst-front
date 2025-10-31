@@ -70,7 +70,22 @@ export async function analyzeArmado(
   opts?: { signal?: AbortSignal }
 ): Promise<any> {
   const res = await instance.post(
-    `/api/armado/${encodeURIComponent(areaYearId)}`
+    `/api/armado/${encodeURIComponent(areaYearId)}`,
+    undefined,
+    { signal: opts?.signal }
+  );
+  return res.data;
+}
+
+export async function completeArmadoRules(
+  ids: number[],
+  opts?: { signal?: AbortSignal; token?: string }
+): Promise<{ success?: boolean } | any> {
+  const headers = opts?.token ? { Authorization: `Bearer ${opts.token}` } : undefined;
+  const res = await instance.post(
+    "/api/armado/rules/complete",
+    { ids },
+    { signal: opts?.signal, headers }
   );
   return res.data;
 }
