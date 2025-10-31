@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Plus,
   Download,
@@ -40,43 +40,45 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
   const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCost, setEditingCost] = useState<Cost | null>(null);
+  const [selectedBudgetItem, setSelectedBudgetItem] = useState<BudgetItem | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
+
+  // Reload data function - reusable
+  const reloadData = useCallback(async () => {
+    try {
+      const [budgetResponse, costsResponse] = await Promise.all([
+        getBudgetItems(Number(areaYearId), {
+          month: selectedMonth || undefined,
+          currency: selectedCurrency || undefined,
+          page_size: 1000,
+        }),
+        getCosts({
+          area_year_id: Number(areaYearId),
+          month: selectedMonth || undefined,
+          currency: selectedCurrency || undefined,
+          page_size: 1000,
+        }),
+      ]);
+
+      setBudgetItems(budgetResponse.results);
+      setCosts(costsResponse.results);
+    } catch (err: any) {
+      console.error("Error loading tracking data:", err);
+      setError(err.response?.data?.message || "Error al cargar los datos");
+    }
+  }, [areaYearId, selectedMonth, selectedCurrency]);
 
   // Load budget items and costs
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       setError(null);
-      try {
-        const [budgetResponse, costsResponse] = await Promise.all([
-          getBudgetItems(Number(areaYearId), {
-            month: selectedMonth || undefined,
-            currency: selectedCurrency || undefined,
-            page_size: 1000,
-          }),
-          getCosts({
-            area_year_id: Number(areaYearId),
-            month: selectedMonth || undefined,
-            currency: selectedCurrency || undefined,
-            page_size: 1000,
-          }),
-        ]);
-
-        console.log('Budget Items Response:', budgetResponse);
-        console.log('Costs Response:', costsResponse);
-        
-        setBudgetItems(budgetResponse.results);
-        setCosts(costsResponse.results);
-      } catch (err: any) {
-        console.error("Error loading tracking data:", err);
-        setError(err.response?.data?.message || "Error al cargar los datos");
-      } finally {
-        setLoading(false);
-      }
+      await reloadData();
+      setLoading(false);
     };
 
     loadData();
-  }, [areaYearId, selectedMonth, selectedCurrency]);
+  }, [reloadData]);
 
   // Calculate totals and statistics
   const statistics = useMemo(() => {
@@ -127,7 +129,8 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
 
     try {
       await deleteCost(costId);
-      setCosts(costs.filter((c) => c.id !== costId));
+      // Reload data to show updated list
+      await reloadData();
     } catch (err: any) {
       alert(err.response?.data?.message || "Error al eliminar el gasto");
     }
@@ -143,12 +146,20 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
     setExpandedItems(newExpanded);
   };
 
-  const handleCostCreatedOrUpdated = () => {
-    // Reload data
+  const handleCostCreatedOrUpdated = async () => {
+    // Close modal first
     setShowCreateModal(false);
     setEditingCost(null);
-    // Trigger reload by changing a dependency
-    setSelectedMonth(selectedMonth);
+    setSelectedBudgetItem(null);
+    
+    // Reload data to show new/updated cost
+    await reloadData();
+  };
+
+  const handleAddCostToBudgetItem = (item: BudgetItem) => {
+    setSelectedBudgetItem(item);
+    setEditingCost(null);
+    setShowCreateModal(true);
   };
 
   const exportToCSV = () => {
@@ -221,6 +232,7 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
           <button
             onClick={() => {
               setEditingCost(null);
+              setSelectedBudgetItem(null);
               setShowCreateModal(true);
             }}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -355,11 +367,11 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
 
               return (
                 <div key={item.id} className="px-6 py-4">
-                  <div
-                    className="flex items-center justify-between cursor-pointer hover:bg-gray-50 -mx-6 px-6 py-2 rounded"
-                    onClick={() => toggleExpanded(item.id)}
-                  >
-                    <div className="flex items-center space-x-3 flex-1">
+                  <div className="flex items-center justify-between -mx-6 px-6 py-2 rounded">
+                    <div 
+                      className="flex items-center space-x-3 flex-1 cursor-pointer hover:bg-gray-50 py-2 -my-2 rounded"
+                      onClick={() => toggleExpanded(item.id)}
+                    >
                       {isExpanded ? (
                         <ChevronDown className="w-5 h-5 text-gray-400" />
                       ) : (
@@ -412,6 +424,21 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
                             style={{ width: `${Math.min(percentage, 100)}%` }}
                           />
                         </div>
+                      </div>
+                      <div className="relative z-10">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            handleAddCostToBudgetItem(item);
+                          }}
+                          className="flex items-center space-x-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm whitespace-nowrap"
+                          title={`Agregar gasto a ${item.cuenta}`}
+                          type="button"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Agregar Gasto</span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -479,17 +506,19 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
       </div>
 
       {/* Create/Edit Cost Modal */}
-      {showCreateModal && user && (
+      {showCreateModal && (
         <CreateCostModal
           open={showCreateModal}
           onClose={() => {
             setShowCreateModal(false);
             setEditingCost(null);
+            setSelectedBudgetItem(null);
           }}
           areaYearId={Number(areaYearId)}
           budgetItems={budgetItems || []}
-          userId={Number(user.id)}
+          userId={user ? Number(user.id) : 1}
           editingCost={editingCost}
+          preSelectedBudgetItem={selectedBudgetItem}
           onSuccess={handleCostCreatedOrUpdated}
         />
       )}

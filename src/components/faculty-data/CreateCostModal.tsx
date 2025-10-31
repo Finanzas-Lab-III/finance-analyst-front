@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import { X, DollarSign, Calendar, FileText, AlertCircle } from "lucide-react";
+import { X, DollarSign, AlertCircle } from "lucide-react";
 import {
   createCost,
   updateCost,
@@ -10,13 +10,14 @@ import {
   type CreateCostData,
 } from "@/lib/tracking-api";
 
-interface CreateCostModalProps {
+export interface CreateCostModalProps {
   open: boolean;
   onClose: () => void;
   areaYearId: number;
   budgetItems: BudgetItem[];
   userId: number;
   editingCost?: Cost | null;
+  preSelectedBudgetItem?: BudgetItem | null;
   onSuccess: () => void;
 }
 
@@ -27,16 +28,17 @@ export default function CreateCostModal({
   budgetItems,
   userId,
   editingCost,
+  preSelectedBudgetItem,
   onSuccess,
 }: CreateCostModalProps) {
   const [formData, setFormData] = useState({
-    budgetItemId: editingCost?.budgetItemId || null,
-    cuenta: editingCost?.cuenta || "",
-    month: editingCost?.month || 1,
+    budgetItemId: editingCost?.budgetItemId || preSelectedBudgetItem?.id || null,
+    cuenta: editingCost?.cuenta || preSelectedBudgetItem?.cuenta || "",
+    month: editingCost?.month || preSelectedBudgetItem?.month || 1,
     title: editingCost?.title || "",
     description: editingCost?.description || "",
     amount: editingCost?.amount || 0,
-    currency: (editingCost?.currency || "ARS") as "USD" | "ARS" | "EUR",
+    currency: (editingCost?.currency || preSelectedBudgetItem?.currency || "ARS") as "USD" | "ARS" | "EUR",
   });
 
   const [loading, setLoading] = useState(false);
@@ -55,8 +57,19 @@ export default function CreateCostModal({
         currency: editingCost.currency,
       });
       setManualEntry(!editingCost.budgetItemId);
+    } else if (preSelectedBudgetItem) {
+      setFormData({
+        budgetItemId: preSelectedBudgetItem.id,
+        cuenta: preSelectedBudgetItem.cuenta,
+        month: preSelectedBudgetItem.month,
+        title: "",
+        description: "",
+        amount: 0,
+        currency: preSelectedBudgetItem.currency,
+      });
+      setManualEntry(false);
     }
-  }, [editingCost]);
+  }, [editingCost, preSelectedBudgetItem]);
 
   const handleBudgetItemChange = (itemId: string) => {
     if (itemId === "manual") {
@@ -175,23 +188,36 @@ export default function CreateCostModal({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Línea Presupuestaria
             </label>
-            <select
-              value={formData.budgetItemId || "manual"}
-              onChange={(e) => handleBudgetItemChange(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={!!editingCost}
-            >
-              <option value="manual">Ingreso manual (sin línea presupuestaria)</option>
-              {budgetItems.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.cuenta} - {item.name || "Sin nombre"} ({getMonthName(item.month)}) -{" "}
-                  {item.currency}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              Seleccione una línea presupuestaria o ingrese manualmente
-            </p>
+            {preSelectedBudgetItem && !editingCost ? (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                <p className="text-sm font-medium text-blue-900">
+                  {preSelectedBudgetItem.cuenta} - {preSelectedBudgetItem.name || "Sin nombre"} ({getMonthName(preSelectedBudgetItem.month)}) - {preSelectedBudgetItem.currency}
+                </p>
+                <p className="text-xs text-blue-700 mt-1">
+                  Línea presupuestaria seleccionada automáticamente
+                </p>
+              </div>
+            ) : (
+              <>
+                <select
+                  value={formData.budgetItemId || "manual"}
+                  onChange={(e) => handleBudgetItemChange(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={!!editingCost}
+                >
+                  <option value="manual">Ingreso manual (sin línea presupuestaria)</option>
+                  {budgetItems.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.cuenta} - {item.name || "Sin nombre"} ({getMonthName(item.month)}) -{" "}
+                      {item.currency}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Seleccione una línea presupuestaria o ingrese manualmente
+                </p>
+              </>
+            )}
           </div>
 
           {/* Manual Entry Fields */}
@@ -258,7 +284,7 @@ export default function CreateCostModal({
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full text-black border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Ej: Compra de equipamiento de laboratorio"
               required
             />
@@ -272,7 +298,7 @@ export default function CreateCostModal({
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-black w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Detalles adicionales del gasto (opcional)"
               rows={3}
             />
@@ -291,7 +317,7 @@ export default function CreateCostModal({
                 type="number"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                className="w-full border border-gray-300 rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-black border border-gray-300 rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0.00"
                 step="0.01"
                 min="0.01"
