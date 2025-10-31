@@ -80,17 +80,45 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
     loadData();
   }, [reloadData]);
 
-  // Calculate totals and statistics
+  // Calculate totals and statistics (respect selectedCurrency on client too)
   const statistics = useMemo(() => {
-    // Safety check: ensure arrays are defined
-    const items = budgetItems || [];
-    const expenses = costs || [];
+    // Base arrays
+    const itemsBase = budgetItems || [];
+    const expensesBase = costs || [];
+
+    // Apply client-side currency filter to be safe even if backend ignores it
+    const items = selectedCurrency
+      ? itemsBase.filter((it) => it.currency === selectedCurrency)
+      : itemsBase;
+    const expenses = selectedCurrency
+      ? expensesBase.filter((c) => c.currency === selectedCurrency)
+      : expensesBase;
     
-    const totalBudgeted = items.reduce((sum, item) => sum + item.budgetedAmount, 0);
+    // Group budgeted amounts by currency
+    const budgetedByCurrency: Record<string, number> = {};
+    items.forEach((item) => {
+      const currency = item.currency || 'ARS';
+      budgetedByCurrency[currency] = (budgetedByCurrency[currency] || 0) + item.budgetedAmount;
+    });
     
-    // Calculate spent amount from costs
-    const totalSpent = expenses.reduce((sum, cost) => sum + cost.amount, 0);
+    // Group spent amounts by currency
+    const spentByCurrency: Record<string, number> = {};
+    expenses.forEach((cost) => {
+      const currency = cost.currency || 'ARS';
+      spentByCurrency[currency] = (spentByCurrency[currency] || 0) + cost.amount;
+    });
     
+    // Calculate remaining by currency
+    const remainingByCurrency: Record<string, number> = {};
+    Object.keys(budgetedByCurrency).forEach((currency) => {
+      const budgeted = budgetedByCurrency[currency] || 0;
+      const spent = spentByCurrency[currency] || 0;
+      remainingByCurrency[currency] = budgeted - spent;
+    });
+    
+    // Calculate totals (for legacy compatibility)
+    const totalBudgeted = Object.values(budgetedByCurrency).reduce((sum, val) => sum + val, 0);
+    const totalSpent = Object.values(spentByCurrency).reduce((sum, val) => sum + val, 0);
     const remaining = totalBudgeted - totalSpent;
     const percentageUsed = calculateBudgetUsagePercentage(totalSpent, totalBudgeted);
 
@@ -121,8 +149,11 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
       percentageUsed,
       itemsOverBudget,
       costsByBudgetItem,
+      budgetedByCurrency,
+      spentByCurrency,
+      remainingByCurrency,
     };
-  }, [budgetItems, costs]);
+  }, [budgetItems, costs, selectedCurrency]);
 
   const handleDeleteCost = async (costId: number) => {
     if (!window.confirm("¿Está seguro de eliminar este gasto?")) return;
@@ -163,7 +194,10 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
   };
 
   const exportToCSV = () => {
-    const items = budgetItems || [];
+    const itemsRaw = budgetItems || [];
+    const items = selectedCurrency
+      ? itemsRaw.filter((it) => it.currency === selectedCurrency)
+      : itemsRaw;
     const headers = ["Cuenta", "Nombre", "Mes", "Presupuestado", "Gastado", "Restante", "% Uso", "Moneda"];
     const rows = items.map((item) => {
       const itemCosts = statistics.costsByBudgetItem.get(item.id) || [];
@@ -293,38 +327,62 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Presupuestado</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {formatCurrency(statistics.totalBudgeted, "ARS")}
-              </p>
-            </div>
-            <DollarSign className="w-10 h-10 text-blue-500" />
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-gray-600">Presupuestado</p>
+            <DollarSign className="w-8 h-8 text-blue-500" />
+          </div>
+          <div className="space-y-1">
+            {Object.entries(statistics.budgetedByCurrency).map(([currency, amount]) => (
+              <div key={currency} className="flex items-baseline justify-between">
+                <span className="text-xs text-gray-500">{currency}:</span>
+                <span className="text-lg font-bold text-gray-900">
+                  {formatCurrency(amount, currency as any)}
+                </span>
+              </div>
+            ))}
+            {Object.keys(statistics.budgetedByCurrency).length === 0 && (
+              <p className="text-lg font-bold text-gray-400">--</p>
+            )}
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Gastado</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {formatCurrency(statistics.totalSpent, "ARS")}
-              </p>
-            </div>
-            <TrendingUp className="w-10 h-10 text-orange-500" />
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-gray-600">Gastado</p>
+            <TrendingUp className="w-8 h-8 text-orange-500" />
+          </div>
+          <div className="space-y-1">
+            {Object.entries(statistics.spentByCurrency).map(([currency, amount]) => (
+              <div key={currency} className="flex items-baseline justify-between">
+                <span className="text-xs text-gray-500">{currency}:</span>
+                <span className="text-lg font-bold text-gray-900">
+                  {formatCurrency(amount, currency as any)}
+                </span>
+              </div>
+            ))}
+            {Object.keys(statistics.spentByCurrency).length === 0 && (
+              <p className="text-lg font-bold text-gray-400">--</p>
+            )}
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Restante</p>
-              <p className={`text-2xl font-bold mt-1 ${statistics.remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(statistics.remaining, "ARS")}
-              </p>
-            </div>
-            <TrendingDown className={`w-10 h-10 ${statistics.remaining >= 0 ? 'text-green-500' : 'text-red-500'}`} />
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-gray-600">Restante</p>
+            <TrendingDown className="w-8 h-8 text-green-500" />
+          </div>
+          <div className="space-y-1">
+            {Object.entries(statistics.remainingByCurrency).map(([currency, amount]) => (
+              <div key={currency} className="flex items-baseline justify-between">
+                <span className="text-xs text-gray-500">{currency}:</span>
+                <span className={`text-lg font-bold ${amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatCurrency(amount, currency as any)}
+                </span>
+              </div>
+            ))}
+            {Object.keys(statistics.remainingByCurrency).length === 0 && (
+              <p className="text-lg font-bold text-gray-400">--</p>
+            )}
           </div>
         </div>
 
@@ -353,12 +411,15 @@ export default function ExpenseTrackingTab({ areaYearId }: ExpenseTrackingTabPro
         </div>
 
         <div className="divide-y divide-gray-100">
-          {!budgetItems || budgetItems.length === 0 ? (
+          {!(budgetItems && budgetItems.length > 0) ? (
             <div className="px-6 py-8 text-center text-gray-500">
               No hay líneas presupuestarias disponibles
             </div>
           ) : (
-            budgetItems.map((item) => {
+            (selectedCurrency
+              ? budgetItems.filter((it) => it.currency === selectedCurrency)
+              : budgetItems
+            ).map((item) => {
               const itemCosts = statistics.costsByBudgetItem.get(item.id) || [];
               const spent = itemCosts.reduce((sum, c) => sum + c.amount, 0);
               const remaining = item.budgetedAmount - spent;
