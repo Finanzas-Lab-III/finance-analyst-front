@@ -52,8 +52,8 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
       if (folder && folder.trim().length > 0) form.append("folder", folder.trim());
       if (title && title.trim().length > 0) form.append("title", title.trim());
       if (notes && notes.trim().length > 0) form.append("notes", notes.trim());
-
-      const res = await fetch(`${USERS_API_BASE}/api/upload`, {
+      console.log("Uploading file with data:", USERS_API_BASE)
+      const res = await fetch('http://localhost:8000/api/upload', {
         method: "POST",
         body: form,
         headers: { 'ngrok-skip-browser-warning': 'true' },

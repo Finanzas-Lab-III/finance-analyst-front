@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 type PaymentRecord = {
+  id?: number; // identificador del gasto, usado para updates
   fila: number;
   denominacion: string | null;
   observaciones: string | null;
@@ -56,10 +57,35 @@ function normalizeCurrency(currency: string | null): string {
   return currency;
 }
 
+function extractRecordId(rec: PaymentRecord): number | null {
+  const anyRec = rec as any;
+  const candidateKeys = [
+    'id',
+    'payment_id', 'paymentId',
+    'gasto_id', 'gastoId',
+    'cost_id', 'costId',
+    'id_gasto', 'id_costo',
+    'row_id'
+  ];
+  for (const key of candidateKeys) {
+    const v = anyRec?.[key];
+    const n = typeof v === 'string' ? Number(v) : v;
+    if (typeof n === 'number' && Number.isFinite(n)) return n;
+  }
+  if (typeof rec.fila === 'number' && Number.isFinite(rec.fila)) return rec.fila;
+  return null;
+}
+
 export default function CalendarTab({ areaYearId, year }: CalendarTabProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [payments, setPayments] = useState<PaymentsResponse | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<PaymentRecord | null>(null);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [formStatus, setFormStatus] = useState<string>('COMPLETADO');
+  const [formTotalPagado, setFormTotalPagado] = useState<string>('');
+  const [saving, setSaving] = useState<boolean>(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -132,20 +158,42 @@ export default function CalendarTab({ areaYearId, year }: CalendarTabProps) {
       // Calcular highlight mensual según estado y fecha
       const now = new Date();
       const statusOf = (s: string | null) => (s || "").trim().toUpperCase();
-      const hasUnpaid = validItems.some((it) => statusOf(it.status) !== "PAGADO");
-      const allPaid = validItems.length > 0 && validItems.every((it) => statusOf(it.status) === "PAGADO");
+      const hasUnpaid = validItems.some((it) => statusOf(it.status) !== "COMPLETADO");
+      const allPaid = validItems.length > 0 && validItems.every((it) => statusOf(it.status) === "COMPLETADO");
 
-      let highlight: 'green' | 'yellow' | 'red' | 'none' = 'none';
+      // Color por defecto (lógica existente)
+      let defaultHighlight: 'green' | 'yellow' | 'red' | 'none' = 'none';
       if (allPaid) {
-        highlight = 'green';
+        defaultHighlight = 'green';
       } else if (hasUnpaid && dueDate instanceof Date && !isNaN(dueDate.getTime())) {
         const msDiff = dueDate.getTime() - now.getTime();
         const daysDiff = msDiff / (1000 * 60 * 60 * 24);
         if (now.getTime() > dueDate.getTime()) {
-          highlight = 'red';
+          defaultHighlight = 'red';
         } else if (daysDiff <= 30) {
-          highlight = 'yellow';
+          defaultHighlight = 'yellow';
         }
+      }
+
+      // Reglas solicitadas según mes actual y estado COMPLETADOS/NO_COMPLETADOS
+      let highlight: 'green' | 'yellow' | 'red' | 'none' = defaultHighlight;
+      if (dueDate instanceof Date && !isNaN(dueDate.getTime())) {
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthStart = new Date(dueDate.getFullYear(), dueDate.getMonth(), 1);
+
+        // Meses anteriores al actual: NO_COMPLETADOS -> rojo; caso contrario -> verde
+        if (monthStart < currentMonthStart) {
+          highlight = hasUnpaid ? 'red' : 'green';
+        }
+
+        // Meses posteriores al actual: COMPLETADOS -> verde; si no, mantener color actual
+        if (monthStart > currentMonthStart) {
+          if (allPaid) {
+            highlight = 'green';
+          }
+          // si no está completado, se mantiene defaultHighlight (color actual)
+        }
+        // Mes actual: mantener la lógica existente (defaultHighlight)
       }
 
       result.push({ month: m, items: validItems, totalsByCurrency: totals, dueDate, highlight });
@@ -201,7 +249,20 @@ export default function CalendarTab({ areaYearId, year }: CalendarTabProps) {
                 ) : (
                   <ul className="space-y-2">
                     {items.slice(0, 8).map((it) => (
-                      <li key={`${it.fila}-${it.denominacion}`} className="flex items-start justify-between">
+                      <li
+                        key={`${it.fila}-${it.denominacion}`}
+                        className="flex items-start justify-between cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2"
+                        onClick={() => {
+                          setSelectedRecord(it);
+                          setFormStatus('COMPLETADO');
+                          const currentPaid = typeof it.totalPagado === 'number' && Number.isFinite(it.totalPagado)
+                            ? String(it.totalPagado)
+                            : String(parseNumber(it.total));
+                          setFormTotalPagado(currentPaid);
+                          setSaveError(null);
+                          setShowEditModal(true);
+                        }}
+                      >
                         <div className="pr-3">
                           <div className="text-sm font-medium text-gray-900 truncate max-w-[220px]">{it.denominacion}</div>
                           {it.observaciones && (
@@ -219,6 +280,127 @@ export default function CalendarTab({ areaYearId, year }: CalendarTabProps) {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {showEditModal && selectedRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-lg font-semibold text-gray-900">Actualizar gasto</h4>
+              <button
+                className="text-gray-500 hover:text-gray-700"
+                onClick={() => { setShowEditModal(false); setSelectedRecord(null); }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <div className="text-sm text-gray-700 font-medium">Gasto</div>
+                <div className="text-sm text-gray-900">{selectedRecord.denominacion || '-'}</div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                <label className="block">
+                  <span className="text-sm text-gray-700">Estado</span>
+                  <select
+                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formStatus}
+                    onChange={(e) => setFormStatus(e.target.value)}
+                  >
+                    <option value="COMPLETADO" color="black">COMPLETADO</option>
+                    <option value="NO_COMPLETADO">NO_COMPLETADO</option>
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="text-sm text-gray-700">Total pagado (monto final)</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formTotalPagado}
+                    onChange={(e) => setFormTotalPagado(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              {saveError && (
+                <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">{saveError}</div>
+              )}
+            </div>
+
+            <div className="mt-5 flex items-center justify-end space-x-2">
+              <button
+                className="px-3 py-2 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                onClick={() => { setShowEditModal(false); setSelectedRecord(null); }}
+                disabled={saving}
+              >
+                Cancelar
+              </button>
+              <button
+                className="px-3 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                onClick={async () => {
+                  const idForPost = selectedRecord ? extractRecordId(selectedRecord) : null;
+                  const amount = Number(formTotalPagado);
+                  if (!Number.isFinite(amount) || amount < 0) {
+                    setSaveError('Ingresa un monto válido.');
+                    return;
+                  }
+                  setSaveError(null);
+                  setSaving(true);
+                  try {
+                    const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? '';
+                    const res = await fetch(`${API_BASE}/api/armado/payments/cost/update`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'ngrok-skip-browser-warning': 'true',
+                      },
+                      credentials: 'include',
+                      body: JSON.stringify({
+                        id: idForPost,
+                        status: formStatus,
+                        totalPagado: amount,
+                      }),
+                    });
+                    if (!res.ok) {
+                      throw new Error(`Error ${res.status}`);
+                    }
+
+                    // Actualizar estado local
+                    setPayments((prev) => {
+                      if (!prev) return prev;
+                      const copy: PaymentsResponse = { ...prev };
+                      Object.keys(copy).forEach((k) => {
+                        copy[k] = copy[k].map((rec) => {
+                          const recId = extractRecordId(rec);
+                          if (recId === idForPost) {
+                            return { ...rec, status: formStatus, totalPagado: amount } as PaymentRecord;
+                          }
+                          return rec;
+                        });
+                      });
+                      return copy;
+                    });
+
+                    setShowEditModal(false);
+                    setSelectedRecord(null);
+                  } catch (e: any) {
+                    setSaveError(e?.message ? String(e.message) : 'No se pudo guardar');
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={saving}
+              >
+                {saving ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
