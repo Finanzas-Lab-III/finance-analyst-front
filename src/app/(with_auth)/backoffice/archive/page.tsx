@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Archive } from "lucide-react";
+import { Archive, Plus } from "lucide-react";
 import { AreaInChargeDto, FacultyInChargeDto } from "@/api/userService";
-import { getFacultiesAndAreas } from "@/lib/user-api";
+import { getFacultiesAndAreas, getAllOrgUnits } from "@/lib/user-api";
+import AddFacultyAreaModal from "@/components/backoffice/AddFacultyAreaModal";
 
 export default function ArchivePage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function ArchivePage() {
   const [error, setError] = useState<string | null>(null);
   const [areas, setAreas] = useState<AreaInChargeDto[]>([]);
   const [facultades, setFacultades] = useState<FacultyInChargeDto[]>([]);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -18,7 +20,7 @@ export default function ArchivePage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await getFacultiesAndAreas();
+        const res = await getAllOrgUnits();
         // Expected shape:
         // { areas_in_charge: AreaInChargeDto[], faculties_in_charge: FacultyInChargeDto[] }
         if (!cancelled) {
@@ -51,6 +53,41 @@ export default function ArchivePage() {
       cancelled = true;
     };
   }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log("Reloading faculties and areas...");
+      // Try the admin endpoint first for more up-to-date data
+      const res = await getAllOrgUnits();
+      console.log("Raw API response:", res);
+      
+      const faculties = Array.isArray(res?.faculties_in_charge) ? res.faculties_in_charge : [];
+      const areasInCharge = Array.isArray(res?.areas_in_charge) ? res.areas_in_charge : [];
+
+      console.log("Processed faculties:", faculties);
+      console.log("Processed areas:", areasInCharge);
+
+      const uniqueById = <T extends { id: number }>(xs: T[]) =>
+        Array.from(new Map(xs.map(x => [x.id, x])).values());
+
+      setFacultades(
+        uniqueById(faculties).sort((a, b) => a.name.localeCompare(b.name))
+      );
+      setAreas(
+        uniqueById(areasInCharge).sort((a, b) => a.name.localeCompare(b.name))
+      );
+      
+      console.log("Updated state - faculties count:", faculties.length);
+      console.log("Updated state - areas count:", areasInCharge.length);
+    } catch (e: any) {
+      console.error("Error loading data:", e);
+      setError(e?.message ? String(e.message) : "Error cargando datos");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const showFacultades = facultades.length > 0;
   const showAreas = areas.length > 0;
@@ -148,6 +185,38 @@ export default function ArchivePage() {
           No hay facultades ni áreas a cargo para este usuario.
         </div>
       )}
+
+      {/* Add Faculty/Area Button */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Gestionar Facultades y Áreas</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Agrega nuevas facultades o áreas para expandir la estructura organizacional.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            disabled={loading}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Agregar Facultad o Área
+          </button>
+        </div>
+      </div>
+
+      {/* Add Faculty/Area Modal */}
+      <AddFacultyAreaModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={() => {
+          setShowAddModal(false);
+          // Reload data immediately after successful creation
+          loadData();
+        }}
+        availableFaculties={facultades}
+      />
     </div>
   );
 }

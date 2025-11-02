@@ -606,3 +606,57 @@ export function buildRawFileUrl(fileId: number | string, raw: boolean = true): s
   const rawParam = raw ? "true" : "false";
   return `${USERS_API_BASE}/api/archivo/${fileId}/?raw=${rawParam}`;
 }
+
+// Create Faculty/Area API functions
+export interface CreateFacultyPayload {
+  name: string;
+  code: string;
+}
+
+export interface CreateAreaPayload {
+  name: string;
+  code: string;
+  parent_area_id: number; // Faculty ID that this area belongs to
+}
+
+export async function createFaculty(payload: CreateFacultyPayload): Promise<FacultyInChargeDto> {
+  const url = `${USERS_API_BASE}/api/faculties/`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
+    body: JSON.stringify({
+      ...payload,
+      type: "FACULTY"
+    }),
+  });
+  if (!res.ok) {
+    let message = `Error creando facultad: ${res.status} ${res.statusText}`;
+    try {
+      const data = await res.json();
+      if (data?.detail) message = String(data.detail);
+    } catch {}
+    throw new Error(message);
+  }
+  return await res.json();
+}
+
+export async function createArea(payload: CreateAreaPayload): Promise<AreaInChargeDto> {
+  const url = `${USERS_API_BASE}/api/faculties/`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
+    body: JSON.stringify({
+      ...payload,
+      type: "AREA"
+    }),
+  });
+  if (!res.ok) {
+    let message = `Error creando área: ${res.status} ${res.statusText}`;
+    try {
+      const data = await res.json();
+      if (data?.detail) message = String(data.detail);
+    } catch {}
+    throw new Error(message);
+  }
+  return await res.json();
+}
