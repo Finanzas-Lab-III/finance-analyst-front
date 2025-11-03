@@ -403,10 +403,7 @@ class CommentsService {
   }
 
   async getCommentsByDocument(documentId: number): Promise<CommentsResponse> {
-    console.log('getCommentsByDocument called with:', documentId);
-    const result = await this.request<CommentsResponse>(`/document/${documentId}/`);
-    console.log('getCommentsByDocument result:', result);
-    return result;
+    return this.request<CommentsResponse>(`/document/${documentId}/`);
   }
 
   async updateComment(commentId: number, content: string, userId: number): Promise<Comment> {
