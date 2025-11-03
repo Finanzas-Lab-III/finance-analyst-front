@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { MessageSquare, Send, Edit2, Trash2, AlertCircle, User, Clock, CheckCircle, XCircle, Loader2, FileText, Calendar, X } from "lucide-react";
 import { useComments } from "@/hooks/useComments";
-import { DocumentStatus, Comment } from "@/api/commentsService";
+import { DocumentStatus, Comment, MonthlyContext } from "@/api/commentsService";
 import { formatRelativeTime, getUserInitials, getDocumentStatusLabel } from "@/lib/commentUtils";
 
 interface IntegratedCommentsProps {
@@ -12,14 +12,10 @@ interface IntegratedCommentsProps {
   currentUserName: string;
   canEdit?: boolean;
   canDelete?: boolean;
-  monthlyDocumentContext?: {
-    documentId: number;
-    month: string;
-    version: string;
-    createdAt: string;
-  };
+  monthlyContext?: MonthlyContext;
   onCommentSubmitted?: () => void;
   onClearContext?: () => void;
+  showAllComments?: boolean;
 }
 
 export default function IntegratedComments({
@@ -29,14 +25,18 @@ export default function IntegratedComments({
   currentUserName,
   canEdit = true,
   canDelete = true,
-  monthlyDocumentContext,
+  monthlyContext,
   onCommentSubmitted,
   onClearContext,
+  showAllComments = false,
 }: IntegratedCommentsProps) {
   const { comments, loading, error, createComment, updateComment, deleteComment } = useComments({
     documentId,
     documentStatus,
     currentUserId,
+    currentUserName,
+    currentUserEmail: `${currentUserName.toLowerCase().replace(/\s+/g, '.')}@austral.edu.ar`,
+    monthlyContext,
   });
 
   const [newComment, setNewComment] = useState("");
@@ -44,24 +44,25 @@ export default function IntegratedComments({
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showOnlyContextual, setShowOnlyContextual] = useState(false);
 
   // Pre-rellenar comentario con contexto de documento mensual
   useEffect(() => {
-    if (monthlyDocumentContext && !newComment) {
+    if (monthlyContext && !newComment) {
       const monthNames: Record<string, string> = {
         enero: 'Enero', febrero: 'Febrero', marzo: 'Marzo', abril: 'Abril',
         mayo: 'Mayo', junio: 'Junio', julio: 'Julio', agosto: 'Agosto',
         septiembre: 'Septiembre', octubre: 'Octubre', noviembre: 'Noviembre', diciembre: 'Diciembre'
       };
       
-      const monthDisplay = monthNames[monthlyDocumentContext.month] || monthlyDocumentContext.month;
-      const dateDisplay = new Date(monthlyDocumentContext.createdAt).toLocaleDateString('es-AR');
+      const monthDisplay = monthNames[monthlyContext.month] || monthlyContext.month;
+      const dateDisplay = new Date(monthlyContext.created_at).toLocaleDateString('es-AR');
       
-      const contextComment = `📋 **Comentario sobre seguimiento mensual de ${monthDisplay}**\n🗓️ Documento: ${monthlyDocumentContext.version} (${dateDisplay})\n\n💬 `;
+      const contextComment = `📋 **Comentario sobre seguimiento mensual de ${monthDisplay}**\n🗓️ Documento: ${monthlyContext.version} (${dateDisplay})\n\n💬 `;
       
       setNewComment(contextComment);
     }
-  }, [monthlyDocumentContext?.documentId]);
+  }, [monthlyContext?.documentId]);
 
   const handleSubmitComment = async () => {
     if (!newComment.trim()) return;
@@ -138,8 +139,8 @@ export default function IntegratedComments({
 
   return (
     <div className="space-y-6">
-      {/* Monthly Document Context Banner */}
-      {monthlyDocumentContext && (
+      {/* Monthly Context Banner */}
+      {monthlyContext && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
@@ -151,22 +152,22 @@ export default function IntegratedComments({
                   Comentarios sobre documento mensual
                 </h4>
                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {monthlyDocumentContext.month.charAt(0).toUpperCase() + monthlyDocumentContext.month.slice(1)} 2025
+                  {monthlyContext.month.charAt(0).toUpperCase() + monthlyContext.month.slice(1)} 2025
                 </span>
               </div>
               <div className="flex items-center space-x-4 text-sm text-blue-700">
                 <div className="flex items-center space-x-1">
                   <span className="font-medium">Versión:</span>
-                  <span>{monthlyDocumentContext.version}</span>
+                  <span>{monthlyContext.version}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Calendar className="w-4 h-4" />
-                  <span>{new Date(monthlyDocumentContext.createdAt).toLocaleDateString('es-AR')}</span>
+                  <span>{new Date(monthlyContext.created_at).toLocaleDateString('es-AR')}</span>
                 </div>
               </div>
               <p className="text-sm text-blue-600 mt-2">
                 Puedes agregar comentarios específicos sobre el documento del mes de{' '}
-                <strong>{monthlyDocumentContext.month}</strong>.
+                <strong>{monthlyContext.month}</strong>.
               </p>
             </div>
             <div className="flex-shrink-0">
@@ -266,6 +267,11 @@ export default function IntegratedComments({
                     <h5 className="font-medium text-gray-900">
                       {comment.user_name || 'Usuario'}
                     </h5>
+                    {comment.monthly_context && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        📅 {comment.monthly_context.month}
+                      </span>
+                    )}
                     <span className="text-sm text-gray-500">
                       {formatRelativeTime(comment.created_at)}
                     </span>

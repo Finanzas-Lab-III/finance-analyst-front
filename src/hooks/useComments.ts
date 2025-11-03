@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { commentsService, Comment, DocumentStatus, CreateCommentRequest } from '@/api/commentsService';
+import { commentsService, Comment, DocumentStatus, CreateCommentRequest, MonthlyContext } from '@/api/commentsService';
 
 interface UseCommentsOptions {
   documentId: number;
   documentStatus: DocumentStatus;
   currentUserId: number;
+  currentUserName?: string;
+  currentUserEmail?: string;
+  monthlyContext?: MonthlyContext;
 }
 
 interface UseCommentsReturn {
@@ -17,16 +20,25 @@ interface UseCommentsReturn {
   refresh: () => Promise<void>;
 }
 
-export function useComments({ documentId, documentStatus, currentUserId }: UseCommentsOptions): UseCommentsReturn {
+export function useComments({ 
+  documentId, 
+  documentStatus, 
+  currentUserId,
+  currentUserName,
+  currentUserEmail,
+  monthlyContext
+}: UseCommentsOptions): UseCommentsReturn {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchComments = useCallback(async () => {
+    console.log('fetchComments called with documentId:', documentId);
     try {
       setLoading(true);
       setError(null);
-      const response = await commentsService.getCommentsByDocument(documentId, true);
+      const response = await commentsService.getCommentsByDocument(documentId);
+      console.log('Comments response:', response);
       setComments(response.comments.sort((a, b) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       ));
@@ -54,6 +66,9 @@ export function useComments({ documentId, documentStatus, currentUserId }: UseCo
         user_id: currentUserId,
         document_id: documentId,
         document_status: documentStatus,
+        user_name: currentUserName,
+        user_email: currentUserEmail,
+        monthly_context: monthlyContext // Incluir contexto mensual si está presente
       };
 
       const newComment = await commentsService.createComment(newCommentData);
@@ -65,7 +80,7 @@ export function useComments({ documentId, documentStatus, currentUserId }: UseCo
       setError(errorMessage);
       throw err;
     }
-  }, [documentId, documentStatus, currentUserId]);
+  }, [documentId, documentStatus, currentUserId, currentUserName, currentUserEmail, monthlyContext]);
 
   const updateComment = useCallback(async (commentId: number, content: string) => {
     if (!content.trim()) {
@@ -77,7 +92,7 @@ export function useComments({ documentId, documentStatus, currentUserId }: UseCo
     }
 
     try {
-      const updatedComment = await commentsService.updateComment(commentId, content.trim());
+      const updatedComment = await commentsService.updateComment(commentId, content.trim(), currentUserId);
       
       setComments(prev => 
         prev.map(comment => 
@@ -89,11 +104,11 @@ export function useComments({ documentId, documentStatus, currentUserId }: UseCo
       setError(errorMessage);
       throw err;
     }
-  }, []);
+  }, [currentUserId]);
 
   const deleteComment = useCallback(async (commentId: number) => {
     try {
-      await commentsService.deleteComment(commentId);
+      await commentsService.deleteComment(commentId, currentUserId);
       
       setComments(prev => prev.filter(comment => comment.id !== commentId));
     } catch (err) {
@@ -101,7 +116,7 @@ export function useComments({ documentId, documentStatus, currentUserId }: UseCo
       setError(errorMessage);
       throw err;
     }
-  }, []);
+  }, [currentUserId]);
 
   const refresh = useCallback(async () => {
     await fetchComments();
