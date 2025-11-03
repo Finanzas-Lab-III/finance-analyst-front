@@ -27,9 +27,11 @@ import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
 import { useAreaYearStatus } from "@/hooks/useAreaYearStatus";
 import { statusColor as areaYearStatusColor, statusLabelEs as areaYearStatusLabel } from "@/lib/areaYearStatus";
 import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "@/lib/commentsHelpers";
+import { MonthlyContext } from "@/api/commentsService";
+import { useAuth } from "@/components/AuthContext";
+import SimpleComments from "@/components/SimpleComments";
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
 import { useArmadoDocuments } from "@/hooks/useArmadoDocuments";
-import { useAuth } from "@/components/AuthContext";
 import CalendarTab from "@/components/faculty-data/CalendarTab";
 
 interface BudgetDetail {
@@ -243,6 +245,21 @@ export default function BudgetDetailPage() {
     setCommentContext({});
   };
 
+  // Convertir estructura de comentarios para compatibilidad
+  const convertToMonthlyContext = (monthlyDoc?: typeof commentContext.monthlyDocument): MonthlyContext | undefined => {
+    if (!monthlyDoc) return undefined;
+    
+    return {
+      month: monthlyDoc.month,
+      version: monthlyDoc.version,
+      created_at: monthlyDoc.createdAt, // Conversión de createdAt a created_at
+      documentId: getDocumentIdFromAreaYearId(areaYearId), // SIEMPRE usar el documentId del presupuesto principal
+      title: `Seguimiento ${monthlyDoc.month} ${monthlyDoc.version}`,
+      fileKey: `seguimiento/${monthlyDoc.month}/${monthlyDoc.month}_${monthlyDoc.version.toLowerCase()}.xlsx`,
+      notes: `Documento de seguimiento mensual`
+    };
+  };
+
   const getCommentTypeColor = (type: BudgetComment['type']) => {
     switch (type) {
       case 'approval':
@@ -343,26 +360,54 @@ export default function BudgetDetailPage() {
             <CalendarTab areaYearId={areaYearId} year={Number(year) || undefined} />
           )}
 
-          {activeTab === 'comments' && user && (
+          {activeTab === 'comments' && (
             <div className="space-y-6">
-              <div className="flex items-center space-x-2">
-                <MessageSquare className="w-5 h-5 text-gray-600" />
-                <h3 className="font-semibold text-gray-900">Comentarios y Comunicación</h3>
-              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <MessageSquare className="w-5 h-5 text-gray-600" />
+                  <h3 className="font-semibold text-gray-900">Comentarios y Comunicación</h3>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {process.env.NEXT_PUBLIC_USE_MOCK_COMMENTS === 'true' && (
+                    <div className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-lg border border-green-200">
+                      💾 Modo Mock (con persistencia)
+                    </div>
+                  )}
+                </div>
+              )</div>
 
-              <IntegratedComments
-                documentId={commentContext.monthlyDocument?.documentId || getDocumentIdFromAreaYearId(areaYearId)}
-                documentStatus={mapAreaYearStatusToDocumentStatus(status || 'NOT_STARTED')}
-                currentUserId={parseInt(user.id)}
-                currentUserName={user.name}
-                canEdit={true}
-                canDelete={true}
-                monthlyDocumentContext={commentContext.monthlyDocument}
-                onCommentSubmitted={() => {
-                  console.log('Comment submitted');
-                }}
-                onClearContext={handleClearCommentContext}
-              />
+              {!user ? (
+                <div className="space-y-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-yellow-800">⚠️ No hay usuario autenticado. Mostrando demo con usuario temporal.</p>
+                  </div>
+                  <IntegratedComments
+                    documentId={getDocumentIdFromAreaYearId(areaYearId)}
+                    documentStatus={mapAreaYearStatusToDocumentStatus(status || 'NOT_STARTED')}
+                    currentUserId={999}
+                    currentUserName="Usuario Demo"
+                    monthlyContext={convertToMonthlyContext(commentContext.monthlyDocument)}
+                    onClearContext={handleClearCommentContext}
+                    showAllComments={true}
+                    onCommentSubmitted={() => {
+                      console.log('Comentario enviado');
+                    }}
+                  />
+                </div>
+              ) : (
+                <IntegratedComments
+                  documentId={getDocumentIdFromAreaYearId(areaYearId)}
+                  documentStatus={mapAreaYearStatusToDocumentStatus(status || 'NOT_STARTED')}
+                  currentUserId={parseInt(user.id) || 1}
+                  currentUserName={user.name}
+                  monthlyContext={convertToMonthlyContext(commentContext.monthlyDocument)}
+                  onClearContext={handleClearCommentContext}
+                  showAllComments={true}
+                  onCommentSubmitted={() => {
+                    console.log('Comentario enviado');
+                  }}
+                />
+              )}
             </div>
           )}
         </div>

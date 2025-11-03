@@ -15,9 +15,6 @@ const Page: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Debug: Log the selectedFile value
-  console.log('Seguimiento page - selectedFile:', selectedFile);
-
   useEffect(() => {
     if (!selectedFile) {
       const loadFiles = async () => {
