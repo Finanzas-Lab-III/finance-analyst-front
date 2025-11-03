@@ -388,17 +388,24 @@ class CommentsService {
   }
 
   async createComment(data: CreateCommentRequest): Promise<Comment> {
+    // Prepare request body, only include monthly_context if it exists
+    const requestBody: any = {
+      content: data.content,
+      user_id: data.user_id,
+      document_id: data.document_id,
+      document_status: data.document_status,
+      user_name: data.user_name,
+      user_email: data.user_email,
+    };
+    
+    // Only include monthly_context if it's not null/undefined
+    if (data.monthly_context) {
+      requestBody.monthly_context = data.monthly_context;
+    }
+    
     return this.request<Comment>("/", {
       method: "POST",
-      body: JSON.stringify({
-        content: data.content,
-        user_id: data.user_id,
-        document_id: data.document_id,
-        document_status: data.document_status,
-        user_name: data.user_name,
-        user_email: data.user_email,
-        monthly_context: data.monthly_context,
-      }),
+      body: JSON.stringify(requestBody),
     });
   }
 

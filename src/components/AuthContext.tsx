@@ -1,5 +1,7 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getProfile } from '@/lib/user-api';
+import { NavBarData } from '@/types/profile';
 
 // Simple cookie helpers (client-side only)
 function setCookie(name: string, value: string, days: number = 365) {
@@ -54,25 +56,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
 
+  // Function to load real user from backend
+  const loadRealUser = async () => {
+    try {
+      const profile = await getProfile();
+      if (profile) {
+        // Convert NavBarData to User format
+        const realUser: User = {
+          id: profile.id?.toString() || "1",
+          name: profile.name || "",
+          email: profile.email || "",
+          role: (profile.role?.toLowerCase() as Exclude<UserRole, null>) || "director",
+          department: "Real User"
+        };
+        
+        setUser(realUser);
+        setUserRole(realUser.role);
+        
+        // Save to localStorage for persistence
+        localStorage.setItem('currentUser', JSON.stringify(realUser));
+        localStorage.setItem('testRole', realUser.role);
+        setCookie('userRole', realUser.role);
+        setCookie('userId', realUser.id);
+        
+        console.log('✅ Real user loaded:', realUser);
+        return realUser;
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not load real user, falling back to mock data:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
-    // Restaurar desde cookie primero y luego fallback a localStorage
-    const cookieRole = (getCookie('userRole') as UserRole) || null;
-    const savedUser = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
-    const savedRole = typeof window !== 'undefined' ? (localStorage.getItem('testRole') as UserRole) : null;
+    // Try to load real user first
+    const initializeUser = async () => {
+      const realUser = await loadRealUser();
+      
+      if (!realUser) {
+        // Fallback to saved data or mock
+        const cookieRole = (getCookie('userRole') as UserRole) || null;
+        const savedUser = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
+        const savedRole = typeof window !== 'undefined' ? (localStorage.getItem('testRole') as UserRole) : null;
 
-    if (cookieRole) {
-      // Usar helper de testing para hidratar usuario falso acorde al rol
-      setTestRole(cookieRole);
-      return;
-    }
+        if (cookieRole) {
+          setTestRole(cookieRole);
+          return;
+        }
 
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        }
 
-    if (savedRole) {
-      setUserRole(savedRole);
-    }
+        if (savedRole) {
+          setUserRole(savedRole);
+        }
+      }
+    };
+    
+    initializeUser();
   }, []);
 
   // Enforce default director id when role is director
@@ -133,8 +175,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     
-    // In a real implementation, this should be removed or replaced with proper role management
-    console.warn('setTestRole is deprecated and should not be used in production');
+    // Set mock user based on role for testing
+    const mockUser: User = {
+      id: "1",
+      name: "Ana López",
+      email: "ana.lopez@austral.edu.ar", 
+      role: role as Exclude<UserRole, null>,
+      department: "Finanzas"
+    };
+    
+    setUser(mockUser);
+    setUserRole(role);
+    localStorage.setItem('currentUser', JSON.stringify(mockUser));
+    localStorage.setItem('testRole', role);
+    setCookie('userRole', role);
+    setCookie('userId', mockUser.id);
+    
+    console.log('Mock user set:', mockUser);
   };
 
   return (

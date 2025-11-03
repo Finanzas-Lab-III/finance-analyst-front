@@ -35,7 +35,11 @@ export default function IntegratedComments({
     documentStatus,
     currentUserId,
     currentUserName,
-    currentUserEmail: `${currentUserName.toLowerCase().replace(/\s+/g, '.')}@austral.edu.ar`,
+    currentUserEmail: `${currentUserName.toLowerCase()
+      .replace(/\s+/g, '.')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+    }@austral.edu.ar`,
     monthlyContext,
   });
 

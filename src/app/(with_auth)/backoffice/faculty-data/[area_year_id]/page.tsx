@@ -28,10 +28,10 @@ import { useAreaYearStatus } from "@/hooks/useAreaYearStatus";
 import { statusColor as areaYearStatusColor, statusLabelEs as areaYearStatusLabel } from "@/lib/areaYearStatus";
 import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "@/lib/commentsHelpers";
 import { MonthlyContext } from "@/api/commentsService";
+import { useAuth } from "@/components/AuthContext";
 import SimpleComments from "@/components/SimpleComments";
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
 import { useArmadoDocuments } from "@/hooks/useArmadoDocuments";
-import { useAuth } from "@/components/AuthContext";
 import CalendarTab from "@/components/faculty-data/CalendarTab";
 
 interface BudgetDetail {
