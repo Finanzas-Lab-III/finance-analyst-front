@@ -376,17 +376,6 @@ export default function BudgetDetailPage() {
                 </div>
               )</div>
 
-              {/* Debug info */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-                <h4 className="font-semibold text-blue-900 mb-2">🔧 Debug Info</h4>
-                <p><strong>User:</strong> {user ? `${user.name} (ID: ${user.id})` : 'No user'}</p>
-                <p><strong>Area Year ID:</strong> {areaYearId}</p>
-                <p><strong>Document ID (Unified):</strong> {getDocumentIdFromAreaYearId(areaYearId)}</p>
-                <p><strong>Status:</strong> {status || 'NOT_STARTED'}</p>
-                <p><strong>Monthly Context:</strong> {commentContext.monthlyDocument ? `${commentContext.monthlyDocument.month} ${commentContext.monthlyDocument.version}` : 'No'}</p>
-                <p><strong>Mock Mode:</strong> {process.env.NEXT_PUBLIC_USE_MOCK_COMMENTS === 'true' ? 'Enabled with LocalStorage persistence' : 'Disabled (Real API)'}</p>
-              </div>
-
               {!user ? (
                 <div className="space-y-4">
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
