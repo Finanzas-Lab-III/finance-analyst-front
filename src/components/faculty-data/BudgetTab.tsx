@@ -17,6 +17,8 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
   const router = useRouter();
   const { analysisResults, analysisLoading, analysisError } = useArmadoAI(String(areaYearId));
   const [showDetails, setShowDetails] = useState(false);
+  const [exportingPrev, setExportingPrev] = useState(false);
+  const [exportingPrevBudget, setExportingPrevBudget] = useState(false);
 
   const { totalErrors, groupedByRule } = useMemo(() => {
     const byRule = new Map<string, { count: number; items: any[] }>();
@@ -122,6 +124,146 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
             <p className="text-gray-600 text-sm mt-1">Versión actual del presupuesto</p>
           </div>
           <div className="flex space-x-2">
+            <button
+              onClick={async () => {
+                try {
+                  setExportingPrevBudget(true);
+                  const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? 'http://localhost:8000';
+                  const url = `${API_BASE}/api/armado/budget/areayear/${encodeURIComponent(String(areaYearId))}/previous/export`;
+                  const res = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                      Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream;q=0.9, */*;q=0.8',
+                      'ngrok-skip-browser-warning': 'true',
+                    },
+                    credentials: 'include',
+                  });
+                  if (!res.ok) {
+                    try {
+                      const ct = (res.headers.get('content-type') || '').toLowerCase();
+                      if (ct.includes('application/json')) {
+                        const data: any = await res.json().catch(() => null);
+                        const msg = String(data?.message || data?.error || `Error ${res.status}`);
+                        alert(msg);
+                      } else {
+                        const txt = await res.text().catch(() => '');
+                        const msg = txt && txt.length < 300 ? txt : `Error ${res.status}`;
+                        alert(msg);
+                      }
+                    } catch {
+                      alert(`Error ${res.status}`);
+                    } finally {
+                      setExportingPrevBudget(false);
+                    }
+                    return;
+                  }
+                  const ctOk = (res.headers.get('content-type') || '').toLowerCase();
+                  if (ctOk.includes('application/json')) {
+                    try {
+                      const data: any = await res.json().catch(() => null);
+                      const msg = String(data?.message || data?.error || 'No se pudo exportar el presupuesto del año anterior');
+                      alert(msg);
+                    } finally {
+                      setExportingPrevBudget(false);
+                    }
+                    return;
+                  }
+                  const blob = await res.blob();
+                  const cd = res.headers.get('content-disposition') || '';
+                  const match = /filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i.exec(cd);
+                  const filename = match ? decodeURIComponent(match[1]) : `presupuesto-anio-anterior-${String(areaYearId)}.xlsx`;
+                  const link = document.createElement('a');
+                  const href = URL.createObjectURL(blob);
+                  link.href = href;
+                  link.download = filename;
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                  URL.revokeObjectURL(href);
+                } catch (e) {
+                  console.error(e);
+                  try { alert('No se pudo exportar el presupuesto del año anterior'); } catch {}
+                } finally {
+                  setExportingPrevBudget(false);
+                }
+              }}
+              className="flex items-center space-x-2 px-4 py-2 bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50"
+              disabled={exportingPrevBudget}
+              title="Exportar presupuesto del año anterior"
+            >
+              <Download className="w-4 h-4" />
+              <span>{exportingPrevBudget ? 'Exportando...' : 'Presupuesto año anterior'}</span>
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  setExportingPrev(true);
+                  const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? 'http://localhost:8000';
+                  const url = `${API_BASE}/api/armado/summary/areayear/${encodeURIComponent(String(areaYearId))}/previous/export`;
+                  const res = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                      Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream;q=0.9, */*;q=0.8',
+                      'ngrok-skip-browser-warning': 'true',
+                    },
+                    credentials: 'include',
+                  });
+                  if (!res.ok) {
+                    try {
+                      const ct = (res.headers.get('content-type') || '').toLowerCase();
+                      if (ct.includes('application/json')) {
+                        const data: any = await res.json().catch(() => null);
+                        const msg = String(data?.message || data?.error || `Error ${res.status}`);
+                        alert(msg);
+                      } else {
+                        const txt = await res.text().catch(() => '');
+                        const msg = txt && txt.length < 300 ? txt : `Error ${res.status}`;
+                        alert(msg);
+                      }
+                    } catch {
+                      alert(`Error ${res.status}`);
+                    } finally {
+                      setExportingPrev(false);
+                    }
+                    return;
+                  }
+                  const ctOk = (res.headers.get('content-type') || '').toLowerCase();
+                  if (ctOk.includes('application/json')) {
+                    try {
+                      const data: any = await res.json().catch(() => null);
+                      const msg = String(data?.message || data?.error || 'No se pudo exportar los gastos del año anterior');
+                      alert(msg);
+                    } finally {
+                      setExportingPrev(false);
+                    }
+                    return;
+                  }
+                  const blob = await res.blob();
+                  const cd = res.headers.get('content-disposition') || '';
+                  const match = /filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i.exec(cd);
+                  const filename = match ? decodeURIComponent(match[1]) : `gastos-anio-anterior-${String(areaYearId)}.xlsx`;
+                  const link = document.createElement('a');
+                  const href = URL.createObjectURL(blob);
+                  link.href = href;
+                  link.download = filename;
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                  URL.revokeObjectURL(href);
+                } catch (e) {
+                  console.error(e);
+                  try { alert('No se pudo exportar los gastos del año anterior'); } catch {}
+                } finally {
+                  setExportingPrev(false);
+                }
+              }}
+              className="flex items-center space-x-2 px-4 py-2 bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50"
+              disabled={exportingPrev}
+              title="Exportar gastos del año anterior"
+            >
+              <Download className="w-4 h-4" />
+              <span>{exportingPrev ? 'Exportando...' : 'Gastos del año anterior'}</span>
+            </button>
             <button
               onClick={() => latest && handleDownload(latest)}
               disabled={!latest}

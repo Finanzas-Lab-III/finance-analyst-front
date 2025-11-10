@@ -332,7 +332,7 @@ export default function BudgetDetailPage() {
           )}
 
           {activeTab === 'calendar' && (
-            <CalendarTab areaYearId={areaYearId} year={Number(year) || undefined} />
+            <CalendarTab areaYearId={areaYearId} year={Number(year) || undefined} fileId={latest?.id} />
           )}
 
           {activeTab === 'comments' && user && (
