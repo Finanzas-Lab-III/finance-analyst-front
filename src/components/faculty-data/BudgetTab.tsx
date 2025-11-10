@@ -109,7 +109,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
       // 1) Cambiar estado
       await createAreaYearStatus(areaYearId, "NECESITA_CAMBIOS_FINANZAS");
       // 2) Crear comentario
-      const res = await fetch(`${API_BASE}/api/coments`, {
+      const res = await fetch(`${API_BASE}/api/coments/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +117,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
         },
         credentials: "include",
         body: JSON.stringify({
-          areaYearId,
+          areaYearId: Number(areaYearId),
           comentario: comment,
         }),
       });
