@@ -361,13 +361,13 @@ export default function CalendarTab({ areaYearId, year, fileId }: CalendarTabPro
                 setExporting(false);
               }
             }}
-            title="Exportar devoluciones"
+            title="Exportar gastos"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path d="M3 14.5A1.5 1.5 0 004.5 16h11a1.5 1.5 0 001.5-1.5V12a.5.5 0 00-1 0v2.5a.5.5 0 01-.5.5h-11a.5.5 0 01-.5-.5V12a.5.5 0 00-1 0v2.5z" />
               <path d="M10 3a.5.5 0 00-.5.5v8.293L7.354 9.646a.5.5 0 10-.708.708l3 3a.5.5 0 00.708 0l3-3a.5.5 0 10-.708-.708L10.5 11.793V3.5A.5.5 0 0010 3z" />
             </svg>
-            <span>{exporting ? 'Exportando...' : 'Exportar devoluciones'}</span>
+            <span>{exporting ? 'Exportando...' : 'Exportar gastos'}</span>
           </button>
         </div>
       </div>

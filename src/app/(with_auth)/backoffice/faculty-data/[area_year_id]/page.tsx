@@ -20,16 +20,19 @@ import TabManager from "@/components/TabManager";
 import OverviewTab from "@/components/faculty-data/OverviewTab";
 import BudgetTab from "@/components/faculty-data/BudgetTab";
 import TrackingTab from "@/components/faculty-data/TrackingTab";
-import IntegratedComments from "@/components/IntegratedComments";
+import CommentsTab from "@/components/faculty-data/CommentsTab";
 import DocumentSnapshotModal from "@/components/faculty-data/DocumentSnapshotModal";
 import UploadBudgetModal from "@/components/faculty-data/UploadBudgetModal";
 import { useAreaYearStatus } from "@/hooks/useAreaYearStatus";
 import { statusColor as areaYearStatusColor, statusLabelEs as areaYearStatusLabel } from "@/lib/areaYearStatus";
-import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "@/lib/commentsHelpers";
+// import { mapAreaYearStatusToDocumentStatus, getDocumentIdFromAreaYearId } from "@/lib/commentsHelpers";
 import BudgetHeader from "@/components/faculty-data/BudgetHeader";
 import { useArmadoDocuments } from "@/hooks/useArmadoDocuments";
 import { useAuth } from "@/components/AuthContext";
+import { getProfile } from "@/lib/user-api";
+import type { NavBarData } from "@/types/profile";
 import CalendarTab from "@/components/faculty-data/CalendarTab";
+import { BudgetComment as ComponentBudgetComment } from "@/components/faculty-data/types";
 
 interface BudgetDetail {
   id: string;
@@ -195,8 +198,12 @@ export default function BudgetDetailPage() {
   const params = useParams() as { area_year_id?: string };
   const areaYearId = params.area_year_id as string;
   const { user } = useAuth();
+  const [profile, setProfile] = useState<NavBarData | null>(null);
+  const isAdmin = (profile?.role === "ADMINISTRADOR") || (user?.role === 'finance');
   
   const [budget] = useState<BudgetDetail>(mockBudgetDetail);
+  const [newComment, setNewComment] = useState<string>("");
+  const [comments, setComments] = useState<ComponentBudgetComment[]>([]);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState<BudgetDetail['status']>(budget.status);
   const { status, area, year, faculty } = useAreaYearStatus(areaYearId);
@@ -223,6 +230,14 @@ export default function BudgetDetailPage() {
     };
   }>({});
   const { latest, history } = useArmadoDocuments(areaYearId);
+
+  useEffect(() => {
+    let cancelled = false;
+    getProfile().then((p) => {
+      if (!cancelled) setProfile(p);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   // Prefer backend-provided updated_at; fallback to created_at and then mock value
   const lastModifiedISOFromBackend = latest?.updated_at || latest?.created_at || budget.lastModified;
@@ -270,14 +285,22 @@ export default function BudgetDetailPage() {
 
   
 
+  const calendarDisabled = (status as any) !== "APROBADO";
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
     // { id: 'overview', label: 'Resumen' },
     { id: 'budget', label: 'Presupuesto' },
     { id: 'tracking', label: 'Seguimientos' },
-    { id: 'calendar', label: 'Calendario' },
+    { id: 'calendar', label: 'Calendario', disabled: calendarDisabled },
     { id: 'comments', label: 'Comentarios' },
   ] as const;
+
+  // If calendar becomes disabled while active, move user away from it
+  useEffect(() => {
+    if (activeTab === 'calendar' && calendarDisabled) {
+      setActiveTab('dashboard');
+    }
+  }, [activeTab, calendarDisabled]);
 
   return (
     <div className="space-y-6">
@@ -315,7 +338,7 @@ export default function BudgetDetailPage() {
           )}
 
           {activeTab === 'dashboard' && (
-            <DashboardTab isAdmin={user?.role === 'finance'} areaYearId={areaYearId} />
+            <DashboardTab isAdmin={isAdmin} areaYearId={areaYearId} />
           )}
 
           {activeTab === 'budget' && (
@@ -324,6 +347,8 @@ export default function BudgetDetailPage() {
               history={history}
               onOpenUpload={() => setShowUploadModal(true)}
               areaYearId={areaYearId}
+              isAdmin={isAdmin}
+              currentStatus={status as any}
             />
           )}
 
@@ -338,25 +363,19 @@ export default function BudgetDetailPage() {
             <CalendarTab areaYearId={areaYearId} year={Number(year) || undefined} fileId={latest?.id} />
           )}
 
-          {activeTab === 'comments' && user && (
+          {activeTab === 'comments' && (
             <div className="space-y-6">
-              <div className="flex items-center space-x-2">
-                <MessageSquare className="w-5 h-5 text-gray-600" />
-                <h3 className="font-semibold text-gray-900">Comentarios y Comunicación</h3>
-              </div>
 
-              <IntegratedComments
-                documentId={commentContext.monthlyDocument?.documentId || getDocumentIdFromAreaYearId(areaYearId)}
-                documentStatus={mapAreaYearStatusToDocumentStatus(status || 'SIN_EMPEZAR')}
-                currentUserId={parseInt(user.id)}
-                currentUserName={user.name}
-                canEdit={true}
-                canDelete={true}
-                monthlyDocumentContext={commentContext.monthlyDocument}
-                onCommentSubmitted={() => {
-                  console.log('Comment submitted');
+
+              <CommentsTab
+                comments={comments}
+                areaYearId={Number(areaYearId)}
+                newComment={newComment}
+                setNewComment={setNewComment}
+                onSubmit={() => {
+                  // Optionally refresh comments list if needed later
+                  // For now, we keep a simple no-op
                 }}
-                onClearContext={handleClearCommentContext}
               />
             </div>
           )}

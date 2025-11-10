@@ -1,24 +1,64 @@
 "use client"
-import React, { useMemo, useState } from "react";
-import { Download, Upload, FileText, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
-import { ArmadoDocument } from "@/api/userService";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Download, Upload, FileText, ChevronDown, ChevronRight, Loader2, CheckCircle, X } from "lucide-react";
+import { ArmadoDocument, AreaYearStatus, createAreaYearStatus } from "@/api/userService";
 import { useRouter } from "next/navigation";
 import { useArmadoAI } from "@/components/armado/hooks/useArmadoAI";
+
+function AutoResizingTextarea({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  placeholder?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+  const autoResize = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+  useEffect(() => {
+    autoResize();
+  }, [value]);
+  useEffect(() => {
+    autoResize();
+  }, []);
+  return (
+    <textarea
+      ref={ref}
+      rows={1}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onInput={autoResize}
+      placeholder={placeholder}
+      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black resize-none overflow-hidden"
+    />
+  );
+}
 
 interface BudgetTabProps {
   latest: ArmadoDocument | null | undefined;
   history: ArmadoDocument[] | undefined;
   onOpenUpload: () => void;
   areaYearId: string | number;
+  isAdmin?: boolean;
+  currentStatus?: AreaYearStatus | null;
 }
 
-export default function BudgetTab({ latest, history = [], onOpenUpload, areaYearId }: BudgetTabProps) {
+export default function BudgetTab({ latest, history = [], onOpenUpload, areaYearId, isAdmin = false, currentStatus = null }: BudgetTabProps) {
   const USERS_API_BASE = "";
   const router = useRouter();
   const { analysisResults, analysisLoading, analysisError } = useArmadoAI(String(areaYearId));
   const [showDetails, setShowDetails] = useState(false);
   const [exportingPrev, setExportingPrev] = useState(false);
   const [exportingPrevBudget, setExportingPrevBudget] = useState(false);
+  const [showChangeModal, setShowChangeModal] = useState(false);
+  const [changeComment, setChangeComment] = useState("");
+  const [submittingAction, setSubmittingAction] = useState<null | "approve" | "request_changes">(null);
 
   const { totalErrors, groupedByRule } = useMemo(() => {
     const byRule = new Map<string, { count: number; items: any[] }>();
@@ -39,6 +79,61 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
     const url = `${USERS_API_BASE}/api/archivo/${doc.id}?raw=true`;
     // Open in a new tab to let the browser handle file download (avoids CORS issues with fetch)
     window.open(url, "_blank");
+  };
+
+  const canAdminAct = isAdmin && currentStatus === "REVISION_FINANZAS";
+  const budgetLockedForNonAdmin = !isAdmin && (currentStatus === "REVISION_FINANZAS" || currentStatus === "APROBADO");
+
+  const approveBudget = async () => {
+    try {
+      setSubmittingAction("approve");
+      await createAreaYearStatus(areaYearId, "APROBADO");
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+      try { alert("No se pudo aprobar el presupuesto"); } catch {}
+    } finally {
+      setSubmittingAction(null);
+    }
+  };
+
+  const submitChangeRequest = async () => {
+    const API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "http://localhost:8000").replace(/\/+$/, "");
+    const comment = changeComment.trim();
+    if (!comment) {
+      try { alert("Escribe un comentario para solicitar cambios"); } catch {}
+      return;
+    }
+    try {
+      setSubmittingAction("request_changes");
+      // 1) Cambiar estado
+      await createAreaYearStatus(areaYearId, "NECESITA_CAMBIOS_FINANZAS");
+      // 2) Crear comentario
+      const res = await fetch(`${API_BASE}/api/coments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          areaYearId,
+          comentario: comment,
+        }),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(text || `Error ${res.status}`);
+      }
+      setShowChangeModal(false);
+      setChangeComment("");
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+      try { alert("No se pudo enviar la solicitud de cambios"); } catch {}
+    } finally {
+      setSubmittingAction(null);
+    }
   };
 
   return (
@@ -124,6 +219,29 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
             <p className="text-gray-600 text-sm mt-1">Versión actual del presupuesto</p>
           </div>
           <div className="flex space-x-2">
+            {canAdminAct && (
+              <>
+                <button
+                  onClick={() => setShowChangeModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50"
+                  title="Solicitar cambios al director"
+                  disabled={submittingAction != null}
+                >
+                  <span>Pedir Cambios</span>
+                </button>
+                <button
+                  onClick={approveBudget}
+                  className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                  disabled={submittingAction === "approve"}
+                  title="Aprobar presupuesto"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{submittingAction === "approve" ? "Aprobando..." : "Aprobar presupuesto"}</span>
+                </button>
+              </>
+            )}
+            {!canAdminAct && (
+              <>
             <button
               onClick={async () => {
                 try {
@@ -187,7 +305,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
                   setExportingPrevBudget(false);
                 }
               }}
-              className="flex items-center space-x-2 px-4 py-2 bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50"
+              className="flex items-center space-x-2 px-4 py-2 bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={exportingPrevBudget}
               title="Exportar presupuesto del año anterior"
             >
@@ -257,7 +375,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
                   setExportingPrev(false);
                 }
               }}
-              className="flex items-center space-x-2 px-4 py-2 bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50"
+              className="flex items-center space-x-2 px-4 py-2 bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={exportingPrev}
               title="Exportar gastos del año anterior"
             >
@@ -274,11 +392,14 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
             </button>
             <button 
               onClick={onOpenUpload}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              disabled={budgetLockedForNonAdmin}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Upload className="w-4 h-4" />
               <span>Nueva Versión</span>
             </button>
+              </>
+            )}
           </div>
         </div>
         {latest ? (
@@ -306,6 +427,49 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
           </div>
         )}
       </div>
+
+      {showChangeModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xxs bg-white/30">
+          <div className="bg-white rounded-lg p-6 w-[90%] border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Solicitar Cambios</h3>
+              <button
+                onClick={() => setShowChangeModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Comentario
+                </label>
+                <AutoResizingTextarea
+                  value={changeComment}
+                  onChange={setChangeComment}
+                  placeholder="Detalla los cambios solicitados…"
+                />
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowChangeModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={submitChangeRequest}
+                  disabled={submittingAction === "request_changes"}
+                  className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50"
+                >
+                  {submittingAction === "request_changes" ? "Enviando..." : "Enviar"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-gray-50 rounded-lg p-6">
         <h4 className="font-semibold text-gray-900 text-lg mb-4">Historial de Versiones</h4>

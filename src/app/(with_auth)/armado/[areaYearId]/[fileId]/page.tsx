@@ -111,7 +111,10 @@ export default function ArmadoDocumentPage_Example() {
             } catch {
               // ignore network errors
             } finally {
-              // Stay on the page; no tab closing or redirect
+              // Close the tab after hitting the endpoint when there are no remaining rules
+              if (typeof window !== 'undefined') {
+                window.close()
+              }
             }
           }}
         />
