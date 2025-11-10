@@ -7,6 +7,7 @@ if (!SERVICE_URL) {
 }
 
 const nextConfig: NextConfig = {
+  reactStrictMode: false,
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**" },

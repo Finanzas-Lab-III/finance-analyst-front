@@ -224,6 +224,9 @@ export default function BudgetDetailPage() {
   }>({});
   const { latest, history } = useArmadoDocuments(areaYearId);
 
+  // Prefer backend-provided updated_at; fallback to created_at and then mock value
+  const lastModifiedISOFromBackend = latest?.updated_at || latest?.created_at || budget.lastModified;
+
   // Handler para navegar a comentarios con contexto de documento mensual
   const handleNavigateToComments = (documentId: number, month: string, version: string, createdAt: string) => {
     setCommentContext({
@@ -297,7 +300,7 @@ export default function BudgetDetailPage() {
         faculty={faculty || (area ? "" : budget.faculty)}
         area={area || ""}
         status={String(headerStatus)}
-        lastModifiedISO={budget.lastModified}
+        lastModifiedISO={lastModifiedISOFromBackend}
         getStatusText={(s) => areaYearStatusLabel(s as any)}
         getStatusColor={(s) => areaYearStatusColor(s as any)}
       />
@@ -312,7 +315,7 @@ export default function BudgetDetailPage() {
           )}
 
           {activeTab === 'dashboard' && (
-            <DashboardTab isAdmin={user?.role === 'finance'} />
+            <DashboardTab isAdmin={user?.role === 'finance'} areaYearId={areaYearId} />
           )}
 
           {activeTab === 'budget' && (
@@ -344,7 +347,7 @@ export default function BudgetDetailPage() {
 
               <IntegratedComments
                 documentId={commentContext.monthlyDocument?.documentId || getDocumentIdFromAreaYearId(areaYearId)}
-                documentStatus={mapAreaYearStatusToDocumentStatus(status || 'NOT_STARTED')}
+                documentStatus={mapAreaYearStatusToDocumentStatus(status || 'SIN_EMPEZAR')}
                 currentUserId={parseInt(user.id)}
                 currentUserName={user.name}
                 canEdit={true}

@@ -324,12 +324,11 @@ export async function fetchUserFacultiesAreas(
 
 // Años por área
 export type AreaYearStatus =
-  | "NOT_STARTED"
-  | "BUDGET_STARTED"
-  | "NEEDS_CHANGES"
-  | "PENDING_APPROVAL"
-  | "BUDGET_APPROVED"
-  | "FOLLOW_UP_AVAILABLE";
+  | "SIN_EMPEZAR"
+  | "NECESITA_CAMBIOS_IA"
+  | "REVISION_FINANZAS"
+  | "NECESITA_CAMBIOS_FINANZAS"
+  | "APROBADO";
 
 
 export interface AreaSummaryDto {
@@ -367,7 +366,7 @@ export async function fetchAreaYearStatus(areaYearId: number | string): Promise<
       }
       // Default mock data if area-year not found
       return {
-        status: "BUDGET_APPROVED",
+        status: "APROBADO",
         area_name: "Universidad Austral",
         year: 2025,
         area: null,
@@ -411,7 +410,7 @@ export async function fetchAreaYearStatus(areaYearId: number | string): Promise<
     }
     // Default mock data if area-year not found
     return {
-      status: "BUDGET_APPROVED",
+      status: "APROBADO",
       area_name: "Universidad Austral", 
       year: 2025,
       area: null,

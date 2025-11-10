@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { FileProvider } from '@/components/FileContext'
 import {useArmadoSheet} from "@/components/armado/hooks/useArmadoSheets";
 import ArmadoHeader from '@/components/armado/components/ArmadoHeader'
@@ -15,6 +15,7 @@ export default function ArmadoDocumentPage_Example() {
   const params = useParams() as { areaYearId?: string; fileId?: string }
   const areaYearId = params?.areaYearId
   const fileId = params?.fileId
+  const router = useRouter()
 
 
   const {
@@ -39,7 +40,7 @@ export default function ArmadoDocumentPage_Example() {
   const { analysisResults, analysisLoading, analysisError } = useArmadoAI(areaYearId)
 
   const [showDisclaimer, setShowDisclaimer] = useState(true)
-  const allChecked = Array.isArray(analysisResults) ? analysisResults.length > 0 : false
+  const allChecked = Array.isArray(analysisResults) ? analysisResults.length === 0 : false
 
   return (
     <FileProvider>
@@ -95,9 +96,23 @@ export default function ArmadoDocumentPage_Example() {
           showDisclaimer={showDisclaimer}
           onCloseDisclaimer={() => setShowDisclaimer(false)}
           allChecked={allChecked}
-          onSubmit={() => {
-            // TODO: hook your submit action here
-            // e.g., router.push('/destino') or trigger a mutation
+          onSubmit={async ({ remaining }) => {
+            if (remaining !== 0) return
+            try {
+              const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? ''
+              await fetch(`${API_BASE}/api/files/status/${encodeURIComponent(String(areaYearId ?? ''))}/revision_finanzas`, {
+                method: 'POST',
+                headers: {
+                  Accept: 'application/json',
+                  'ngrok-skip-browser-warning': 'true',
+                },
+                credentials: 'include',
+              })
+            } catch {
+              // ignore network errors
+            } finally {
+              // Stay on the page; no tab closing or redirect
+            }
           }}
         />
 

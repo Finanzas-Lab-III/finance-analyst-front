@@ -6,15 +6,22 @@ import InflationScenarios from "./InflationScenarios";
 
 interface DashboardTabProps {
   isAdmin?: boolean;
+  areaYearId?: string;
 }
 
-export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
+export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardTabProps) {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [data, setData] = React.useState<{
-    total_budget: string | number;
-    total_spent: string | number;
-    progress_percentage: string | number;
+    budget_pesos: number;
+    budget_usd: number;
+    budget_eur: number;
+    spent_pesos: number;
+    spent_usd: number;
+    spent_eur: number;
+    usd_percentage: number;
+    pesos_percentage: number;
+    eur_percentage: number;
   } | null>(null);
 
   const formatNumber = (value: string | number): string => {
@@ -23,21 +30,43 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
     return num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   };
 
+  const formatPercent = (value: number): string => {
+    if (value === null || value === undefined) return '-';
+    const num = Number(value);
+    if (isNaN(num)) return '-';
+    return `${num.toFixed(2)}%`;
+  };
+
+  const toDiffText = (budget: number, spent: number): { text: string; isPositive: boolean } => {
+    const diff = (budget || 0) - (spent || 0);
+    return {
+      text: `${diff >= 0 ? '+' : ''}${formatNumber(diff)}`,
+      isPositive: diff >= 0
+    };
+  };
+
   React.useEffect(() => {
     let mounted = true;
     async function fetchLatestTotals() {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_SERVICE_URL ?? '';
-        const res = await fetch(`${API_BASE_URL}/api/analyze/latest_totals/`);
+        const qs = areaYearId ? `?areaYearId=${encodeURIComponent(areaYearId)}` : '';
+        const res = await fetch(`${API_BASE_URL}/api/analyze/latest_totals/${qs}`);
         if (!res.ok) throw new Error('Failed to load totals');
         const json = await res.json();
         console.log('API Response:', json);
 
         if (!mounted) return;
         const responseData = {
-          total_budget: json.total_budget,
-          total_spent: json.total_spent,
-          progress_percentage: json.progress_percentage
+          budget_pesos: json.budget_pesos,
+          budget_usd: json.budget_usd,
+          budget_eur: json.budget_eur,
+          spent_pesos: json.spent_pesos,
+          spent_usd: json.spent_usd,
+          spent_eur: json.spent_eur,
+          usd_percentage: json.usd_percentage,
+          pesos_percentage: json.pesos_percentage,
+          eur_percentage: json.eur_percentage
         };
         console.log('Processed Data:', responseData);
         setData(responseData);
@@ -52,7 +81,7 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
 
     fetchLatestTotals();
     return () => { mounted = false; };
-  }, []);
+  }, [areaYearId]);
 
   return (
     <div className="space-y-8">
@@ -88,24 +117,85 @@ export default function DashboardTab({ isAdmin = false }: DashboardTabProps) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* ARS */}
             <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <div className="text-sm text-gray-500 uppercase">Presupuesto Total</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-900">
-                $ {formatNumber(58726381922)}
+              <div className="text-sm text-gray-500 uppercase">Pesos (ARS)</div>
+              <div className="mt-3 space-y-1">
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>Presupuesto</span>
+                  <span className="font-medium text-gray-900">$ {formatNumber(data.budget_pesos || 0)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>Gastado</span>
+                  <span className="font-medium text-gray-900">$ {formatNumber(data.spent_pesos || 0)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Porcentaje</span>
+                  <span className="font-medium text-gray-900">{formatPercent(data.pesos_percentage || 0)}</span>
+                </div>
+                {(() => {
+                  const diff = toDiffText(data.budget_pesos || 0, data.spent_pesos || 0);
+                  return (
+                    <div className={`flex items-center justify-between text-sm ${diff.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      <span>Diferencia</span>
+                      <span className="font-semibold">{diff.text}</span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
-            
+            {/* USD */}
             <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <div className="text-sm text-gray-500 uppercase">Total Gastado</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-900">
-                $ {formatNumber(36534054212)}
+              <div className="text-sm text-gray-500 uppercase">Dólares (USD)</div>
+              <div className="mt-3 space-y-1">
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>Presupuesto</span>
+                  <span className="font-medium text-gray-900">US$ {formatNumber(data.budget_usd || 0)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>Gastado</span>
+                  <span className="font-medium text-gray-900">US$ {formatNumber(data.spent_usd || 0)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Porcentaje</span>
+                  <span className="font-medium text-gray-900">{formatPercent(data.usd_percentage || 0)}</span>
+                </div>
+                {(() => {
+                  const diff = toDiffText(data.budget_usd || 0, data.spent_usd || 0);
+                  return (
+                    <div className={`flex items-center justify-between text-sm ${diff.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      <span>Diferencia</span>
+                      <span className="font-semibold">{diff.text}</span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
-            
+            {/* EUR */}
             <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <div className="text-sm text-gray-500 uppercase">Porcentaje de Progreso</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-900">
-                {formatNumber(36534054212/58726381922 * 100)}%
+              <div className="text-sm text-gray-500 uppercase">Euros (EUR)</div>
+              <div className="mt-3 space-y-1">
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>Presupuesto</span>
+                  <span className="font-medium text-gray-900">€ {formatNumber(data.budget_eur || 0)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>Gastado</span>
+                  <span className="font-medium text-gray-900">€ {formatNumber(data.spent_eur || 0)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Porcentaje</span>
+                  <span className="font-medium text-gray-900">{formatPercent(data.eur_percentage || 0)}</span>
+                </div>
+                {(() => {
+                  const diff = toDiffText(data.budget_eur || 0, data.spent_eur || 0);
+                  return (
+                    <div className={`flex items-center justify-between text-sm ${diff.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      <span>Diferencia</span>
+                      <span className="font-semibold">{diff.text}</span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>

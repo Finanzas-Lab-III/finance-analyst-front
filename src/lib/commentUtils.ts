@@ -71,6 +71,13 @@ export function getUserInitials(name: string): string {
  */
 export function getDocumentStatusLabel(status: string): string {
   const statusMap: Record<string, string> = {
+    // New statuses (Spanish)
+    'SIN_EMPEZAR': 'Sin empezar',
+    'NECESITA_CAMBIOS_IA': 'Necesita cambios (IA)',
+    'REVISION_FINANZAS': 'Revisión finanzas',
+    'NECESITA_CAMBIOS_FINANZAS': 'Necesita cambios (Finanzas)',
+    'APROBADO': 'Aprobado',
+    // Legacy statuses (English) kept for compatibility
     'NOT_STARTED': 'No iniciado',
     'BUDGET_STARTED': 'Presupuesto iniciado',
     'NEEDS_CHANGES': 'Necesita cambios',

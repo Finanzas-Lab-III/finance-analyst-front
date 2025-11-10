@@ -27,7 +27,7 @@ export default function ArmadoSidebar({
   showDisclaimer: boolean;
   onCloseDisclaimer: () => void;
   allChecked: boolean;
-  onSubmit?: () => void;
+  onSubmit?: (ctx: { remaining: number }) => void;
 }) {
   const [items, setItems] = useState<AnalysisItem[]>([])
   const [checked, setChecked] = useState<boolean[]>([])
@@ -60,6 +60,12 @@ export default function ArmadoSidebar({
 
   const handleSubmit = async () => {
     if (!Array.isArray(items)) return
+    // If there are no items to compare and allChecked is true,
+    // finalize immediately without requiring any selection.
+    if (items.length === 0 && enableSubmit) {
+      if (onSubmit) onSubmit({ remaining: 0 })
+      return
+    }
     const selected = items
       .map((it: any, idx: number) => ({ it, idx }))
       .filter(({ idx }) => checked[idx])
@@ -101,7 +107,7 @@ export default function ArmadoSidebar({
         setItems(nextItems)
         setChecked(nextChecked)
         setRemovingKeys(new Set())
-        if (onSubmit) onSubmit()
+        if (onSubmit) onSubmit({ remaining: nextItems.length })
       }, 300)
     } catch (e: any) {
       toast.error(e?.message ? String(e.message) : "No se pudieron enviar las reglas")

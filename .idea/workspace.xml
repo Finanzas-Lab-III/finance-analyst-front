@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Feat: Calendar">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-data/[area_year_id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-data/[area_year_id]/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/faculty-data/CalendarTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/CalendarTab.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/UploadBudgetModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/UploadBudgetModal.tsx" afterDir="false" />
     </list>
     <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="commit not" />
     <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
@@ -123,6 +123,8 @@
       <workItem from="1760532960957" duration="38000" />
       <workItem from="1760889559997" duration="5432000" />
       <workItem from="1761434851888" duration="18612000" />
+      <workItem from="1762395129177" duration="1942000" />
+      <workItem from="1762709662615" duration="19000" />
     </task>
     <task id="LOCAL-00001" summary="Feat: User management.">
       <option name="closed" value="true" />

@@ -70,9 +70,9 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
       if (variant === 'ARMADO') {
         try {
           const current = await fetchAreaYearStatus(areaYearId);
-          if ((current.status as AreaYearStatus) === "NOT_STARTED") {
-            // Set initial status to BUDGET_STARTED using POST as requested
-            await createAreaYearStatus(areaYearId, "BUDGET_STARTED");
+          if ((current.status as AreaYearStatus) === "SIN_EMPEZAR") {
+            // Set initial status to NECESITA_CAMBIOS_IA using POST as requested
+            await createAreaYearStatus(areaYearId, "NECESITA_CAMBIOS_IA");
           }
         } catch (e) {
           // Non-blocking: ignore status update error here, but log for debugging
