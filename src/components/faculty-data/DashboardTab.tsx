@@ -213,10 +213,10 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
       )}
 
       {/* Monthly Budget by Currency Chart */}
-      <MonthlyBudgetByCurrencyChart />
+      {/*<MonthlyBudgetByCurrencyChart />*/}
 
       {/* Inflation Scenarios */}
-      <InflationScenarios />
+      {/*<InflationScenarios />*/}
     </div>
   );
 }

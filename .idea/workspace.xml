@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Feat: Calendar">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-data/[area_year_id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(with_auth)/backoffice/faculty-data/[area_year_id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/CalendarTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/CalendarTab.tsx" afterDir="false" />
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Feat: checkpoint">
+      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/BudgetTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/BudgetTab.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/DashboardTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/DashboardTab.tsx" afterDir="false" />
     </list>
     <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="commit not" />
     <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
@@ -125,6 +124,7 @@
       <workItem from="1761434851888" duration="18612000" />
       <workItem from="1762395129177" duration="1942000" />
       <workItem from="1762709662615" duration="19000" />
+      <workItem from="1762807766063" duration="6121000" />
     </task>
     <task id="LOCAL-00001" summary="Feat: User management.">
       <option name="closed" value="true" />
@@ -326,7 +326,23 @@
       <option name="project" value="LOCAL" />
       <updated>1761600477434</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Feat: Calendar">
+      <option name="closed" value="true" />
+      <created>1762809021193</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1762809021193</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Feat: checkpoint">
+      <option name="closed" value="true" />
+      <created>1762810091902</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1762810091902</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -379,6 +395,7 @@
     <MESSAGE value="Feat: trying to avoid a cors error, by redirecting all /api request to the backend." />
     <MESSAGE value="Feat: integrating with rules persistence" />
     <MESSAGE value="Feat: Calendar" />
-    <option name="LAST_COMMIT_MESSAGE" value="Feat: Calendar" />
+    <MESSAGE value="Feat: checkpoint" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feat: checkpoint" />
   </component>
 </project>

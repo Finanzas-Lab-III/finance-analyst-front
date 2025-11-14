@@ -56,6 +56,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
   const [showDetails, setShowDetails] = useState(false);
   const [exportingPrev, setExportingPrev] = useState(false);
   const [exportingPrevBudget, setExportingPrevBudget] = useState(false);
+  const [exportingHybrid, setExportingHybrid] = useState(false);
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [changeComment, setChangeComment] = useState("");
   const [submittingAction, setSubmittingAction] = useState<null | "approve" | "request_changes">(null);
@@ -311,6 +312,49 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
             >
               <Download className="w-4 h-4" />
               <span>{exportingPrevBudget ? 'Exportando...' : 'Presupuesto año anterior'}</span>
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  setExportingHybrid(true);
+                  const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? 'http://localhost:8000';
+                  const url = `${API_BASE}/api/armado/summary/areayear/${encodeURIComponent(String(areaYearId))}/hybrid/previous/export`;
+                  const res = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                      Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream;q=0.9, */*;q=0.8',
+                      'ngrok-skip-browser-warning': 'true',
+                    },
+                    credentials: 'include',
+                  });
+                  if (!res.ok) {
+                    throw new Error(`Error ${res.status}`);
+                  }
+                  const blob = await res.blob();
+                  const cd = res.headers.get('content-disposition') || '';
+                  const match = /filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i.exec(cd);
+                  const filename = match ? decodeURIComponent(match[1]) : `presupuesto-hibrido-${String(areaYearId)}.xlsx`;
+                  const link = document.createElement('a');
+                  const href = URL.createObjectURL(blob);
+                  link.href = href;
+                  link.download = filename;
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                  URL.revokeObjectURL(href);
+                } catch (e) {
+                  console.error(e);
+                  try { alert('No se pudo exportar el presupuesto híbrido'); } catch {}
+                } finally {
+                  setExportingHybrid(false);
+                }
+              }}
+              className="flex items-center space-x-2 px-4 py-2 bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={exportingHybrid}
+              title="Exportar presupuesto híbrido"
+            >
+              <Download className="w-4 h-4" />
+              <span>{exportingHybrid ? 'Exportando...' : 'Presupuesto híbrido'}</span>
             </button>
             <button
               onClick={async () => {
