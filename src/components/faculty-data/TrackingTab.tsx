@@ -142,13 +142,14 @@ export default function TrackingTab({ areaYearId, onNavigateToComments }: Tracki
           </div>
         ) : monthlyData ? (
           <div className="relative">
-            {/*<BudgetVariationChart*/}
-            {/*  formatCurrency={value => new Intl.NumberFormat('es-AR', {*/}
-            {/*    style: 'currency',*/}
-            {/*    currency: 'ARS',*/}
-            {/*    minimumFractionDigits: 0*/}
-            {/*  }).format(value)}*/}
-            {/*/>*/}
+            <BudgetVariationChart
+              data={monthlyData}
+              formatCurrency={value => new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS',
+                minimumFractionDigits: 0
+              }).format(value)}
+            />
             <button 
               onClick={() => {
                 setMonthlyData(null); // Clear cached data to force reload

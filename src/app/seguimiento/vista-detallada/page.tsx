@@ -24,6 +24,7 @@ const SeguimientoDetailedViewContent = () => {
   const [data, setData] = useState<any[][]>([]);
   const [sheetNames, setSheetNames] = useState<string[]>([]);
   const [selectedSheet, setSelectedSheet] = useState<string | null>(null);
+  const [workbook, setWorkbook] = useState<XLSX.WorkBook | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,50 +56,57 @@ const SeguimientoDetailedViewContent = () => {
         }
 
         const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const wb = XLSX.read(arrayBuffer, { type: 'array' });
         
-        const names = workbook.SheetNames;
+        const names = wb.SheetNames;
         if (!names || names.length === 0) {
           throw new Error('No sheets found in Excel file');
         }
         
+        setWorkbook(wb);
         setSheetNames(names);
 
-        const firstSheetName = names[0];
-        setSelectedSheet(firstSheetName);
-        const worksheet = workbook.Sheets[firstSheetName];
+        // Try to find a sheet that matches the subarea (month)
+        let sheetToSelect = names[0]; // default to first sheet
         
-        if (!worksheet) {
-          throw new Error('Sheet not found in Excel file');
-        }
-
-        // Process sheet data with better error handling
-        try {
-          // Get all data from the worksheet
-          const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
-            header: 1,
-            defval: '', // Fill empty cells with empty string
-            blankrows: true // Include blank rows
-          }) as any[][];
+        if (subarea) {
+          // Normalize the subarea for comparison (lowercase, trim)
+          const normalizedSubarea = subarea.toLowerCase().trim();
           
-          // Ensure we have valid data
-          if (!Array.isArray(jsonData) || jsonData.length === 0) {
-            setData([['No data found in Excel file']]);
-            return;
-          }
+          // Month names mapping for better matching
+          const monthNames: Record<string, string[]> = {
+            'enero': ['enero', 'january', 'ene', 'jan'],
+            'febrero': ['febrero', 'february', 'feb'],
+            'marzo': ['marzo', 'march', 'mar'],
+            'abril': ['abril', 'april', 'abr', 'apr'],
+            'mayo': ['mayo', 'may'],
+            'junio': ['junio', 'june', 'jun'],
+            'julio': ['julio', 'july', 'jul'],
+            'agosto': ['agosto', 'august', 'ago', 'aug'],
+            'septiembre': ['septiembre', 'september', 'sep', 'sept'],
+            'octubre': ['octubre', 'october', 'oct'],
+            'noviembre': ['noviembre', 'november', 'nov'],
+            'diciembre': ['diciembre', 'december', 'dic', 'dec']
+          };
           
-          // Process the data to ensure consistency
-          const processedData = jsonData.map(row => {
-            if (!Array.isArray(row)) return [''];
-            return row.map(cell => cell == null ? '' : String(cell));
+          // Get possible variations of the month name
+          const monthVariations = monthNames[normalizedSubarea] || [normalizedSubarea];
+          
+          // Try to find a matching sheet
+          const matchingSheet = names.find(sheetName => {
+            const normalizedSheetName = sheetName.toLowerCase().trim();
+            // Check if any month variation is found in the sheet name
+            return monthVariations.some(variation => 
+              normalizedSheetName.includes(variation)
+            );
           });
           
-          setData(processedData);
-        } catch (processingError) {
-          console.error('Error processing sheet data:', processingError);
-          // Set basic data as fallback
-          setData([['Error processing Excel data: ' + (processingError instanceof Error ? processingError.message : 'Unknown error')]]);
+          if (matchingSheet) {
+            sheetToSelect = matchingSheet;
+          }
         }
+        
+        setSelectedSheet(sheetToSelect);
       } catch (err) {
         console.error('Error loading Excel file:', err);
         setError(err instanceof Error ? err.message : 'Failed to load file');
@@ -109,7 +117,56 @@ const SeguimientoDetailedViewContent = () => {
     };
 
     loadExcelFile();
-  }, [fileName]);
+  }, [fileName, subarea]);
+
+  // Load sheet data when selected sheet changes
+  useEffect(() => {
+    if (!workbook || !selectedSheet) return;
+
+    try {
+      const worksheet = workbook.Sheets[selectedSheet];
+      
+      if (!worksheet) {
+        setError('Sheet not found in Excel file');
+        setData([['']]);
+        return;
+      }
+
+      // Process sheet data with better error handling
+      try {
+        // Get all data from the worksheet
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+          header: 1,
+          defval: '', // Fill empty cells with empty string
+          blankrows: true // Include blank rows
+        }) as any[][];
+        
+        // Ensure we have valid data
+        if (!Array.isArray(jsonData) || jsonData.length === 0) {
+          setData([['No data found in Excel file']]);
+          return;
+        }
+        
+        // Process the data to ensure consistency
+        const processedData = jsonData.map(row => {
+          if (!Array.isArray(row)) return [''];
+          return row.map(cell => cell == null ? '' : String(cell));
+        });
+        
+        setData(processedData);
+        setError(null);
+      } catch (processingError) {
+        console.error('Error processing sheet data:', processingError);
+        // Set basic data as fallback
+        setData([['Error processing Excel data: ' + (processingError instanceof Error ? processingError.message : 'Unknown error')]]);
+        setError('Error processing sheet data');
+      }
+    } catch (err) {
+      console.error('Error loading sheet:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load sheet');
+      setData([['']]);
+    }
+  }, [workbook, selectedSheet]);
 
   if (!documentId || !areaYearId) {
     return (
