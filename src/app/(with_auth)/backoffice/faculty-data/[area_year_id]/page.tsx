@@ -30,6 +30,8 @@ import BudgetHeader from "@/components/faculty-data/BudgetHeader";
 import { useArmadoDocuments } from "@/hooks/useArmadoDocuments";
 import { useAuth } from "@/components/AuthContext";
 import CalendarTab from "@/components/faculty-data/CalendarTab";
+import { getProfile } from "@/lib/user-api";
+import { NavBarData } from "@/types/profile";
 
 interface BudgetDetail {
   id: string;
@@ -195,12 +197,28 @@ export default function BudgetDetailPage() {
   const params = useParams() as { area_year_id?: string };
   const areaYearId = params.area_year_id as string;
   const { user } = useAuth();
+  const [profile, setProfile] = useState<NavBarData | null>(null);
   
   const [budget] = useState<BudgetDetail>(mockBudgetDetail);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState<BudgetDetail['status']>(budget.status);
   const { status, area, year, faculty } = useAreaYearStatus(areaYearId);
   const headerStatus = (status as any) ?? budget.status;
+
+  // Fetch user profile for userId
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getProfile();
+        if (data) {
+          setProfile(data);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+    fetchProfile();
+  }, []);
   
   // Title format: "Presupuesto {facultyOrArea} {year}"
   const headerName = `Presupuesto ${faculty || area || budget.area} ${year || new Date().getFullYear()}`;
@@ -332,7 +350,11 @@ export default function BudgetDetailPage() {
           )}
 
           {activeTab === 'calendar' && (
-            <CalendarTab areaYearId={areaYearId} year={Number(year) || undefined} />
+            <CalendarTab 
+              areaYearId={areaYearId} 
+              year={Number(year) || undefined}
+              userId={profile?.id ? parseInt(profile.id, 10) : undefined}
+            />
           )}
 
           {activeTab === 'comments' && user && (
