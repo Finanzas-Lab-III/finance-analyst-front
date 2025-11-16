@@ -90,10 +90,16 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
         const totalBudgetARS = computeTotalBudgetARS(monthly);
 
         if (!mounted) return;
+        // Calculate progress percentage based on total_budget and total_spent
+        const totalSpent = json.total_spent || 0;
+        const progressPercentage = totalBudgetARS > 0 
+          ? (totalSpent / totalBudgetARS) * 100 
+          : 0;
+        
         const responseData = {
           total_budget: totalBudgetARS,
-          total_spent: json.total_spent,
-          progress_percentage: json.progress_percentage
+          total_spent: totalSpent,
+          progress_percentage: progressPercentage
         };
         setMonthlyRows(monthly);
         setData(responseData);
@@ -140,7 +146,13 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
     };
 
     const totalBudgetARS = computeTotalBudgetARS(monthlyRows);
-    setData({ ...data, total_budget: totalBudgetARS });
+    // Recalculate progress percentage when total budget changes
+    const totalSpent = data.total_spent || 0;
+    const progressPercentage = totalBudgetARS > 0 
+      ? (totalSpent / totalBudgetARS) * 100 
+      : 0;
+    
+    setData({ ...data, total_budget: totalBudgetARS, progress_percentage: progressPercentage });
   }, [conversionRates]);
 
   return (
