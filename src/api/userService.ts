@@ -480,7 +480,7 @@ export interface ArmadoDocumentsResponse {
 
 export async function fetchArmadoDocuments(areaYearId: number | string): Promise<ArmadoDocument[]> {
   try {
-    const url = `${USERS_API_BASE}/api/archivos_armado/area_year/${areaYearId}`;
+    const url = `${USERS_API_BASE}/api/archivos_armado/area_year/${areaYearId}/`;
     const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
     
     if (!res.ok) {

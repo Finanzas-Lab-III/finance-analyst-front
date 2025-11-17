@@ -2,8 +2,9 @@ import { NavBarData } from "@/types/profile";
 import axios from "axios";
 import {YearsOfAreaItemDto, YearsOfAreaResponse} from "@/types/types";
 
+const BASE_URL = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
 const instance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_SERVICE_URL, // <- ya no /api/proxy
+  baseURL: BASE_URL, // <- ya no /api/proxy
   withCredentials: true, // <- manda cookies al backend
 });
 
@@ -44,7 +45,7 @@ export async function getYearsOfArea(areaId: string): Promise<YearsOfAreaRespons
         status: string;
         year: { year: number; isCurrent: boolean; isFuture: boolean };
       }>;
-    }>(`/api/years_of_area/${encodeURIComponent(areaId)}`);
+    }>(`/api/years_of_area/${encodeURIComponent(areaId)}/`);
     const payload = res.data;
 
     const items: YearsOfAreaItemDto[] = (payload.area_years ?? []).map((it) => ({
