@@ -16,20 +16,14 @@ export default function DashboardSection() {
     let mounted = true;
     async function fetchLatestTotals() {
       try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_SERVICE_URL ?? '';
+        const API_BASE_URL = (process.env.NEXT_PUBLIC_SERVICE_URL || '').replace(/\/+$/, '');
         const res = await fetch(`${API_BASE_URL}/api/analyze/latest_totals/`);
         if (!res.ok) throw new Error('Failed to load totals');
         const json = await res.json();
         console.log('API Response:', json);
 
         if (!mounted) return;
-        const responseData = {
-          total_budget: json.total_budget,
-          total_spent: json.total_spent,
-          progress_percentage: json.progress_percentage
-        };
-        console.log('Processed Data:', responseData);
-        setData(responseData);
+        setData(json);
       } catch (err: any) {
         if (!mounted) return;
         setError(err.message || String(err));
@@ -57,16 +51,22 @@ export default function DashboardSection() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-6 bg-white rounded border flex flex-col items-start">
-          <div className="text-xs text-gray-500 uppercase">Total Budget</div>
-          <div className="mt-2 text-2xl font-semibold">{String(data.total_budget)}</div>
+          <div className="text-xs text-gray-500 uppercase">Pesos (ARS)</div>
+          <div className="mt-2 text-2xl font-semibold">{Number(data.pesos_percentage ?? 0).toFixed(2)}%</div>
+          <div className="mt-3 text-sm text-gray-600">Presupuesto: $ {Number(data.budget_pesos ?? 0).toLocaleString('es-AR')}</div>
+          <div className="text-sm text-gray-600">Gastado: $ {Number(data.spent_pesos ?? 0).toLocaleString('es-AR')}</div>
         </div>
         <div className="p-6 bg-white rounded border flex flex-col items-start">
-          <div className="text-xs text-gray-500 uppercase">Total Spent</div>
-          <div className="mt-2 text-2xl font-semibold">{String(data.total_spent)}</div>
+          <div className="text-xs text-gray-500 uppercase">Dólares (USD)</div>
+          <div className="mt-2 text-2xl font-semibold">{Number(data.usd_percentage ?? 0).toFixed(2)}%</div>
+          <div className="mt-3 text-sm text-gray-600">Presupuesto: US$ {Number(data.budget_usd ?? 0).toLocaleString('es-AR')}</div>
+          <div className="text-sm text-gray-600">Gastado: US$ {Number(data.spent_usd ?? 0).toLocaleString('es-AR')}</div>
         </div>
         <div className="p-6 bg-white rounded border flex flex-col items-start">
-          <div className="text-xs text-gray-500 uppercase">Progress Percentage</div>
-          <div className="mt-2 text-2xl font-semibold">{String(data.progress_percentage)}</div>
+          <div className="text-xs text-gray-500 uppercase">Euros (EUR)</div>
+          <div className="mt-2 text-2xl font-semibold">{Number(data.eur_percentage ?? 0).toFixed(2)}%</div>
+          <div className="mt-3 text-sm text-gray-600">Presupuesto: € {Number(data.budget_eur ?? 0).toLocaleString('es-AR')}</div>
+          <div className="text-sm text-gray-600">Gastado: € {Number(data.spent_eur ?? 0).toLocaleString('es-AR')}</div>
         </div>
       </div>
     </div>

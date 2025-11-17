@@ -15,9 +15,15 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [data, setData] = React.useState<{
-    total_budget: number;
-    total_spent: number;
-    progress_percentage: number;
+    budget_pesos: number;
+    budget_usd: number;
+    budget_eur: number;
+    spent_pesos: number;
+    spent_usd: number;
+    spent_eur: number;
+    pesos_percentage: number;
+    usd_percentage: number;
+    eur_percentage: number;
   } | null>(null);
   const [monthlyRows, setMonthlyRows] = React.useState<BudgetDataItem[] | null>(null);
   const [conversionRates, setConversionRates] = React.useState<Record<string, number>>({
@@ -57,8 +63,8 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
     let mounted = true;
     async function fetchLatestTotals() {
       try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_SERVICE_URL ?? '';
-        // Fetch monthly budget data for computing total budget from the same source as the monthly chart
+        const API_BASE_URL = (process.env.NEXT_PUBLIC_SERVICE_URL || '').replace(/\/+$/, '');
+        // Fetch monthly budget data for charts and latest totals for currency cards
         const [latestTotalsRes, monthlyData] = await Promise.all([
           fetch(`${API_BASE_URL}/api/analyze/latest_totals/`),
           processBudgetFile(parseInt(areaYearId))
@@ -67,42 +73,22 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
         if (!latestTotalsRes.ok) throw new Error('Failed to load totals');
         const json = await latestTotalsRes.json();
 
-        // Compute total budget in ARS by summing month columns (same method as chart)
-        const computeTotalBudgetARS = (rows: BudgetDataItem[]): number => {
-          return rows
-            .filter(r => Boolean(r['Moneda']))
-            .reduce((sum, row) => {
-              const currencyRaw = String(row['Moneda']);
-              const rate =
-                DEFAULT_CONVERSION_RATES[currencyRaw as keyof typeof DEFAULT_CONVERSION_RATES] ??
-                DEFAULT_CONVERSION_RATES[currencyRaw.toUpperCase() as keyof typeof DEFAULT_CONVERSION_RATES] ??
-                1;
-              const rowMonthlyTotal = MONTH_COLUMNS.reduce((acc, col) => {
-                const v = (row as any)[col];
-                const num = typeof v === 'number' ? v : parseFloat(String(v)) || 0;
-                return acc + num;
-              }, 0);
-              return sum + rowMonthlyTotal * rate;
-            }, 0);
-        };
-
         const monthly = (monthlyData?.data || []).filter(r => Boolean(r['Moneda']));
-        const totalBudgetARS = computeTotalBudgetARS(monthly);
 
         if (!mounted) return;
-        // Calculate progress percentage based on total_budget and total_spent
-        const totalSpent = json.total_spent || 0;
-        const progressPercentage = totalBudgetARS > 0 
-          ? (totalSpent / totalBudgetARS) * 100 
-          : 0;
-        
-        const responseData = {
-          total_budget: totalBudgetARS,
-          total_spent: totalSpent,
-          progress_percentage: progressPercentage
-        };
         setMonthlyRows(monthly);
-        setData(responseData);
+        // Use API-provided currency breakdown directly
+        setData({
+          budget_pesos: Number(json.budget_pesos ?? 0),
+          budget_usd: Number(json.budget_usd ?? 0),
+          budget_eur: Number(json.budget_eur ?? 0),
+          spent_pesos: Number(json.spent_pesos ?? 0),
+          spent_usd: Number(json.spent_usd ?? 0),
+          spent_eur: Number(json.spent_eur ?? 0),
+          pesos_percentage: Number(json.pesos_percentage ?? 0),
+          usd_percentage: Number(json.usd_percentage ?? 0),
+          eur_percentage: Number(json.eur_percentage ?? 0),
+        });
       } catch (err: any) {
         if (!mounted) return;
         const friendly = toFriendlyError(err, 'No se pudieron cargar las métricas del panel.');
@@ -124,36 +110,7 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
     return () => { mounted = false; };
   }, [areaYearId]);
 
-  // Recompute total budget when conversion rates change
-  React.useEffect(() => {
-    if (!monthlyRows || !data) return;
-    const computeTotalBudgetARS = (rows: BudgetDataItem[]): number => {
-      return rows
-        .filter(r => Boolean(r['Moneda']))
-        .reduce((sum, row) => {
-          const currencyRaw = String(row['Moneda']);
-          const rate =
-            conversionRates[currencyRaw as keyof typeof conversionRates] ??
-            conversionRates[currencyRaw.toUpperCase() as keyof typeof conversionRates] ??
-            1;
-          const rowMonthlyTotal = MONTH_COLUMNS.reduce((acc, col) => {
-            const v = (row as any)[col];
-            const num = typeof v === 'number' ? v : parseFloat(String(v)) || 0;
-            return acc + num;
-          }, 0);
-          return sum + rowMonthlyTotal * rate;
-        }, 0);
-    };
-
-    const totalBudgetARS = computeTotalBudgetARS(monthlyRows);
-    // Recalculate progress percentage when total budget changes
-    const totalSpent = data.total_spent || 0;
-    const progressPercentage = totalBudgetARS > 0 
-      ? (totalSpent / totalBudgetARS) * 100 
-      : 0;
-    
-    setData({ ...data, total_budget: totalBudgetARS, progress_percentage: progressPercentage });
-  }, [conversionRates]);
+  // We keep conversionRates state for charts; currency totals come directly from API now
 
   return (
     <div className="space-y-8">
@@ -184,31 +141,42 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
       {!loading && !error && data && (
         <div className="bg-gray-50 rounded-lg p-6">
           <div className="flex items-center space-x-2 mb-4">
-            <User className="w-5 h-5 text-gray-600" />
-            <h4 className="font-semibold text-gray-900">Métricas Principales</h4>
+            <User className="w-5 h-5 text-gray-600"/>
+            <div className="flex flex-col">
+              <h4 className="font-semibold text-gray-900">Progreso porcentual de gastos</h4>
+              <p className=" text-gray-900">Comparamos lo presupuestado contra lo verdaderamente gastado para
+                cada moneda</p>
+            </div>
           </div>
 
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* ARS */}
+            {/* Pesos (ARS) */}
             <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <div className="text-sm text-gray-500 uppercase">Presupuesto Total</div>
+              <div className="text-xs font-medium text-gray-500 uppercase">Pesos (ARS)</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                $ {formatNumber(data.total_budget)}
+                {formatPercent(data.pesos_percentage)}
               </div>
+              <div className="mt-3 text-sm text-gray-600">Presupuesto: $ {formatNumber(data.budget_pesos)}</div>
+              <div className="text-sm text-gray-600">Gastado: $ {formatNumber(data.spent_pesos)}</div>
             </div>
-            {/* USD */}
+            {/* Dólares (USD) */}
             <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <div className="text-sm text-gray-500 uppercase">Total Gastado</div>
+              <div className="text-xs font-medium text-gray-500 uppercase">Dólares (USD)</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                $ {formatNumber(data.total_spent)}
+                {formatPercent(data.usd_percentage)}
               </div>
+              <div className="mt-3 text-sm text-gray-600">Presupuesto: US$ {formatNumber(data.budget_usd)}</div>
+              <div className="text-sm text-gray-600">Gastado: US$ {formatNumber(data.spent_usd)}</div>
             </div>
-            {/* EUR */}
+            {/* Euros (EUR) */}
             <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <div className="text-sm text-gray-500 uppercase">Porcentaje de Progreso</div>
+              <div className="text-xs font-medium text-gray-500 uppercase">Euros (EUR)</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900">
-                {formatNumber(data.progress_percentage)}%
+                {formatPercent(data.eur_percentage)}
               </div>
+              <div className="mt-3 text-sm text-gray-600">Presupuesto: € {formatNumber(data.budget_eur)}</div>
+              <div className="text-sm text-gray-600">Gastado: € {formatNumber(data.spent_eur)}</div>
             </div>
           </div>
         </div>
@@ -216,7 +184,7 @@ export default function DashboardTab({ isAdmin = false, areaYearId }: DashboardT
 
       {!loading && !error && !data && (
         <div className="bg-white rounded-lg p-6 border border-gray-200">
-          <div className="text-gray-700">No hay gráficos para mostrar todavía.</div>
+        <div className="text-gray-700">No hay gráficos para mostrar todavía.</div>
         </div>
       )}
 
