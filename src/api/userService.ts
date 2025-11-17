@@ -15,10 +15,10 @@ export interface UserFilters {
   mail?: string;
 }
 
-const USERS_API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL || "";
+const USERS_API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
 
 export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> {
-  const base = `${USERS_API_BASE}/api/admin/users`;
+  const base = `${USERS_API_BASE}/api/admin/users/`;
   const params = new URLSearchParams();
   if (filters.nombre_apellido) params.set("nombre_apellido", filters.nombre_apellido);
   if (filters.facultad) params.set("facultad", filters.facultad);
@@ -77,7 +77,7 @@ export async function fetchUsers(filters: UserFilters = {}): Promise<UserDto[]> 
 }
 
 export async function deleteUser(id: string | number): Promise<void> {
-  const url = `${USERS_API_BASE}/api/admin/users`;
+  const url = `${USERS_API_BASE}/api/admin/users/`;
   const res = await fetch(url, {
     method: "DELETE",
     headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
@@ -101,7 +101,7 @@ export type CreateUserPayload = {
 };
 
 export async function createUser(payload: CreateUserPayload): Promise<any> {
-  const url = `${USERS_API_BASE}/api/admin/users`;
+  const url = `${USERS_API_BASE}/api/admin/users/`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
@@ -158,7 +158,7 @@ export interface CreateDirectorPayload {
 }
 
 export async function createDirector(payload: CreateDirectorPayload): Promise<any> {
-  const url = `${USERS_API_BASE}/api/admin/users`;
+  const url = `${USERS_API_BASE}/api/admin/users/`;
   const body = { rol: "DIRECTOR", ...payload };
   const res = await fetch(url, {
     method: "POST",
@@ -192,7 +192,7 @@ export interface UserDetailDto {
 }
 
 export async function fetchUserDetail(id: number | string): Promise<UserDetailDto> {
-  const url = `${USERS_API_BASE}/api/admin/users/${id}`;
+  const url = `${USERS_API_BASE}/api/admin/users/${id}/`;
   const res = await fetch(url, { cache: "no-store", headers: { 'ngrok-skip-browser-warning': 'true' } });
   if (!res.ok) {
     throw new Error(`Error obteniendo usuario ${id}: ${res.status} ${res.statusText}`);
@@ -248,7 +248,7 @@ export interface UpdateUserPayload {
 }
 
 export async function updateUser(payload: UpdateUserPayload): Promise<any> {
-  const url = `${USERS_API_BASE}/api/admin/users`;
+  const url = `${USERS_API_BASE}/api/admin/users/`;
   const res = await fetch(url, {
     method: "PUT",
     headers: { "Content-Type": "application/json", 'ngrok-skip-browser-warning': 'true' },
