@@ -55,6 +55,7 @@ const ArmadoContent = () => {
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [currentYear, setCurrentYear] = useState("2025");
+  const [submittingRevision, setSubmittingRevision] = useState(false);
 
   // Get context parameters
   const context = searchParams.get('context');
@@ -187,6 +188,29 @@ const ArmadoContent = () => {
 
   // Elimino el manejo de errores mockeados y el check
   const allChecked = true;
+  const handleEnviar = async () => {
+    if (!areaYearId || submittingRevision) return;
+    setSubmittingRevision(true);
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? "";
+      await fetch(`${API_BASE}/api/files/status/${encodeURIComponent(String(areaYearId))}/revision_finanzas`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+        credentials: "include",
+      });
+    } catch {
+      // ignoramos errores de red
+    } finally {
+      // 1) re-habilitar botón
+      setSubmittingRevision(false);
+
+      // 2) permanecer en la página (no cerrar pestaña ni redirigir)
+    }
+  };
+
 
   // Handle back navigation
   const handleBack = () => {
@@ -482,10 +506,10 @@ const ArmadoContent = () => {
                   </div>
                 )}
                 <button
-                  className={`w-full py-2 mt-2 rounded text-white font-semibold transition-colors ${allChecked ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"}`}
-                  disabled={!allChecked}
+                  className={`w-full py-2 mt-2 rounded text-white font-semibold transition-colors ${allChecked && !submittingRevision ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"}`}
+                  onClick={handleEnviar}
                 >
-                  Enviar
+                  {submittingRevision ? "Enviando..." : "Enviar"}
                 </button>
               </div>
             </div>

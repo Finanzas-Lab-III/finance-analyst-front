@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { TrendingUp, DollarSign, Euro, Banknote, Settings } from 'lucide-react';
 import { processBudgetFile, BudgetProcessorResponse } from "@/lib/budget-api";
+import { toFriendlyError, formatFriendlyErrorInline } from "@/lib/http-errors";
 
 interface BudgetDataItem {
   'Grupo Cuenta': string;
@@ -38,7 +39,9 @@ interface BudgetDataItem {
 // Response type is imported from budget-api
 
 interface MonthlyBudgetByCurrencyChartProps {
-  filePath?: string;
+  areaYearId: number;
+  conversionRates?: { [key: string]: number };
+  onConversionRatesChange?: (rates: { [key: string]: number }) => void;
 }
 
 const MONTH_COLUMNS = [
@@ -68,21 +71,25 @@ const DEFAULT_CONVERSION_RATES = {
 };
 
 export default function MonthlyBudgetByCurrencyChart({ 
-  filePath = '/app/storage/files/4/armado/Modelo presupuestario 2024 Bioterio - Gallo (Versión Final).xlsx' 
+  areaYearId,
+  conversionRates: controlledRates,
+  onConversionRatesChange
 }: MonthlyBudgetByCurrencyChartProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currencies, setCurrencies] = useState<string[]>([]);
   const [currencyData, setCurrencyData] = useState<{ [key: string]: any[] }>({});
-  const [conversionRates, setConversionRates] = useState(DEFAULT_CONVERSION_RATES);
+  const [uncontrolledRates, setUncontrolledRates] = useState(DEFAULT_CONVERSION_RATES);
   const [showSettings, setShowSettings] = useState(false);
+
+  const effectiveRates = controlledRates ?? uncontrolledRates;
 
   useEffect(() => {
     let mounted = true;
 
     async function fetchBudgetData() {
       try {
-        const result: BudgetProcessorResponse = await processBudgetFile(filePath);
+        const result: BudgetProcessorResponse = await processBudgetFile(areaYearId);
 
         if (!mounted) return;
 
@@ -98,7 +105,15 @@ export default function MonthlyBudgetByCurrencyChart({
       } catch (err: any) {
         if (!mounted) return;
         console.error('Error fetching budget data:', err);
-        setError(err.message || 'Failed to load budget data');
+        const friendly = toFriendlyError(err, 'No se pudo cargar el presupuesto.');
+        // If there is simply no data yet, render a neutral no-data state (no red error)
+        if (friendly.code === 400 || friendly.code === 404) {
+          setCurrencies([]);
+          setCurrencyData({});
+          setError(null);
+        } else {
+          setError(formatFriendlyErrorInline(friendly));
+        }
       } finally {
         if (!mounted) return;
         setLoading(false);
@@ -107,7 +122,7 @@ export default function MonthlyBudgetByCurrencyChart({
 
     fetchBudgetData();
     return () => { mounted = false; };
-  }, [filePath]);
+  }, [areaYearId]);
 
   const prepareChartData = (data: BudgetDataItem[]) => {
     // Get unique currencies
@@ -159,7 +174,7 @@ export default function MonthlyBudgetByCurrencyChart({
       currencies.forEach(currency => {
         const monthData = currencyData[currency]?.[index];
         if (monthData) {
-          const rate = conversionRates[currency as keyof typeof conversionRates] || 1;
+          const rate = effectiveRates[currency as keyof typeof effectiveRates] || 1;
           totalARS += monthData.amount * rate;
         }
       });
@@ -175,10 +190,16 @@ export default function MonthlyBudgetByCurrencyChart({
 
   const handleConversionRateChange = (currency: string, value: string) => {
     const numValue = parseFloat(value) || 0;
-    setConversionRates(prev => ({
-      ...prev,
+    const next = {
+      ...effectiveRates,
       [currency]: numValue
-    }));
+    } as { [key: string]: number };
+
+    if (onConversionRatesChange) {
+      onConversionRatesChange(next);
+    } else {
+      setUncontrolledRates(next as any);
+    }
   };
 
   if (loading) {
@@ -216,8 +237,8 @@ export default function MonthlyBudgetByCurrencyChart({
           <TrendingUp className="w-5 h-5 text-gray-600" />
           <h4 className="font-semibold text-gray-900">Presupuesto Mensual por Moneda</h4>
         </div>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-yellow-800 text-sm">No hay datos disponibles para mostrar.</p>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p className="text-gray-700 text-sm">No hay gráficos para mostrar todavía.</p>
         </div>
       </div>
     );
@@ -256,7 +277,7 @@ export default function MonthlyBudgetByCurrencyChart({
                  </label>
                  <input
                    type="number"
-                   value={conversionRates[currency as keyof typeof conversionRates] || 0}
+                   value={effectiveRates[currency as keyof typeof effectiveRates] || 0}
                    onChange={(e) => handleConversionRateChange(currency, e.target.value)}
                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium"
                    step="0.01"

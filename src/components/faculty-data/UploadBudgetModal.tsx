@@ -15,7 +15,7 @@ interface UploadBudgetModalProps {
 export default function UploadBudgetModal({ open, onClose, areaYearId, onUploaded, variant = 'ARMADO', folder = null }: UploadBudgetModalProps) {
   if (!open) return null;
 
-  const USERS_API_BASE = "";
+  const USERS_API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState<string>("");
@@ -52,8 +52,8 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
       if (folder && folder.trim().length > 0) form.append("folder", folder.trim());
       if (title && title.trim().length > 0) form.append("title", title.trim());
       if (notes && notes.trim().length > 0) form.append("notes", notes.trim());
-
-      const res = await fetch(`${USERS_API_BASE}/api/upload`, {
+      console.log("Uploading file with data:", USERS_API_BASE)
+      const res = await fetch(`${USERS_API_BASE}/api/upload/`, {
         method: "POST",
         body: form,
         headers: { 'ngrok-skip-browser-warning': 'true' },
@@ -70,9 +70,9 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
       if (variant === 'ARMADO') {
         try {
           const current = await fetchAreaYearStatus(areaYearId);
-          if ((current.status as AreaYearStatus) === "NOT_STARTED") {
-            // Set initial status to BUDGET_STARTED using POST as requested
-            await createAreaYearStatus(areaYearId, "BUDGET_STARTED");
+          if ((current.status as AreaYearStatus) === "SIN_EMPEZAR") {
+            // Set initial status to NECESITA_CAMBIOS_IA using POST as requested
+            await createAreaYearStatus(areaYearId, "NECESITA_CAMBIOS_IA");
           }
         } catch (e) {
           // Non-blocking: ignore status update error here, but log for debugging

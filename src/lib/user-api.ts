@@ -2,8 +2,9 @@ import { NavBarData } from "@/types/profile";
 import axios from "axios";
 import {YearsOfAreaItemDto, YearsOfAreaResponse} from "@/types/types";
 
+const BASE_URL = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
 const instance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_SERVICE_URL, // <- ya no /api/proxy
+  baseURL: BASE_URL, // <- ya no /api/proxy
   withCredentials: true, // <- manda cookies al backend
 });
 
@@ -11,8 +12,13 @@ export const getProfile = async (): Promise<NavBarData | null> => {
   try {
     const res = await instance.get<NavBarData>("/api/user/me"); // mismo path que usabas
     return res.data;
-  } catch {
-    return null;
+  } catch (error: any) {
+    // If 404, 403, or 500, user doesn't exist or backend has issues
+    if (error?.response?.status === 404 || error?.response?.status === 403 || error?.response?.status === 500) {
+      throw new Error("USER_NOT_FOUND");
+    }
+    // Other errors
+    throw error;
   }
 };
 
@@ -39,7 +45,7 @@ export async function getYearsOfArea(areaId: string): Promise<YearsOfAreaRespons
         status: string;
         year: { year: number; isCurrent: boolean; isFuture: boolean };
       }>;
-    }>(`/api/years_of_area/${encodeURIComponent(areaId)}`);
+    }>(`/api/years_of_area/${encodeURIComponent(areaId)}/`);
     const payload = res.data;
 
     const items: YearsOfAreaItemDto[] = (payload.area_years ?? []).map((it) => ({
@@ -65,7 +71,22 @@ export async function analyzeArmado(
   opts?: { signal?: AbortSignal }
 ): Promise<any> {
   const res = await instance.post(
-    `/api/armado/${encodeURIComponent(areaYearId)}`
+    `/api/armado/${encodeURIComponent(areaYearId)}`,
+    undefined,
+    { signal: opts?.signal }
+  );
+  return res.data;
+}
+
+export async function completeArmadoRules(
+  ids: number[],
+  opts?: { signal?: AbortSignal; token?: string }
+): Promise<{ success?: boolean } | any> {
+  const headers = opts?.token ? { Authorization: `Bearer ${opts.token}` } : undefined;
+  const res = await instance.post(
+    "/api/armado/rules/complete",
+    { ids },
+    { signal: opts?.signal, headers }
   );
   return res.data;
 }

@@ -30,7 +30,7 @@ export interface MockYearsOfAreaItemDto {
   year: number;
   isCurrent: boolean;
   isFuture: boolean;
-  status: "NOT_STARTED" | "BUDGET_STARTED" | "NEEDS_CHANGES" | "PENDING_APPROVAL" | "BUDGET_APPROVED" | "FOLLOW_UP_AVAILABLE";
+  status: "SIN_EMPEZAR" | "NECESITA_CAMBIOS_IA" | "REVISION_FINANZAS" | "NECESITA_CAMBIOS_FINANZAS" | "APROBADO";
 }
 
 export interface MockYearsOfAreaResponse {
@@ -40,53 +40,53 @@ export interface MockYearsOfAreaResponse {
 
 // Mock data para estados de área-año
 export interface MockAreaYearStatusResponse {
-  status: "NOT_STARTED" | "BUDGET_STARTED" | "NEEDS_CHANGES" | "PENDING_APPROVAL" | "BUDGET_APPROVED" | "FOLLOW_UP_AVAILABLE";
+  status: "SIN_EMPEZAR" | "NECESITA_CAMBIOS_IA" | "REVISION_FINANZAS" | "NECESITA_CAMBIOS_FINANZAS" | "APROBADO";
   area: string;
   year: number | string;
 }
 
 export const MOCK_AREA_YEAR_STATUS: Record<string, MockAreaYearStatusResponse> = {
   // Estados para área-años de Facultad de Ingeniería
-  "101": { status: "BUDGET_APPROVED", area: "Facultad de Ingeniería", year: 2023 },
-  "102": { status: "FOLLOW_UP_AVAILABLE", area: "Facultad de Ingeniería", year: 2024 },
-  "103": { status: "BUDGET_APPROVED", area: "Facultad de Ingeniería", year: 2025 },
-  "104": { status: "BUDGET_STARTED", area: "Facultad de Ingeniería", year: 2026 },
-  "105": { status: "NOT_STARTED", area: "Facultad de Ingeniería", year: 2027 },
+  "101": { status: "APROBADO", area: "Facultad de Ingeniería", year: 2023 },
+  "102": { status: "APROBADO", area: "Facultad de Ingeniería", year: 2024 },
+  "103": { status: "APROBADO", area: "Facultad de Ingeniería", year: 2025 },
+  "104": { status: "REVISION_FINANZAS", area: "Facultad de Ingeniería", year: 2026 },
+  "105": { status: "SIN_EMPEZAR", area: "Facultad de Ingeniería", year: 2027 },
   
   // Estados para área-años de Facultad de Ciencias Biomédicas
-  "201": { status: "BUDGET_APPROVED", area: "Facultad de Ciencias Biomédicas", year: 2023 },
-  "202": { status: "FOLLOW_UP_AVAILABLE", area: "Facultad de Ciencias Biomédicas", year: 2024 },
-  "203": { status: "PENDING_APPROVAL", area: "Facultad de Ciencias Biomédicas", year: 2025 },
-  "204": { status: "BUDGET_STARTED", area: "Facultad de Ciencias Biomédicas", year: 2026 },
-  "205": { status: "NOT_STARTED", area: "Facultad de Ciencias Biomédicas", year: 2027 },
+  "201": { status: "APROBADO", area: "Facultad de Ciencias Biomédicas", year: 2023 },
+  "202": { status: "APROBADO", area: "Facultad de Ciencias Biomédicas", year: 2024 },
+  "203": { status: "REVISION_FINANZAS", area: "Facultad de Ciencias Biomédicas", year: 2025 },
+  "204": { status: "REVISION_FINANZAS", area: "Facultad de Ciencias Biomédicas", year: 2026 },
+  "205": { status: "SIN_EMPEZAR", area: "Facultad de Ciencias Biomédicas", year: 2027 },
   
   // Estados para área-años de Facultad de Ciencias Empresariales
-  "301": { status: "BUDGET_APPROVED", area: "Facultad de Ciencias Empresariales", year: 2023 },
-  "302": { status: "FOLLOW_UP_AVAILABLE", area: "Facultad de Ciencias Empresariales", year: 2024 },
-  "303": { status: "BUDGET_APPROVED", area: "Facultad de Ciencias Empresariales", year: 2025 },
-  "304": { status: "NOT_STARTED", area: "Facultad de Ciencias Empresariales", year: 2026 },
-  "305": { status: "NOT_STARTED", area: "Facultad de Ciencias Empresariales", year: 2027 },
+  "301": { status: "APROBADO", area: "Facultad de Ciencias Empresariales", year: 2023 },
+  "302": { status: "APROBADO", area: "Facultad de Ciencias Empresariales", year: 2024 },
+  "303": { status: "APROBADO", area: "Facultad de Ciencias Empresariales", year: 2025 },
+  "304": { status: "SIN_EMPEZAR", area: "Facultad de Ciencias Empresariales", year: 2026 },
+  "305": { status: "SIN_EMPEZAR", area: "Facultad de Ciencias Empresariales", year: 2027 },
   
   // Estados para área-años de Facultad de Derecho
-  "401": { status: "BUDGET_APPROVED", area: "Facultad de Derecho", year: 2023 },
-  "402": { status: "FOLLOW_UP_AVAILABLE", area: "Facultad de Derecho", year: 2024 },
-  "403": { status: "NEEDS_CHANGES", area: "Facultad de Derecho", year: 2025 },
-  "404": { status: "NOT_STARTED", area: "Facultad de Derecho", year: 2026 },
-  "405": { status: "NOT_STARTED", area: "Facultad de Derecho", year: 2027 },
+  "401": { status: "APROBADO", area: "Facultad de Derecho", year: 2023 },
+  "402": { status: "APROBADO", area: "Facultad de Derecho", year: 2024 },
+  "403": { status: "NECESITA_CAMBIOS_IA", area: "Facultad de Derecho", year: 2025 },
+  "404": { status: "SIN_EMPEZAR", area: "Facultad de Derecho", year: 2026 },
+  "405": { status: "SIN_EMPEZAR", area: "Facultad de Derecho", year: 2027 },
   
   // Estados para área-años de Departamento de Sistemas
-  "601": { status: "BUDGET_APPROVED", area: "Departamento de Sistemas", year: 2023 },
-  "602": { status: "FOLLOW_UP_AVAILABLE", area: "Departamento de Sistemas", year: 2024 },
-  "603": { status: "BUDGET_APPROVED", area: "Departamento de Sistemas", year: 2025 },
-  "604": { status: "BUDGET_STARTED", area: "Departamento de Sistemas", year: 2026 },
-  "605": { status: "NOT_STARTED", area: "Departamento de Sistemas", year: 2027 },
+  "601": { status: "APROBADO", area: "Departamento de Sistemas", year: 2023 },
+  "602": { status: "APROBADO", area: "Departamento de Sistemas", year: 2024 },
+  "603": { status: "APROBADO", area: "Departamento de Sistemas", year: 2025 },
+  "604": { status: "REVISION_FINANZAS", area: "Departamento de Sistemas", year: 2026 },
+  "605": { status: "SIN_EMPEZAR", area: "Departamento de Sistemas", year: 2027 },
   
   // Estados para área-años de Departamento de Ingeniería Industrial
-  "701": { status: "BUDGET_APPROVED", area: "Departamento de Ingeniería Industrial", year: 2023 },
-  "702": { status: "FOLLOW_UP_AVAILABLE", area: "Departamento de Ingeniería Industrial", year: 2024 },
-  "703": { status: "PENDING_APPROVAL", area: "Departamento de Ingeniería Industrial", year: 2025 },
-  "704": { status: "NOT_STARTED", area: "Departamento de Ingeniería Industrial", year: 2026 },
-  "705": { status: "NOT_STARTED", area: "Departamento de Ingeniería Industrial", year: 2027 }
+  "701": { status: "APROBADO", area: "Departamento de Ingeniería Industrial", year: 2023 },
+  "702": { status: "APROBADO", area: "Departamento de Ingeniería Industrial", year: 2024 },
+  "703": { status: "REVISION_FINANZAS", area: "Departamento de Ingeniería Industrial", year: 2025 },
+  "704": { status: "SIN_EMPEZAR", area: "Departamento de Ingeniería Industrial", year: 2026 },
+  "705": { status: "SIN_EMPEZAR", area: "Departamento de Ingeniería Industrial", year: 2027 }
 };
 
 // Datos completos de Universidad Austral
@@ -284,77 +284,77 @@ export const MOCK_YEARS_DATA: Record<string, MockYearsOfAreaResponse> = {
   "1": {
     area_id: 1,
     yearsOfArea: [
-      { area_year_id: 101, year: 2023, isCurrent: false, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 102, year: 2024, isCurrent: false, isFuture: false, status: "FOLLOW_UP_AVAILABLE" },
-      { area_year_id: 103, year: 2025, isCurrent: true, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 104, year: 2026, isCurrent: false, isFuture: true, status: "BUDGET_STARTED" },
-      { area_year_id: 105, year: 2027, isCurrent: false, isFuture: true, status: "NOT_STARTED" }
+      { area_year_id: 101, year: 2023, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 102, year: 2024, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 103, year: 2025, isCurrent: true, isFuture: false, status: "APROBADO" },
+      { area_year_id: 104, year: 2026, isCurrent: false, isFuture: true, status: "REVISION_FINANZAS" },
+      { area_year_id: 105, year: 2027, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" }
     ]
   },
   // Facultad de Ciencias Biomédicas (ID: 2)
   "2": {
     area_id: 2,
     yearsOfArea: [
-      { area_year_id: 201, year: 2023, isCurrent: false, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 202, year: 2024, isCurrent: false, isFuture: false, status: "FOLLOW_UP_AVAILABLE" },
-      { area_year_id: 203, year: 2025, isCurrent: true, isFuture: false, status: "PENDING_APPROVAL" },
-      { area_year_id: 204, year: 2026, isCurrent: false, isFuture: true, status: "BUDGET_STARTED" },
-      { area_year_id: 205, year: 2027, isCurrent: false, isFuture: true, status: "NOT_STARTED" }
+      { area_year_id: 201, year: 2023, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 202, year: 2024, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 203, year: 2025, isCurrent: true, isFuture: false, status: "REVISION_FINANZAS" },
+      { area_year_id: 204, year: 2026, isCurrent: false, isFuture: true, status: "REVISION_FINANZAS" },
+      { area_year_id: 205, year: 2027, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" }
     ]
   },
   // Facultad de Ciencias Empresariales (ID: 3)
   "3": {
     area_id: 3,
     yearsOfArea: [
-      { area_year_id: 301, year: 2023, isCurrent: false, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 302, year: 2024, isCurrent: false, isFuture: false, status: "FOLLOW_UP_AVAILABLE" },
-      { area_year_id: 303, year: 2025, isCurrent: true, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 304, year: 2026, isCurrent: false, isFuture: true, status: "NOT_STARTED" },
-      { area_year_id: 305, year: 2027, isCurrent: false, isFuture: true, status: "NOT_STARTED" }
+      { area_year_id: 301, year: 2023, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 302, year: 2024, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 303, year: 2025, isCurrent: true, isFuture: false, status: "APROBADO" },
+      { area_year_id: 304, year: 2026, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" },
+      { area_year_id: 305, year: 2027, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" }
     ]
   },
   // Facultad de Derecho (ID: 4)
   "4": {
     area_id: 4,
     yearsOfArea: [
-      { area_year_id: 401, year: 2023, isCurrent: false, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 402, year: 2024, isCurrent: false, isFuture: false, status: "FOLLOW_UP_AVAILABLE" },
-      { area_year_id: 403, year: 2025, isCurrent: true, isFuture: false, status: "NEEDS_CHANGES" },
-      { area_year_id: 404, year: 2026, isCurrent: false, isFuture: true, status: "NOT_STARTED" },
-      { area_year_id: 405, year: 2027, isCurrent: false, isFuture: true, status: "NOT_STARTED" }
+      { area_year_id: 401, year: 2023, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 402, year: 2024, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 403, year: 2025, isCurrent: true, isFuture: false, status: "NECESITA_CAMBIOS_IA" },
+      { area_year_id: 404, year: 2026, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" },
+      { area_year_id: 405, year: 2027, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" }
     ]
   },
   // Facultad de Comunicación (ID: 5)
   "5": {
     area_id: 5,
     yearsOfArea: [
-      { area_year_id: 501, year: 2023, isCurrent: false, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 502, year: 2024, isCurrent: false, isFuture: false, status: "FOLLOW_UP_AVAILABLE" },
-      { area_year_id: 503, year: 2025, isCurrent: true, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 504, year: 2026, isCurrent: false, isFuture: true, status: "BUDGET_STARTED" },
-      { area_year_id: 505, year: 2027, isCurrent: false, isFuture: true, status: "NOT_STARTED" }
+      { area_year_id: 501, year: 2023, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 502, year: 2024, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 503, year: 2025, isCurrent: true, isFuture: false, status: "APROBADO" },
+      { area_year_id: 504, year: 2026, isCurrent: false, isFuture: true, status: "REVISION_FINANZAS" },
+      { area_year_id: 505, year: 2027, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" }
     ]
   },
   // Departamento de Sistemas (ID: 6)
   "6": {
     area_id: 6,
     yearsOfArea: [
-      { area_year_id: 601, year: 2023, isCurrent: false, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 602, year: 2024, isCurrent: false, isFuture: false, status: "FOLLOW_UP_AVAILABLE" },
-      { area_year_id: 603, year: 2025, isCurrent: true, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 604, year: 2026, isCurrent: false, isFuture: true, status: "BUDGET_STARTED" },
-      { area_year_id: 605, year: 2027, isCurrent: false, isFuture: true, status: "NOT_STARTED" }
+      { area_year_id: 601, year: 2023, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 602, year: 2024, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 603, year: 2025, isCurrent: true, isFuture: false, status: "APROBADO" },
+      { area_year_id: 604, year: 2026, isCurrent: false, isFuture: true, status: "REVISION_FINANZAS" },
+      { area_year_id: 605, year: 2027, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" }
     ]
   },
   // Departamento de Ingeniería Industrial (ID: 7)
   "7": {
     area_id: 7,
     yearsOfArea: [
-      { area_year_id: 701, year: 2023, isCurrent: false, isFuture: false, status: "BUDGET_APPROVED" },
-      { area_year_id: 702, year: 2024, isCurrent: false, isFuture: false, status: "FOLLOW_UP_AVAILABLE" },
-      { area_year_id: 703, year: 2025, isCurrent: true, isFuture: false, status: "PENDING_APPROVAL" },
-      { area_year_id: 704, year: 2026, isCurrent: false, isFuture: true, status: "NOT_STARTED" },
-      { area_year_id: 705, year: 2027, isCurrent: false, isFuture: true, status: "NOT_STARTED" }
+      { area_year_id: 701, year: 2023, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 702, year: 2024, isCurrent: false, isFuture: false, status: "APROBADO" },
+      { area_year_id: 703, year: 2025, isCurrent: true, isFuture: false, status: "REVISION_FINANZAS" },
+      { area_year_id: 704, year: 2026, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" },
+      { area_year_id: 705, year: 2027, isCurrent: false, isFuture: true, status: "SIN_EMPEZAR" }
     ]
   }
 };

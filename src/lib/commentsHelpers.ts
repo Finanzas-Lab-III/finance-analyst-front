@@ -6,18 +6,16 @@ import { AreaYearStatus } from "@/api/userService";
  */
 export function mapAreaYearStatusToDocumentStatus(status: AreaYearStatus): DocumentStatus {
   switch (status) {
-    case "NOT_STARTED":
+    case "SIN_EMPEZAR":
       return DocumentStatus.NOT_STARTED;
-    case "BUDGET_STARTED":
-      return DocumentStatus.BUDGET_STARTED;
-    case "NEEDS_CHANGES":
+    case "NECESITA_CAMBIOS_IA":
       return DocumentStatus.NEEDS_CHANGES;
-    case "PENDING_APPROVAL":
+    case "REVISION_FINANZAS":
       return DocumentStatus.PENDING_APPROVAL;
-    case "BUDGET_APPROVED":
+    case "NECESITA_CAMBIOS_FINANZAS":
+      return DocumentStatus.NEEDS_CHANGES;
+    case "APROBADO":
       return DocumentStatus.BUDGET_APPROVED;
-    case "FOLLOW_UP_AVAILABLE":
-      return DocumentStatus.FOLLOW_UP_AVAILABLE;
     default:
       return DocumentStatus.NOT_STARTED;
   }

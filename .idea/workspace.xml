@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Feat: merged main" />
+    <list default="true" id="d67cbc3b-9977-4546-8f92-560d14e98446" name="Changes" comment="Feat: checkpoint">
+      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/BudgetTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/BudgetTab.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/faculty-data/DashboardTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/faculty-data/DashboardTab.tsx" afterDir="false" />
+    </list>
     <list id="bb24014d-6794-4bcb-8010-9a70d787bea8" name="commit not" comment="commit not" />
     <list id="e4bc1d4c-b656-4b36-bea8-27483abf62ce" name="commitnot" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -13,9 +16,22 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/main" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="6-octubre-fer" />
+        <entry key="$PROJECT_DIR$" value="27-octubre-fer" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -103,6 +119,12 @@
       <workItem from="1759704672850" duration="2910000" />
       <workItem from="1759756556650" duration="898000" />
       <workItem from="1759759386642" duration="11917000" />
+      <workItem from="1760532960957" duration="38000" />
+      <workItem from="1760889559997" duration="5432000" />
+      <workItem from="1761434851888" duration="18612000" />
+      <workItem from="1762395129177" duration="1942000" />
+      <workItem from="1762709662615" duration="19000" />
+      <workItem from="1762807766063" duration="6121000" />
     </task>
     <task id="LOCAL-00001" summary="Feat: User management.">
       <option name="closed" value="true" />
@@ -264,7 +286,63 @@
       <option name="project" value="LOCAL" />
       <updated>1760327237027</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Feat: fix npm build">
+      <option name="closed" value="true" />
+      <created>1760327720026</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1760327720026</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Feat: trying to avoid a cors error, by redirecting all /api request to the backend.">
+      <option name="closed" value="true" />
+      <created>1760382855693</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1760382855694</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Feat: trying to avoid a cors error, by redirecting all /api request to the backend.">
+      <option name="closed" value="true" />
+      <created>1760382932125</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1760382932125</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Feat: integrating with rules persistence">
+      <option name="closed" value="true" />
+      <created>1761528890740</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1761528890740</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Feat: Calendar">
+      <option name="closed" value="true" />
+      <created>1761600477434</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1761600477434</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Feat: Calendar">
+      <option name="closed" value="true" />
+      <created>1762809021193</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1762809021193</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Feat: checkpoint">
+      <option name="closed" value="true" />
+      <created>1762810091902</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1762810091902</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -313,6 +391,11 @@
     <MESSAGE value="fix: kinda created a proxy for fixing that the request doesnt send cookies." />
     <MESSAGE value="Feat: merged Marcos's Part" />
     <MESSAGE value="Feat: merged main" />
-    <option name="LAST_COMMIT_MESSAGE" value="Feat: merged main" />
+    <MESSAGE value="Feat: fix npm build" />
+    <MESSAGE value="Feat: trying to avoid a cors error, by redirecting all /api request to the backend." />
+    <MESSAGE value="Feat: integrating with rules persistence" />
+    <MESSAGE value="Feat: Calendar" />
+    <MESSAGE value="Feat: checkpoint" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feat: checkpoint" />
   </component>
 </project>
