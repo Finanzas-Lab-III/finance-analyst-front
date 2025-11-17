@@ -15,7 +15,7 @@ interface UploadBudgetModalProps {
 export default function UploadBudgetModal({ open, onClose, areaYearId, onUploaded, variant = 'ARMADO', folder = null }: UploadBudgetModalProps) {
   if (!open) return null;
 
-  const USERS_API_BASE = "";
+  const USERS_API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState<string>("");
@@ -53,7 +53,7 @@ export default function UploadBudgetModal({ open, onClose, areaYearId, onUploade
       if (title && title.trim().length > 0) form.append("title", title.trim());
       if (notes && notes.trim().length > 0) form.append("notes", notes.trim());
       console.log("Uploading file with data:", USERS_API_BASE)
-      const res = await fetch('http://localhost:8000/api/upload', {
+      const res = await fetch(`${USERS_API_BASE}/api/upload/`, {
         method: "POST",
         body: form,
         headers: { 'ngrok-skip-browser-warning': 'true' },

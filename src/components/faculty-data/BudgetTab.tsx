@@ -50,7 +50,7 @@ interface BudgetTabProps {
 }
 
 export default function BudgetTab({ latest, history = [], onOpenUpload, areaYearId, isAdmin = false, currentStatus = null }: BudgetTabProps) {
-  const USERS_API_BASE = "";
+  const USERS_API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
   const router = useRouter();
   const { analysisResults, analysisLoading, analysisError, noData } = useArmadoAI(String(areaYearId));
   const [showDetails, setShowDetails] = useState(false);
@@ -99,7 +99,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
   };
 
   const submitChangeRequest = async () => {
-    const API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "http://localhost:8000").replace(/\/+$/, "");
+    const API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
     const comment = changeComment.trim();
     if (!comment) {
       try { alert("Escribe un comentario para solicitar cambios"); } catch {}
@@ -252,7 +252,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
               onClick={async () => {
                 try {
                   setExportingPrevBudget(true);
-                  const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? 'http://localhost:8000';
+                  const API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
                   const url = `${API_BASE}/api/armado/budget/areayear/${encodeURIComponent(String(areaYearId))}/previous/export`;
                   const res = await fetch(url, {
                     method: 'GET',
@@ -322,7 +322,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
               onClick={async () => {
                 try {
                   setExportingHybrid(true);
-                  const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? 'http://localhost:8000';
+                  const API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
                   const url = `${API_BASE}/api/armado/summary/areayear/${encodeURIComponent(String(areaYearId))}/hybrid/previous/export`;
                   const res = await fetch(url, {
                     method: 'GET',
@@ -365,7 +365,7 @@ export default function BudgetTab({ latest, history = [], onOpenUpload, areaYear
               onClick={async () => {
                 try {
                   setExportingPrev(true);
-                  const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? 'http://localhost:8000';
+                  const API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
                   const url = `${API_BASE}/api/armado/summary/areayear/${encodeURIComponent(String(areaYearId))}/previous/export`;
                   const res = await fetch(url, {
                     method: 'GET',

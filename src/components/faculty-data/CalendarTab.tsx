@@ -329,7 +329,7 @@ export default function CalendarTab({ areaYearId, year, fileId }: CalendarTabPro
             onClick={async () => {
               try {
                 setExporting(true);
-                const API_BASE = process.env.NEXT_PUBLIC_SERVICE_URL ?? 'http://localhost:8000';
+                const API_BASE = (process.env.NEXT_PUBLIC_SERVICE_URL || "").replace(/\/+$/, "");
                 const url = `${API_BASE}/api/armado/payments/areayear/${encodeURIComponent(String(areaYearId))}/export-devoluciones`;
                 const res = await fetch(url, {
                   method: 'GET',
